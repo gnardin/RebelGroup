@@ -1,0 +1,311 @@
+/*! normalize.css v3.0.2 | MIT License | git.io/normalize */html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0}article,aside,details,figcaption,figure,footer,header,hgroup,main,menu,nav,section,summary{display:block}audio,canvas,progress,video{display:inline-block;vertical-align:baseline}audio:not([controls]){display:none;height:0}[hidden],template{display:none}a{background-color:transparent}a:active,a:hover{outline:0}abbr[title]{border-bottom:1px dotted}b,strong{font-weight:700}dfn{font-style:italic}h1{font-size:2em;margin:.67em 0}mark{background:#ff0;color:#000}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sup{top:-.5em}sub{bottom:-.25em}img{border:0}svg:not(:root){overflow:hidden}figure{margin:1em 40px}hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}pre{overflow:auto}code,kbd,pre,samp{font-family:monospace,monospace;font-size:1em}button,input,optgroup,select,textarea{color:inherit;font:inherit;margin:0}button{overflow:visible}button,select{text-transform:none}button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}button[disabled],html input[disabled]{cursor:default}button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}input{line-height:normal}input[type=checkbox],input[type=radio]{box-sizing:border-box;padding:0}input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{height:auto}input[type=search]{-webkit-appearance:textfield;-moz-box-sizing:content-box;-webkit-box-sizing:content-box;box-sizing:content-box}input[type=search]::-webkit-search-cancel-button,input[type=search]::-webkit-search-decoration{-webkit-appearance:none}fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}legend{border:0;padding:0}textarea{overflow:auto}optgroup{font-weight:700}table{border-collapse:collapse;border-spacing:0}td,th{padding:0}
+/* ==========================================================================
+   Custom styles
+   ========================================================================== */
+
+body {
+  padding: 8px;
+}
+
+table { 
+  border-collapse:collapse;
+  margin: 1em 0;
+}  
+table, td, th { 
+  border: thin solid black;
+  padding: 5px;
+}  
+thead, th {
+  background: aliceblue;
+}
+/* Center the class name of a class population widget */
+table.PopTable>thead>tr:first-child  {
+  text-align: center;
+}
+
+menu {
+  width: 14em;
+  text-align: center;
+  border: 1px solid black;
+  padding: 8px;
+  border-radius: 5px;
+}
+menu li {
+  list-style: none;
+  height: 1.5em;
+  margin: 2px auto;
+}
+menu li button {
+  width: 14em;
+}
+/*** Modal Window and Draggable Modal Window ***/
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  background-color:rgba(0,0,0, 0.5);  /* 50% opacity */
+  animation: overlay-with-modal .3s forwards ease;
+}
+@keyframes overlay-with-modal {
+  from {transform:scale(0.5); background-color:rgba(0,0,0, 0);}
+  to {transform:scale(1); background-color:rgba(0,0,0, 0.5);}
+}
+.modal {
+  width: 680px;
+  max-width: 100%;
+  height: 300px;
+  max-height: 100%;
+  overflow: auto;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);  /* for centering */
+  background-color: #eee;
+}
+.modal > h1 {
+  margin: 0;
+  padding: 0.5em;
+  color: #eee;
+  background-color: blue;
+  font-size: 120%;
+  height: 2em;
+}
+.modal > h1 > span.title {
+  display: inline-block;
+  padding-top: 0.4em;
+}
+.modal > h1 > span.closeButton {
+  color: #eee;
+  float: right;
+  font-size: 180%;
+  font-weight: bold;
+}
+.modal .modal-body {
+  padding: 0.5em;
+}
+.modal label {
+  line-height: 1.5;
+}
+.modal.action-required > h1{
+  background-color: green;
+}
+.modal.error > h1{
+  background-color: deeppink;
+}
+.modal .closeButton:hover,
+.modal .closeButton:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+[draggable=true] {
+  outline: 1px solid black;
+  cursor: move;
+  overflow: auto;
+  resize: both;
+}
+/*********************************************/
+form :invalid {
+  box-shadow: none;  /* neutralizing FF */
+  outline: dotted red;      
+}
+form > h1 {  /* form title */
+  font-size: 120%;
+}
+form > div:first-child  {
+  margin-top: 0.5em;
+}
+form > div:not(:last-child)  {
+  margin-bottom: 0.5em;
+}
+form > div > label {
+  position: relative;
+}
+form > div.I-O-field > label {
+  width: 40em;
+  display: block;     /* by default, one labeled control per line*/
+}
+form div.field-group > label {
+  display: inline-block;
+  width: 20em;
+  margin-left: 1em;
+}
+form div.field-group > label:first-child {
+  margin-left: 0;
+}
+form div.field-group > label > output {
+  position: absolute;
+  left: 12em;
+}
+form output {
+  min-width: 2em;
+  background-color: gainsboro;
+}
+form div.field-group > label > input,
+form div.field-group > label > output {
+  margin-left: 0.7em;
+  margin-right: 0.1em;
+}
+form div.I-O-field > label > input[type="text"],
+form div.I-O-field > label > input[type="number"],
+form div.yes-no-field > label > input[type="checkbox"],
+form div.select > label > select,
+form div.I-O-field > label > output {
+  position: absolute;
+  left: 12em;
+}
+form div.I-O-field > label > input[type="text"],
+form div.I-O-field > label > input[type="number"] {
+  width: 7em;
+}
+/*
+form div.yes-no-field > label > input[type="checkbox"] {
+  position: absolute;
+  left: 2em;
+}
+*/
+form div.action-group {
+  margin-top: 0.5em;
+}
+form div > button {
+  margin-right: 0.5em;  
+}
+
+form fieldset {
+  margin-bottom: 1em;  
+}
+form fieldset > label {
+  margin-right: 1em;  
+}
+form fieldset > label > input[type="radio"],
+    form > fieldset > label > input[type="checkbox"] {
+  margin-right: 0.5em;  
+}
+
+/* In addition to vIEW.css */
+
+#sim4eduinfo {
+    font-size: 90%;
+}
+body>div#frontMatter>h1 {
+    margin-top: 0.2em;
+}
+body>div#frontMatter>h1>div {
+    display: inline-block;
+    margin-left: 2em;
+    font-size: 45%;
+    width: 5em;
+}
+body > footer {
+    margin-top: 3em;
+    font-size: smaller;
+}
+#errors {
+    padding-left: 5px;
+    outline: red solid;
+}
+.error {
+    color: #C0392B;
+}
+
+div[id="progress-container"] {
+    margin: 3em 1em;
+    text-align: center;
+}
+div[id="progress-container"] > h1 {
+    font-size: 100%;
+}
+progress {
+    width: 25em;
+    height: 1.7em;
+}
+
+/* Vertical margin for UI blocks */
+.uiBlock {
+    margin: 1em 0;
+}
+
+form[id="scenario"] div.field-group > label,
+form[id="sim"] div.field-group > label
+{
+    display: inline-block;
+    width: auto;
+}
+form[id="scenario"] div.field-group > label:not(:first-child),
+form[id="sim"] div.field-group > label:not(:first-child)
+{
+    margin-left: 1em;
+}
+form[id="scenario"] div.field-group > label > output,
+form[id="sim"] div.field-group > label > output
+{
+    position: static; left: 0;
+}
+
+table {
+  empty-cells: show;
+  border-collapse: collapse;
+}
+/* Styles for DOM-Grid */
+table#visCanvas {
+  table-layout: fixed;
+}
+/* table[id="space-view"] corresponds to table#space-view, but helps to avoid cascade/specificity issues */
+table[id="visCanvas"] td {
+  padding: 1px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+table[id="space-view"] td div.object-view {
+  display: block;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  min-width: 3px;
+  min-height: 3px;
+  width: 100%;
+  height: 100%;
+  font-size: 90%;
+}
+
+/*canvas {
+  margin: 0.5em 0;
+  width: 100% !important;
+}*/
+.expandablePanel {
+  outline: solid grey;
+  padding: 5px;
+  margin: 1em 0;
+}
+.expandablePanel > h2 {
+  font-size: 1.5em;
+  color: grey;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.expandablePanel > h2 > button {
+    font-size: smaller;
+    margin-right: 1em;
+}
+
+form[id="expost-statistics"] {
+    outline: solid grey;
+    padding: 5px;
+    margin: 1em 0;
+}
+form[id="expost-statistics"] h2 {
+    font-size: 110%;
+    margin-bottom: 0.4em;
+}
+form[id="expost-statistics"] h3 {
+    font-size: 100%;
+    margin-top: 0.3em;
+    margin-bottom: 0.2em;
+}
+div[id="time-series-chart"] {
+    width: 100%;
+    height: 450px;
+}
