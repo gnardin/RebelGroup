@@ -43,7 +43,7 @@ sim.model.v.nmrOfRebelGroups = {
 };
 sim.model.v.nmrOfEnterprises = {
   range: "NonNegativeInteger",
-  initialValue: 10,
+  initialValue: 100,
   label: "Number Enterprises",
   hint: "The number of enterprises"
 };
