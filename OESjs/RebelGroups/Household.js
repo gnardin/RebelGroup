@@ -12,8 +12,19 @@ var Household = new cLASS( {
   Name: "Household",
   supertypeName: "oBJECT",
   properties: {
-    "money": {range: "PositiveDecimal", label: "Money"},
-    "reachableEnterprises": {range: "Enterprise", minCard: 0, maxCard: Infinity},
-    "preferredEnterprises": {range: "Entreprise", minCard: 0, maxCard: Infinity}
+    "money": {
+      range: "PositiveDecimal",
+      label: "Money"
+    },
+    "reachableEnterprises": {
+      range: "Enterprise",
+      minCard: 0,
+      maxCard: Infinity
+    },
+    "preferredEnterprises": {
+      range: "Entreprise",
+      minCard: 0,
+      maxCard: Infinity
+    }
   }
 } );

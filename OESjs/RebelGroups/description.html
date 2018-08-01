@@ -1,33 +1,41 @@
 <!-- ===========================================================================
-* Mafia simulation model
+* Rebel Groups Protection Racket simulation model
 *
-* @copyright Copyright 2017-2018 Brandenburg University of Technology, Germany
+* @copyright Copyright 2018 Brandenburg University of Technology, Germany
 * @license The MIT License (MIT)
+* @author Frances Duffy
+* @author Kamil Klosek
 * @author Luis Gustavo Nardin
 * @author Gerd Wagner
-* @author Jakub Lelo
 =========================================================================== -->
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 
 <head>
 <meta charset="utf-8" />
-<title>Economy under Mafia Influence</title>
+<title>Rebel Groups Protection Racket</title>
 <meta name="viewport" content="width=device-width, initial-scale = 1.0" />
- <link rel="stylesheet" href="../framework/description.css" />
- <script src="metadata.js"></script>
- <script src="../framework/description.js"></script>
+<link rel="stylesheet" href="../framework/description.css" />
+<script src="metadata.js"></script>
+<script src="../framework/description.js"></script>
 </head>
 <body onload="oes.ui.setupDescription()">
   <div id="frontMatter">
-    <h1>Rebel Group Protection Rackets</h1>
-    <p><strong>Classification tags</strong>: Rebel Group, Economics, Civil War, Discrete-Event Simulation</p>
+    <h1>Rebel Groups Protection Racket</h1>
+    <p>
+      <strong>Classification tags</strong>: Rebel Group, Civil War,
+      Discrete-Event Simulation
+    </p>
     <figure class="right">
-      <img src="media/img/theme-image.png" alt="theme-image" width="295" height="246" />
+      <img src="media/img/theme-image.png" alt="theme-image" width="295"
+        height="246"
+      />
     </figure>
     <section id="shortDescription">
       <figure class="right">
-        <img src="media/img/InteractionsOverview.png" alt="InteractionsOverview" width="571" height="361" />
+        <img src="media/img/InteractionsOverview.png" alt="InteractionsOverview"
+          width="571" height="361"
+        />
       </figure>
     </section>
   </div>
@@ -605,12 +613,12 @@
             <td>DemandPizzo</td>
             <td>SET e TO entrepreneur <br> SET m TO mafia <br>
               SET s TO state<br> IF (s.entUnderObserv.includes(e.id
-              )&amp;&amp;<br> (rand.uniform()
-              s.seeAndCaptureProb))<br> THEN<br> INCREASE m.numCaptMaf
-              BY 1<br> ELSE<br> INCREASE m.numFreeMaf BY 1<br>
-              SET pizzoToPay TO parseFloat((m.pizzoPayPerc *<br>
-              e.wealth).toFixed(2))<br> IF (pizzoToPay > 1)<br> THEN<br>
-              INCREMENT extortionCounter<br> SCHEDULE EventStart<br>
+              )&amp;&amp;<br> (rand.uniform() s.seeAndCaptureProb))<br>
+              THEN<br> INCREASE m.numCaptMaf BY 1<br> ELSE<br>
+              INCREASE m.numFreeMaf BY 1<br> SET pizzoToPay TO
+              parseFloat((m.pizzoPayPerc *<br> e.wealth).toFixed(2))<br>
+              IF (pizzoToPay > 1)<br> THEN<br> INCREMENT
+              extortionCounter<br> SCHEDULE EventStart<br>
               (“ConsiderPayPizzo”,this.mafia, this.entrepreneur, this.state,<br>
               this.pizzoToPay)@(t+timeForPayPizzoConsideration)<br>
               SCHEDULE EventStart (“CheckPayment”,this.mafia,<br>
@@ -636,9 +644,9 @@
           <tr>
             <td>Benefit</td>
             <td>SET e TO entrepreneur<br> SET m TO mafia<br> SET
-              randomBenefit TO rand.uniform() >= 0.5<br> IF
-              (randomBenefit == true)<br> SET benefitValue TO parseFloat(
-              (m.pizzoBenPerc *<br> pizzoToPay).toFixed( 2 ) )<br>
+              randomBenefit TO rand.uniform() >= 0.5<br> IF (randomBenefit
+              == true)<br> SET benefitValue TO parseFloat( (m.pizzoBenPerc
+              *<br> pizzoToPay).toFixed( 2 ) )<br>
               this.pizzoToPay).toFixed( 2 ) )<br> INCREASE e.wealth BY
               benefitValue<br> ELSE<br> SET e.fasterProduction TO true
             </td>

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * The Enterprise object class
+ * Flee event class
  * 
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
@@ -8,13 +8,21 @@
  * @author Luis Gustavo Nardin
  * @author Gerd Wagner
  ******************************************************************************/
-var Enterprise = new cLASS( {
-  Name: "Enterprise",
-  supertypeName: "oBJECT",
+var Flee = new cLASS({
+  Name: "Flee",
+  supertypeName: "eVENT",
   properties: {
-    "wealth": {
-      range: "Decimal",
-      label: "Liquidity"
+    "enterprise": {
+      range: "Enterprise"
+    }
+  },
+  methods: {
+    "onEvent": function () {
+      var followupEvents = [];
+      
+      sim.stat.flees += 1;
+      
+      return followupEvents;
     }
   }
-} );
+});
