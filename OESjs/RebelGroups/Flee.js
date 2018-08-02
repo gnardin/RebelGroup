@@ -20,6 +20,8 @@ var Flee = new cLASS({
     "onEvent": function () {
       var followupEvents = [];
       
+      sim.removeObject( this.enterprise );
+      
       sim.stat.flees += 1;
       
       return followupEvents;

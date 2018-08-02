@@ -12,13 +12,21 @@ var RebelGroup = new cLASS( {
   Name: "RebelGroup",
   supertypeName: "oBJECT",
   properties: {
-    "nrmOfRebels": {
+    "nmrOfRebels": {
       range: "NonNegativeInteger",
       label: "Number Rebels"
     },
     "wealth": {
       range: "Decimal",
       label: "Wealth"
+    },
+    "extortionRate": {
+      range: "Decimal",
+      label: "Extortion Rate"
+    },
+    "lastExpansion": {
+      range: "NonNegativeInteger",
+      label: "Last Expansion"
     }
   },
   

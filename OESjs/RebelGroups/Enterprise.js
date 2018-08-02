@@ -12,9 +12,25 @@ var Enterprise = new cLASS( {
   Name: "Enterprise",
   supertypeName: "oBJECT",
   properties: {
+    "rebelgroup": {
+      range: "RebelGroup",
+      label: "Rebel Group Association"
+    },
     "wealth": {
       range: "Decimal",
       label: "Liquidity"
+    },
+    "accIncome": {
+      range: "Decimal",
+      label: "Accumulated Income"
+    },
+    "meanIncome": {
+      range: "Decimal",
+      label: "Income Mean"
+    },
+    "stdDevIncome": {
+      range: "Decimal",
+      label: "Income Standard Deviation"
     }
   }
 } );

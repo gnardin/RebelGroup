@@ -21,33 +21,32 @@ var ReminderDemand = new cLASS({
       var followupEvents = [];
       var enterprise, extortion;
       var enterprises = cLASS["Enterprise"].instances;
-      var eKeys = Object.keys( enterprises );
       
-      // Decide the Enterprise
-      enterprise = enterprises[ eKeys[ 
-        rand.uniformInt( 0, eKeys.length - 1) ] ];
-      
-      // Decide to extort or loot
-      if ( rand.uniform() < 0.5 ) {
+      Object.keys( enterprises ).forEach( function ( a ) {
+        enterprise = enterprises[a];
         
-        // Decide the amount to extort
-        extortion = rand.uniform();
-        
-        followupEvents.push( new Extort( {
-          occTime: this.occTime + 1,
-          rebelgroup: this.rebelgroup,
-          enterprise: enterprise,
-          extortion: extortion
-        }));
-        
-      } else {
-        
-        followupEvents.push( new Loot( {
-          occTime: this.occTime + 1,
-          rebelgroup: this.rebelgroup,
-          enterprise: enterprise
-        }));
-      }
+        // Decide to extort or loot
+        // Looting:
+        // Ratio of power (weak)
+        // Enterprise is controlled by another group
+        // If they receive external money
+        if ( rand.uniform() < 0.5 ) {
+          
+          followupEvents.push( new Extort( {
+            occTime: this.occTime + 1,
+            rebelgroup: this.rebelgroup,
+            enterprise: enterprise
+          }));
+          
+        } else {
+          
+          followupEvents.push( new Loot( {
+            occTime: this.occTime + 1,
+            rebelgroup: this.rebelgroup,
+            enterprise: enterprise
+          }));
+        }
+      });
       
       return followupEvents;
     }
@@ -57,5 +56,5 @@ var ReminderDemand = new cLASS({
 //ReminderPurchase.priority = 1;
 
 ReminderDemand.recurrence = function () {
-  return rand.uniformInt( 5, 10 );
+  return rand.normal( 30, 5 );
 };

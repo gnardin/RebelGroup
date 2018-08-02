@@ -21,7 +21,11 @@ var ReminderIncome = new cLASS({
       var followupEvents = [];
       
       // Decide how much an Enterprise receives as Income
-      this.enterprise.wealth += 100;
+      var revenue = rand.normal( this.enterprise.meanIncome,
+          this.enterprise.stdDevIncome );
+      
+      this.enterprise.wealth += revenue;
+      this.enterprise.accIncome += revenue;
       
       return followupEvents;
     }
@@ -29,5 +33,5 @@ var ReminderIncome = new cLASS({
 });
 
 ReminderIncome.recurrence = function () {
-  return rand.uniformInt( 1, 30 );
+  return 1;
 }

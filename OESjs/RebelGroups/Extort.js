@@ -17,21 +17,22 @@ var Extort = new cLASS({
     },
     "enterprise": {
       range: "Enterprise"
-    },
-    "extortion": {
-      range: "Decimal"
     }
   },
   methods: {
     "onEvent": function () {
       var followupEvents = [];
-      var amount = this.enterprise.wealth * this.extortion;
       
-      this.rebelgroup.wealth += amount;
-      this.enterprise.wealth -= amount;
+      // Decide the amount to extort
+      var extortion = this.enterprise.accIncome *
+        this.rebelgroup.extortionRate;
+      
+      this.rebelgroup.wealth += extortion;
+      this.enterprise.wealth -= extortion;
+      this.enterprise.accIncome = 0;
       
       sim.stat.extortions += 1;
-      sim.stat.amountExtLoot = amount;
+      sim.stat.amountExtLoot = extortion;
       
       return followupEvents;
     }
