@@ -29,9 +29,9 @@ sim.model.timeUnit = "D"; // days
 sim.model.timeIncrement = 1; // optional
 
 /* Object, Event, and Activity types */
-sim.model.objectTypes = ["RebelGroup", "Enterprise"];
-sim.model.eventTypes =
-    ["ReminderIncome", "ReminderDemand", "Extort", "Loot", "Flee"];
+sim.model.objectTypes = [ "RebelGroup", "Enterprise" ];
+sim.model.eventTypes = [ "ReminderIncome", "ReminderDemand", "Extort",
+  "Loot", "Flee" ];
 sim.model.activityTypes = [];
 
 /* Global Variables */
@@ -43,57 +43,57 @@ sim.model.v.nmrOfRebelGroups = {
 };
 sim.model.v.nmrOfEnterprises = {
   range: "NonNegativeInteger",
-  initialValue: 100,
+  initialValue: 10,
   label: "Number Enterprises",
   hint: "The number of enterprises"
 };
+sim.model.v.fightExpansion = {
+  range: "NonNegativeInteger",
+  initialValue: 2,
+  label: "Expansion per fight",
+  hint: "The number of enterprises conquered due to winning a fight"
+};
+
 
 /* Global Functions */
-
+sim.model.f.powerRatio = function ( rebelgroup ) {
+  var nmrOfRebels, totalPower = 0, powerfull = 0;
+  var powerfullRatio, rebelgroupRatio;
+  var rebelgroups = cLASS["RebelGroup"].instances;
+  
+  Object.keys( rebelgroups ).forEach( function ( objId ) {
+    nmrOfRebels = rebelgroups[objId].nmrOfRebels;
+    totalPower += nmrOfRebels;
+    
+    if ( nmrOfRebels > powerfull ) {
+      powerfull = nmrOfRebels;
+    }
+  });
+  
+  powerfullRatio = powerfull / totalPower;
+  rebelgroupRatio = rebelgroup.nmrOfRebels / totalPower;
+  
+  return powerfullRatio - rebelgroupRatio;
+}
 /*******************************************************************************
  * Define Initial State
  ******************************************************************************/
 // Initial Objects
-sim.scenario.initialState.objects = {
-    "1": {
-      typeName: "RebelGroup",
-      name: "rebelgroup1",
-      nmrOfRebels: 500,
-      wealth: 100,
-      extortionRate: 0.3,
-      lastExpansion: 0
-    },
-    "2": {
-      typeName: "RebelGroup",
-      name: "rebelgroup2",
-      nmrOfRebels: 100,
-      wealth: 200,
-      extortionRate: 0.2,
-      lastExpansion: 0
-    }
-};
+sim.scenario.initialState.objects = {};
 
 // Initial Events
-sim.scenario.initialState.events = [
-  {
-    typeName: "ReminderDemand",
-    occTime: 1,
-    rebelgroup: 1
-  },
-  {
-    typeName: "ReminderDemand",
-    occTime: 1,
-    rebelgroup: 2
-  }
-];
+sim.scenario.initialState.events = [];
 
 // Initial Functions
 sim.scenario.setupInitialState = function () {
   var i = 3, objId;
   var nmrHigh, nmrLow;
+  var keys, rebelGroup, rebelgroups, enterprise, enterprises;
   
+  /**
+   * Create Rebel Groups
+   */
   /*
-  // Create Rebel Groups
   for ( i = 1; i <= sim.v.nmrOfRebelGroups; i += 1 ) {
     objId = i;
     sim.addObject( new RebelGroup( {
@@ -110,14 +110,45 @@ sim.scenario.setupInitialState = function () {
       rebelgroup: objId
     } ) );
   }*/
+  sim.addObject( new RebelGroup( {
+    id: 1,
+    name: "rebelgroup1",
+    nmrOfRebels: 500,
+    wealth: 100,
+    extortionRate: 0.3,
+    lastExpansion: 0
+  } ) );
   
-  // Create Enterprises High Income
+  sim.scheduleEvent( new ReminderDemand( {
+    occTime: 1,
+    rebelgroup: 1
+  } ) );
+  
+  sim.addObject( new RebelGroup( {
+    id: 2,
+    name: "rebelgroup2",
+    nmrOfRebels: 100,
+    wealth: 200,
+    extortionRate: 0.2,
+    lastExpansion: 0
+  } ) );
+  
+  sim.scheduleEvent( new ReminderDemand( {
+    occTime: 1,
+    rebelgroup: 2
+  } ) );
+  
+  /**
+   * Create Enterprises
+   */
+  // Create High Income Enterprises
   nmrHigh = sim.v.nmrOfEnterprises * 0.2;
   for ( ; i <= (sim.v.nmrOfRebelGroups + nmrHigh); i += 1 ) {
     objId = i;
     sim.addObject( new Enterprise( {
       id: objId,
       name: "enterprise" + objId,
+      rebelgroup: null,
       wealth: 0,
       meanIncome: 100,
       stdDevIncome: 10
@@ -129,13 +160,14 @@ sim.scenario.setupInitialState = function () {
     } ) );
   }
   
-  //Create Enterprises Low Income
+  // Create Low Income Enterprises
   nmrLow = sim.v.nmrOfEnterprises * 0.8;
   for ( ; i <= (sim.v.nmrOfRebelGroups + nmrHigh + nmrLow); i += 1 ) {
     objId = i;
     sim.addObject( new Enterprise( {
       id: objId,
       name: "enterprise" + objId,
+      rebelgroup: null,
       wealth: 0,
       meanIncome: 5,
       stdDevIncome: 1
@@ -146,6 +178,20 @@ sim.scenario.setupInitialState = function () {
       enterprise: objId
     } ) );
   }
+  
+  /**
+   * Allocate Enterprises to Rebel Groups
+   */
+  rebelgroups = cLASS["RebelGroup"].instances;
+  keys = Object.keys( rebelgroups );
+  enterprises = cLASS["Enterprise"].instances;
+  Object.keys( enterprises ).forEach( function (objId) {
+    enterprise = enterprises[objId];
+    rebelgroup = rebelgroups[ keys[ rand.uniformInt( 0, keys.length - 1) ] ];
+    
+    enterprise.rebelgroup = rebelgroup;
+    rebelgroup.enterprises.push( enterprise );
+  });
 };
 
 /*******************************************************************************

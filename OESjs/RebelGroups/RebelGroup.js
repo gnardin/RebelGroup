@@ -27,6 +27,11 @@ var RebelGroup = new cLASS( {
     "lastExpansion": {
       range: "NonNegativeInteger",
       label: "Last Expansion"
+    },
+    "enterprises": {
+      range: "Enterprise",
+      minCard: 0,
+      maxCard: Infinity
     }
   },
   

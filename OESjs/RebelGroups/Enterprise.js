@@ -14,7 +14,7 @@ var Enterprise = new cLASS( {
   properties: {
     "rebelgroup": {
       range: "RebelGroup",
-      label: "Rebel Group Association"
+      label: "Dominant Rebel Group"
     },
     "wealth": {
       range: "Decimal",

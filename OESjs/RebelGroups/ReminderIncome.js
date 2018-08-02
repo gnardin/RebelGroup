@@ -20,6 +20,8 @@ var ReminderIncome = new cLASS({
     "onEvent": function () {
       var followupEvents = [];
       
+      console.log( "Income " + this.occTime );
+      
       // Decide how much an Enterprise receives as Income
       var revenue = rand.normal( this.enterprise.meanIncome,
           this.enterprise.stdDevIncome );
@@ -34,4 +36,15 @@ var ReminderIncome = new cLASS({
 
 ReminderIncome.recurrence = function () {
   return 1;
-}
+};
+
+ReminderIncome.createNextEvent = function ( e ) {
+  var nextTime = e.occTime + ReminderIncome.recurrence();
+  console.log( "CURRENT " + e.occTime + " NEXT " + nextTime );
+  console.log( typeof( e.occTime ));
+  console.log( typeof( ReminderIncome.recurrence() ));
+  return new ReminderIncome( {
+    occTime: e.occTime + ReminderIncome.recurrence(),
+    enterprise: e.enterprise
+  } );
+};

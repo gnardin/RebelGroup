@@ -20,27 +20,38 @@ var ReminderDemand = new cLASS({
     "onEvent": function () {
       var followupEvents = [];
       var enterprise, extortion;
-      var enterprises = cLASS["Enterprise"].instances;
+      var enterprises = this.rebelgroup.enterprises;
       
-      Object.keys( enterprises ).forEach( function ( a ) {
-        enterprise = enterprises[a];
+      var powerRatio = sim.model.f.powerRatio( this.rebelgroup );
+      
+      console.log( powerRatio );
+      
+      Object.keys( enterprises ).forEach( function ( objId ) {
+        enterprise = enterprises[objId];
         
-        // Decide to extort or loot
-        // Looting:
-        // Ratio of power (weak)
-        // Enterprise is controlled by another group
-        // If they receive external money
-        if ( rand.uniform() < 0.5 ) {
+        /**
+         * Decision to extort or loot
+         * 
+         * Rebel Groups loot proportional to their weakness with respect to
+         * the strongest Rebel Group, otherwise they extort
+         * 
+         * TODO
+         * Rebel Groups also loot if they receive external support that does
+         * not require them to create a deeper connection with the community
+         */
+        if ( rand.uniform() < powerRatio ) {
           
-          followupEvents.push( new Extort( {
+          console.log( this.occTime + " LOOT" );
+          
+          followupEvents.push( new Loot( {
             occTime: this.occTime + 1,
             rebelgroup: this.rebelgroup,
             enterprise: enterprise
           }));
-          
         } else {
           
-          followupEvents.push( new Loot( {
+          console.log( this.occTime + " EXTORT" );
+          followupEvents.push( new Extort( {
             occTime: this.occTime + 1,
             rebelgroup: this.rebelgroup,
             enterprise: enterprise
@@ -53,8 +64,7 @@ var ReminderDemand = new cLASS({
   }
 });
 
-//ReminderPurchase.priority = 1;
-
 ReminderDemand.recurrence = function () {
-  return rand.normal( 30, 5 );
+  console.log( "HERE" );
+  return parseInt( rand.normal( 30, 5 ) );
 };
