@@ -34,6 +34,3 @@ var Enterprise = new cLASS( {
     }
   }
 } );
-
-
-print more than expected
