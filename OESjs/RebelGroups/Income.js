@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Flee event class
+ * Income event class
  *
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
@@ -8,8 +8,8 @@
  * @author Luis Gustavo Nardin
  * @author Gerd Wagner
  ******************************************************************************/
-var Flee = new cLASS( {
-  Name: "Flee",
+var Income = new cLASS( {
+  Name: "Income",
   supertypeName: "eVENT",
   properties: {
     "enterprise": {
@@ -19,21 +19,23 @@ var Flee = new cLASS( {
   methods: {
     "onEvent": function () {
       var followupEvents = [];
-      var rebelGroup, index;
-      var rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
 
-      Object.keys( rebelGroupsObj ).forEach( ( objId ) => {
-        rebelGroup = rebelGroupsObj[ objId ];
+      // Decide how much an Enterprise earn as Income
+      var income = this.enterprise.income;
 
-        index = rebelGroup.extortedEnterprises.indexOf( this.enterprise );
-        if ( index !== -1 ) {
-          rebelGroup.extortedEnterprises.splice( index, 1 );
-        }
-      } );
-
-      sim.stat.nmrOfFlees += 1;
+      this.enterprise.wealth += income;
+      this.enterprise.accIncome += income;
 
       return followupEvents;
     }
   }
 } );
+Income.recurrence = function ( e ) {
+  return e.enterprise.freqIncome;
+};
+Income.createNextEvent = function ( e ) {
+  return new Income( {
+    occTime: e.occTime + Income.recurrence( e ),
+    enterprise: e.enterprise
+  } );
+};

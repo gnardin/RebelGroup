@@ -1,6 +1,6 @@
 /*******************************************************************************
- * The Enterprise object class
- * 
+ * Rebel Groups simulation model
+ *
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
  * @author Frances Duffy
@@ -8,12 +8,12 @@
  * @author Luis Gustavo Nardin
  * @author Gerd Wagner
  ******************************************************************************/
-/*******************************************************************************
+/******************************************************************************
  * Simulation Parameters
  ******************************************************************************/
-sim.scenario.simulationEndTime = 3650;
+sim.scenario.simulationEndTime = 365;
 sim.scenario.idCounter = 1; // optional
-//sim.scenario.randomSeed = 1; // optional
+sim.scenario.randomSeed = 1234; // optional
 /*******************************************************************************
  * Simulation Config
  ******************************************************************************/
@@ -25,13 +25,15 @@ sim.scenario.idCounter = 1; // optional
  * Simulation Model
  ******************************************************************************/
 sim.model.time = "discrete";
-sim.model.timeUnit = "D"; // days
+sim.model.timeUnit = "D"; // D = days
 sim.model.timeIncrement = 1; // optional
 
 /* Object, Event, and Activity types */
 sim.model.objectTypes = [ "RebelGroup", "Enterprise" ];
-sim.model.eventTypes = [ "ReminderIncome", "ReminderDemand", "Extort",
-  "Loot", "Flee" ];
+sim.model.eventTypes = [
+  "Income", "Demand", "Extort", "Loot", "Expand", "Fight", "AllocateResource",
+  "Report", "Flee"
+];
 sim.model.activityTypes = [];
 
 /* Global Variables */
@@ -43,179 +45,278 @@ sim.model.v.nmrOfRebelGroups = {
 };
 sim.model.v.nmrOfEnterprises = {
   range: "NonNegativeInteger",
-  initialValue: 10,
+  initialValue: 1000,
   label: "Number Enterprises",
   hint: "The number of enterprises"
 };
-sim.model.v.fightExpansion = {
+sim.model.v.basket = {
   range: "NonNegativeInteger",
-  initialValue: 2,
-  label: "Expansion per fight",
-  hint: "The number of enterprises conquered due to winning a fight"
+  initialValue: 1,
+  label: "Fight Expansion",
+  hint: "The number of enterprises conquered due to win a fight"
 };
 
-
 /* Global Functions */
-sim.model.f.powerRatio = function ( rebelgroup ) {
-  var nmrOfRebels, totalPower = 0, powerfull = 0;
-  var powerfullRatio, rebelgroupRatio;
-  var rebelgroups = cLASS["RebelGroup"].instances;
-  
-  Object.keys( rebelgroups ).forEach( function ( objId ) {
-    nmrOfRebels = rebelgroups[objId].nmrOfRebels;
-    totalPower += nmrOfRebels;
-    
-    if ( nmrOfRebels > powerfull ) {
-      powerfull = nmrOfRebels;
+/**
+ * Calculates the global relative strength of a Rebel Group. The Rebel Group's
+ * strength with respect to all other Rebel Groups.
+ *
+ * @param rebelGroup Rebel Group
+ * @return Relative strength ratio
+ */
+sim.model.f.globalRelativeStrength = function ( rebelGroup ) {
+  var totalStrength = 0;
+  var rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
+
+  Object.keys( rebelGroupsObj ).forEach( function ( objId ) {
+    totalStrength += rebelGroupsObj[ objId ].nmrOfRebels;
+  } );
+
+  return 1 - ( ( totalStrength - rebelGroup.nmrOfRebels ) / totalStrength );
+};
+/**
+ * Calculates the relative strength of a Rebel Group with respect to an
+ * opponent Rebel Group.
+ *
+ * @param rebelGroup Rebel Group
+ * @param opponent Opponent Rebel Group
+ * @returns Relative strength of the rebelGroup
+ */
+sim.model.f.relativeStrength = function ( rebelGroup, opponent ) {
+  if ( rebelGroup && opponent ) {
+    if ( opponent.nmrOfRebels !== 0 ) {
+      return rebelGroup.nmrOfRebels / opponent.nmrOfRebels;
     }
-  });
-  
-  powerfullRatio = powerfull / totalPower;
-  rebelgroupRatio = rebelgroup.nmrOfRebels / totalPower;
-  
-  return powerfullRatio - rebelgroupRatio;
-}
+  }
+
+  return 1;
+};
 /*******************************************************************************
  * Define Initial State
  ******************************************************************************/
-// Initial Objects
+/* Initial Objects */
 sim.scenario.initialState.objects = {};
 
-// Initial Events
+/* Initial Events */
 sim.scenario.initialState.events = [];
 
-// Initial Functions
+/* Initial Functions */
 sim.scenario.setupInitialState = function () {
-  var i = 3, objId;
-  var nmrHigh, nmrLow;
-  var keys, rebelGroup, rebelgroups, enterprise, enterprises;
-  
-  /**
-   * Create Rebel Groups
-   */
-  /*
-  for ( i = 1; i <= sim.v.nmrOfRebelGroups; i += 1 ) {
-    objId = i;
-    sim.addObject( new RebelGroup( {
-      id: objId,
-      name: "rebelgroup" + objId,
-      nrmOfRebels: 0,
-      wealth: 0,
-      extortionRate: 0.3,
-      lastExpansion: 0
-    } ) );
-    
-    sim.scheduleEvent( new ReminderDemand( {
-      occTime: 1,
-      rebelgroup: objId
-    } ) );
-  }*/
+  var rebelGroupsObj, rebelGroupsKey, rebelGroup;
+  var enterprisesObj, enterprise;
+  var aux, objId;
+  var i = sim.v.nmrOfRebelGroups + 1;
+
+  /* Create Rebel Groups */
   sim.addObject( new RebelGroup( {
     id: 1,
-    name: "rebelgroup1",
+    name: "RebelGroup1",
+    shortLabel: "rg1",
+    wealth: 1050,
     nmrOfRebels: 500,
-    wealth: 100,
+    rebelCost: 2,
+    extortedEnterprises: [],
     extortionRate: 0.3,
-    lastExpansion: 0
+    freqDemand: Math.round( rand.normal( 30, 5 ) ),
+    freqExpand: Math.round( rand.normal( 100, 2 ) ),
+    freqAllocate: 30,
+    lastExpand: 0,
+    lastWealth: 0,
+    reports: {}
   } ) );
-  
-  sim.scheduleEvent( new ReminderDemand( {
+
+  sim.scheduleEvent( new Demand( {
     occTime: 1,
-    rebelgroup: 1
+    rebelGroup: 1
   } ) );
-  
+  sim.scheduleEvent( new Expand( {
+    occTime: 1,
+    rebelGroup: 1
+  } ) );
+  sim.scheduleEvent( new AllocateResource( {
+    occTime: 1,
+    rebelGroup: 1
+  } ) );
+
   sim.addObject( new RebelGroup( {
     id: 2,
-    name: "rebelgroup2",
+    name: "RebelGroup2",
+    shortLabel: "rg2",
+    wealth: 250,
     nmrOfRebels: 100,
-    wealth: 200,
+    rebelCost: 2,
+    extortedEnterprises: [],
     extortionRate: 0.2,
-    lastExpansion: 0
+    freqDemand: Math.round( rand.normal( 30, 5 ) ),
+    freqExpand: Math.round( rand.normal( 100, 2 ) ),
+    freqAllocate: 30,
+    lastExpand: 0,
+    lastWealth: 0,
+    reports: {}
   } ) );
-  
-  sim.scheduleEvent( new ReminderDemand( {
-    occTime: 1,
-    rebelgroup: 2
-  } ) );
-  
-  /**
-   * Create Enterprises
-   */
-  // Create High Income Enterprises
-  nmrHigh = sim.v.nmrOfEnterprises * 0.2;
-  for ( ; i <= (sim.v.nmrOfRebelGroups + nmrHigh); i += 1 ) {
-    objId = i;
-    sim.addObject( new Enterprise( {
-      id: objId,
-      name: "enterprise" + objId,
-      rebelgroup: null,
-      wealth: 0,
-      meanIncome: 100,
-      stdDevIncome: 10
-    } ) );
-    
-    sim.scheduleEvent( new ReminderIncome( {
-      occTime: 1,
-      enterprise: objId
-    } ) );
-  }
-  
-  // Create Low Income Enterprises
-  nmrLow = sim.v.nmrOfEnterprises * 0.8;
-  for ( ; i <= (sim.v.nmrOfRebelGroups + nmrHigh + nmrLow); i += 1 ) {
-    objId = i;
-    sim.addObject( new Enterprise( {
-      id: objId,
-      name: "enterprise" + objId,
-      rebelgroup: null,
-      wealth: 0,
-      meanIncome: 5,
-      stdDevIncome: 1
-    } ) );
-    
-    sim.scheduleEvent( new ReminderIncome( {
-      occTime: 1,
-      enterprise: objId
-    } ) );
-  }
-  
-  /**
-   * Allocate Enterprises to Rebel Groups
-   */
-  rebelgroups = cLASS["RebelGroup"].instances;
-  keys = Object.keys( rebelgroups );
-  enterprises = cLASS["Enterprise"].instances;
-  Object.keys( enterprises ).forEach( function (objId) {
-    enterprise = enterprises[objId];
-    rebelgroup = rebelgroups[ keys[ rand.uniformInt( 0, keys.length - 1) ] ];
-    
-    enterprise.rebelgroup = rebelgroup;
-    rebelgroup.enterprises.push( enterprise );
-  });
-};
 
+  sim.scheduleEvent( new Demand( {
+    occTime: 1,
+    rebelGroup: 2
+  } ) );
+  sim.scheduleEvent( new Expand( {
+    occTime: 1,
+    rebelGroup: 2
+  } ) );
+  sim.scheduleEvent( new AllocateResource( {
+    occTime: 1,
+    rebelGroup: 2
+  } ) );
+
+  /* Create Enterprises */
+  aux = Math.round( sim.v.nmrOfEnterprises * 0.2 );
+  for ( ; i <= ( sim.v.nmrOfRebelGroups + aux ); i += 1 ) {
+    objId = i;
+    sim.addObject( new Enterprise( {
+      id: objId,
+      name: "enterprise" + objId,
+      income: rand.normal( 100, 10 ),
+      freqIncome: 1,
+      rebelGroup: undefined,
+      wealth: 0,
+      accIncome: 0,
+      fleeThreshold: 3,
+      nmrOfExtortions: 0,
+      nmrOfLoot: 0
+    } ) );
+
+    sim.scheduleEvent( new Income( {
+      occTime: 1,
+      enterprise: objId
+    } ) );
+  }
+
+  for ( ; i <= ( sim.v.nmrOfRebelGroups + sim.v.nmrOfEnterprises ); i += 1 ) {
+    objId = i;
+    sim.addObject( new Enterprise( {
+      id: objId,
+      name: "enterprise" + objId,
+      income: rand.normal( 5, 1 ),
+      freqIncome: 1,
+      rebelGroup: undefined,
+      wealth: 0,
+      accIncome: 0,
+      fleeThreshold: 3,
+      nmrOfExtortions: 0,
+      nmrOfLoot: 0
+    } ) );
+
+    sim.scheduleEvent( new Income( {
+      occTime: 1,
+      enterprise: objId
+    } ) );
+  }
+
+  /* Randomly associate Enterprises and Rebel Groups */
+  rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
+  rebelGroupsKey = Object.keys( rebelGroupsObj );
+  enterprisesObj = cLASS[ "Enterprise" ].instances;
+  Object.keys( enterprisesObj ).forEach( function ( objId ) {
+    enterprise = enterprisesObj[ objId ];
+    rebelGroup = rebelGroupsObj[ rebelGroupsKey[ rand.uniformInt( 0,
+      rebelGroupsKey.length - 1 ) ] ];
+
+    enterprise.rebelGroup = rebelGroup;
+    rebelGroup.extortedEnterprises =
+      rebelGroup.extortedEnterprises.concat( enterprise );
+  } );
+};
 /*******************************************************************************
  * Define Output Statistics Variables
  ******************************************************************************/
 sim.model.statistics = {
-  "extortions": {
+  "nmrOfExtortions": {
     range: "NonNegativeInteger",
     label: "Number Extortions",
     initialValue: 0
   },
-  "lootings": {
+  "nmrOfLoot": {
     range: "NonNegativeInteger",
-    label: "Number Lootings",
+    label: "Number Looting",
     initialValue: 0
   },
-  "amountExtLoot": {
-    range: "Decimal",
-    label: "Amount Ext/Loot",
+  "nmrOfFights": {
+    range: "NonNegativeInteger",
+    label: "Number Fights",
     initialValue: 0
   },
-  "flees": {
+  "nmrOfReports": {
+    range: "NonNegativeInteger",
+    label: "Number Reports",
+    initialValue: 0
+  },
+  "nmrOfFlees": {
     range: "NonNegativeInteger",
     label: "Number Flees",
     initialValue: 0
+  },
+  "amountExtorted": {
+    range: "Decimal",
+    label: "Amount Extorted",
+    initialValue: 0
+  },
+  "amountLoot": {
+    range: "Decimal",
+    label: "Amount Loot",
+    initialValue: 0
+  },
+  // "nmrOfRebels": {
+  //   range: "NonNegativeInteger",
+  //   label: "Number of Rebels",
+  //   initialValue: 0,
+  //   showTimeSeries: true,
+  //   computeOnlyAtEnd: false,
+  //   expression: function () {
+  //     var total = 0;
+  //     var rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
+  //     Object.keys( rebelGroupsObj ).forEach( function ( objId ) {
+  //       total += rebelGroupsObj[ objId ].nmrOfRebels;
+  //     } );
+  //     return total;
+  //   }
+  // },
+  "nmrOfExtortedEnterprises": {
+    range: "NonNegativeInteger",
+    label: "Number of Extorted Enterprises",
+    initialValue: 0,
+    showTimeSeries: true,
+    computeOnlyAtEnd: false,
+    expression: function () {
+      var total = 0;
+      var rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
+      Object.keys( rebelGroupsObj ).forEach( function ( objId ) {
+        total += rebelGroupsObj[ objId ].extortedEnterprises.length;
+      } );
+      return total;
+    }
+  },
+  "nmrOfExtorted1": {
+    range: "NonNegativeInteger",
+    label: "Number of Extorted Enterprises (1)",
+    initialValue: 0,
+    showTimeSeries: true,
+    computeOnlyAtEnd: false,
+    expression: function () {
+      var rebelGroupObj = cLASS[ "RebelGroup" ].instances[ 1 ];
+
+      return rebelGroupObj.extortedEnterprises.length;
+    }
+  },
+  "nmrOfExtorted2": {
+    range: "NonNegativeInteger",
+    label: "Number of Extorted Enterprises (2)",
+    initialValue: 0,
+    showTimeSeries: true,
+    computeOnlyAtEnd: false,
+    expression: function () {
+      var rebelGroupObj = cLASS[ "RebelGroup" ].instances[ 2 ];
+
+      return rebelGroupObj.extortedEnterprises.length;
+    }
   }
 };

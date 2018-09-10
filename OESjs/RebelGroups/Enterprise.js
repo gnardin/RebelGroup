@@ -1,6 +1,6 @@
 /*******************************************************************************
- * The Enterprise object class
- * 
+ * Enterprise object class
+ *
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
  * @author Frances Duffy
@@ -12,9 +12,17 @@ var Enterprise = new cLASS( {
   Name: "Enterprise",
   supertypeName: "oBJECT",
   properties: {
-    "rebelgroup": {
+    "income": {
+      range: "Object",
+      label: "Income"
+    },
+    "freqIncome": {
+      range: "Object",
+      label: "Frequency of Income"
+    },
+    "rebelGroup": {
       range: "RebelGroup",
-      label: "Dominant Rebel Group"
+      label: "Main Rebel Group"
     },
     "wealth": {
       range: "Decimal",
@@ -24,13 +32,18 @@ var Enterprise = new cLASS( {
       range: "Decimal",
       label: "Accumulated Income"
     },
-    "meanIncome": {
-      range: "Decimal",
-      label: "Income Mean"
+    "fleeThreshold": {
+      range: "NonNegativeInteger",
+      label: "Number of Loot to Flee"
     },
-    "stdDevIncome": {
-      range: "Decimal",
-      label: "Income Standard Deviation"
+    "nmrOfExtortions": {
+      range: "NonNegativeInteger",
+      label: "Number of Extortions"
+    },
+    "nmrOfLoot": {
+      range: "NonNegativeInteger",
+      label: "Number of Loot"
     }
-  }
+  },
+  methods: {}
 } );

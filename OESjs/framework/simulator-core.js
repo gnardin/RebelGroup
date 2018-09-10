@@ -5227,6 +5227,7 @@ sim.addObjects = function (objArr) {
  * @param o  the object to be removed
  */
 sim.removeObject = function (o) {
+  var ObjectClass = null;
   if (!(o instanceof oes.Object)) {
     console.log( JSON.stringify(o) +" is not an OES object!");
     return;
@@ -5248,6 +5249,8 @@ sim.removeObjectById = function (id) {
     console.log( JSON.stringify(id) +" is not an ID of a registered simulation object!");
     return;
   }
+  ObjectClass = o.constructor;
+  delete ObjectClass.instances[String(o.id)];
   delete sim.objects[String(id)];
 };
 /*******************************************************

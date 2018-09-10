@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Extort event class
- * 
+ *
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
  * @author Frances Duffy
@@ -8,11 +8,11 @@
  * @author Luis Gustavo Nardin
  * @author Gerd Wagner
  ******************************************************************************/
-var Extort = new cLASS({
+var Extort = new cLASS( {
   Name: "Extort",
   supertypeName: "eVENT",
   properties: {
-    "rebelgroup": {
+    "rebelGroup": {
       range: "RebelGroup"
     },
     "enterprise": {
@@ -22,19 +22,38 @@ var Extort = new cLASS({
   methods: {
     "onEvent": function () {
       var followupEvents = [];
-      
-      // Decide the amount to extort
+
+      /**
+       * Decide the amount to extort
+       *
+       * The amount is calculated based on the amount of income the enterprise
+       * accumulated since the last extortion
+       */
       var extortion = this.enterprise.accIncome *
-        this.rebelgroup.extortionRate;
-      
-      this.rebelgroup.wealth += extortion;
+        this.rebelGroup.extortionRate;
+
+      if ( this.enterprise.wealth < extortion ) {
+        extortion = this.enterprise.wealth;
+      }
+
+      this.rebelGroup.wealth += extortion;
       this.enterprise.wealth -= extortion;
       this.enterprise.accIncome = 0;
-      
-      sim.stat.extortions += 1;
-      sim.stat.amountExtLoot = extortion;
-      
+      this.enterprise.nmrOfExtortions += 1;
+
+      if ( this.enterprise.rebelGroup.id !== this.rebelGroup.id ) {
+        followupEvents.push( new Report( {
+          occTime: this.occTime + 1,
+          rebelGroup: this.enterprise.rebelGroup,
+          enterprise: this.enterprise,
+          extorter: this.rebelGroup
+        } ) );
+      }
+
+      sim.stat.nmrOfExtortions += 1;
+      sim.stat.amountExtorted += extortion;
+
       return followupEvents;
     }
   }
-});
+} );
