@@ -50,15 +50,14 @@ var Expand = new cLASS( {
 
         // Select the poorest Enterprise with greater probability
         wEnterprises = [];
-        wEnterprises[ 0 ] = enterprisesObj[ enterprisesKey[ 0 ] ].wealth;
+        wEnterprises[ 0 ] = 1 / enterprisesObj[ enterprisesKey[ 0 ] ].wealth;
         for ( i = 1; i < enterprisesKey.length; i += 1 ) {
           wEnterprises[ i ] = wEnterprises[ i - 1 ] +
-            enterprisesObj[ enterprisesKey[ i ] ].wealth;
+            ( 1 / enterprisesObj[ enterprisesKey[ i ] ].wealth );
         }
         threshold = rand.uniform( 0, 1 );
         for ( i = 0, v = 0; v < threshold; i += 1 ) {
-          v = 1 - ( wEnterprises[ i ] /
-            wEnterprises[ wEnterprises.length - 1 ] );
+          v = wEnterprises[ i ] / wEnterprises[ wEnterprises.length - 1 ];
         }
         enterprise = enterprisesObj[ enterprisesKey[ i ] ];
         if ( ( enterprise.rebelGroup !== null ) &&
@@ -81,7 +80,7 @@ var Expand = new cLASS( {
 
           /* CHECK Fight Probability */
           fightProb = sim.model.f.sigmoid( 1, 1, 1,
-            -1.5, ( strengthRatio * 5 ) - 2 );
+            -1.5, ( strengthRatio * 4 ) );
         } else {
           enterprise.rebelGroup = this.rebelGroup;
         }

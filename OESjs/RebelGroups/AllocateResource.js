@@ -40,18 +40,18 @@ var AllocateResource = new cLASS( {
         deltaRebels = ( ( this.rebelGroup.wealth -
           this.rebelGroup.lastWealth ) / this.rebelGroup.rebelCost );
 
-        recruit = Math.min( deltaRebels,
-          ( this.rebelGroup.nmrOfRebels * this.rebelGroup.expandRate ) );
+        recruit = Math.round( Math.min( deltaRebels,
+          ( this.rebelGroup.nmrOfRebels * this.rebelGroup.expandRate ) ) );
 
       } else if ( this.rebelGroup.wealth < this.rebelGroup.lastWealth ) {
-        deltaRebels += ( this.rebelGroup.lastWealth - this.rebelGroup.wealth ) /
+        deltaRebels = ( this.rebelGroup.lastWealth - this.rebelGroup.wealth ) /
           this.rebelGroup.rebelCost;
 
-        expel += Math.min( this.rebelGroup.nmrOfRebels,
-          deltaRebels );
+        expel = Math.round( Math.min( this.rebelGroup.nmrOfRebels,
+          expel + deltaRebels ) );
       }
 
-      this.rebelGroup.nmrOfRebels = Math.max( 1,
+      this.rebelGroup.nmrOfRebels = Math.max( 0,
         this.rebelGroup.nmrOfRebels + recruit - expel );
 
       this.rebelGroup.lastWealth = this.rebelGroup.wealth;
