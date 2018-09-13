@@ -33,6 +33,8 @@ var Fight = new cLASS( {
         weakRG = this.defiant;
       }
 
+      console.log( this.occTime );
+
       /* Rebel Groups fight only if they have rebels */
       if ( ( strongRG.nmrOfRebels > 0 ) || ( weakRG.nmrOfRebels > 0 ) ) {
         strongRGProb = sim.model.f.relativeStrength( strongRG, weakRG );
