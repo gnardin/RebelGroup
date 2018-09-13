@@ -31,15 +31,20 @@ var Expand = new cLASS( {
       var enterprisesObj = cLASS[ "Enterprise" ].instances;
       var enterprisesKey = Object.keys( enterprisesObj );
 
-      // Define the probability to expand
+      /* CHECK Expand Probability */
       globalStrengthRatio =
         sim.model.f.globalRelativeStrength( this.rebelGroup );
 
-      expandProb = 1 / ( 1 + Math.pow( Math.E, -1 * globalStrengthRatio *
-        ( this.occTime - this.rebelGroup.lastExpand ) ) );
+      expandProb = sim.model.f.sigmoid( 1, 1, 10,
+        sim.model.f.normalizeValue( globalStrengthRatio ),
+        ( this.occTime - this.rebelGroup.lastExpand ) );
 
-      // Decide to expand and is able to expand
+      /*
+       * Decide to expand if there are Enterprises to expand and the Rebel
+       * Group has rebels
+       */
       if ( ( rand.uniform() < expandProb ) &&
+        ( this.rebelGroup.nmrOfRebels > 0 ) &&
         ( enterprisesKey.length >
           this.rebelGroup.extortedEnterprises.length ) ) {
 
@@ -56,48 +61,59 @@ var Expand = new cLASS( {
             wEnterprises[ wEnterprises.length - 1 ] );
         }
         enterprise = enterprisesObj[ enterprisesKey[ i ] ];
-        if ( this.rebelGroup.id === enterprise.rebelGroup.id ) {
+        if ( ( enterprise.rebelGroup !== null ) &&
+          ( this.rebelGroup.id === enterprise.rebelGroup.id ) ) {
           do {
             enterprise = enterprisesObj[ enterprisesKey[
               rand.uniformInt( 0, enterprisesKey.length - 1 ) ] ];
-          } while ( ( this.rebelGroup.id === enterprise.rebelGroup.id ) );
+          } while ( ( enterprise.rebelGroup !== null ) &&
+            ( this.rebelGroup.id === enterprise.rebelGroup.id ) );
         }
 
-        if ( enterprise.rebelGroup ) {
-          strengthRatio = sim.model.f.relativeStrength( this.rebelGroup,
-            enterprise.rebelGroup );
+        /* Calculate the probability to fight if the Enterprise already has
+         * an main extorter Rebel Group
+         */
+        fightProb = 0;
+        if ( enterprise.rebelGroup !== null ) {
+          strengthRatio = sim.model.f.normalizeValue(
+            sim.model.f.relativeStrength( this.rebelGroup,
+              enterprise.rebelGroup ) );
 
-         /* CHECK How to calculate the probability to fight? */
-          fightProb = 1 / ( 1 + Math.pow( Math.E, -3 *
-            ( ( strengthRatio * 10 ) - 5 ) ) );
+          /* CHECK Fight Probability */
+          fightProb = sim.model.f.sigmoid( 1, 1, 1,
+            -1.5, ( strengthRatio * 5 ) - 2 );
+        } else {
+          enterprise.rebelGroup = this.rebelGroup;
+        }
 
-          if ( rand.uniform() < fightProb ) {
-            followupEvents.push( new Fight( {
+        if ( rand.uniform() < fightProb ) {
+          followupEvents.push( new Fight( {
+            occTime: this.occTime + 1,
+            defiant: this.rebelGroup,
+            opponent: enterprise.rebelGroup
+          } ) );
+        } else {
+          /*
+           * Weaker Rebel Groups have a greater chance to loot, while
+           * stronger Rebel Groups tend to extort
+           */
+          if ( rand.uniform() < globalStrengthRatio ) {
+            followupEvents.push( new Extort( {
               occTime: this.occTime + 1,
-              defiant: this.rebelGroup,
-              opponent: enterprise.rebelGroup
+              rebelGroup: this.rebelGroup,
+              enterprise: enterprise
             } ) );
           } else {
-            /**
-             * Weaker Rebel Groups have a greater chance to loot, while
-             * stronger Rebel Groups tend to extort
-             */
-            if ( rand.uniform() < globalStrengthRatio ) {
-              followupEvents.push( new Extort( {
-                occTime: this.occTime + 1,
-                rebelGroup: this.rebelGroup,
-                enterprise: enterprise
-              } ) );
-            } else {
-              followupEvents.push( new Loot( {
-                occTime: this.occTime + 1,
-                rebelGroup: this.rebelGroup,
-                enterprise: enterprise
-              } ) );
-            }
+            followupEvents.push( new Loot( {
+              occTime: this.occTime + 1,
+              rebelGroup: this.rebelGroup,
+              enterprise: enterprise
+            } ) );
           }
-          this.rebelGroup.lastExpand = this.occTime;
         }
+        this.rebelGroup.lastExpand = this.occTime;
+
+        sim.stat.nmrOfExpands += 1;
       }
       return followupEvents;
     }

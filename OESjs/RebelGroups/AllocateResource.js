@@ -19,7 +19,9 @@ var AllocateResource = new cLASS( {
   methods: {
     "onEvent": function () {
       var followupEvents = [];
-      var deltaRebels;
+      var deltaRebels = 0, recruit = 0, expel = 0;
+      var strengthRatio = sim.model.f.globalRelativeStrength( this.rebelGroup );
+
       var totalSalary = this.rebelGroup.nmrOfRebels *
         this.rebelGroup.rebelCost;
 
@@ -27,20 +29,35 @@ var AllocateResource = new cLASS( {
       if ( this.rebelGroup.wealth > totalSalary ) {
         this.rebelGroup.wealth -= totalSalary;
       } else {
-        deltaRebels = this.rebelGroup.nmrOfRebels -
-          Math.round( this.rebelGroup.wealth / totalSalary );
+        // Rebels not paid leave the Rebel Group
+        expel = Math.round( ( totalSalary - this.rebelGroup.wealth ) /
+          this.rebelGroup.rebelCost );
         this.rebelGroup.wealth = 0;
       }
 
-      if ( this.rebelGroup.wealth > this.rebelGroup.lastWealth ) {
-        deltaRebels = ( this.rebelGroup.wealth - this.rebelGroup.lastWealth ) /
-          this.rebelGroup.rebelCost;
-        this.rebelGroup.nmrOfRebels += deltaRebels;
+      if ( ( this.rebelGroup.wealth > this.rebelGroup.lastWealth ) &&
+        ( strengthRatio < this.rebelGroup.freezeExpandThreshold ) ) {
+        deltaRebels = ( ( this.rebelGroup.wealth -
+          this.rebelGroup.lastWealth ) / this.rebelGroup.rebelCost );
+
+        recruit = Math.min( deltaRebels,
+          ( this.rebelGroup.nmrOfRebels * this.rebelGroup.expandRate ) );
+
       } else if ( this.rebelGroup.wealth < this.rebelGroup.lastWealth ) {
-        deltaRebels = ( this.rebelGroup.lastWealth - this.rebelGroup.wealth ) /
+        deltaRebels += ( this.rebelGroup.lastWealth - this.rebelGroup.wealth ) /
           this.rebelGroup.rebelCost;
-        this.rebelGroup.nmrOfRebels -= deltaRebels;
+
+        expel += Math.min( this.rebelGroup.nmrOfRebels,
+          deltaRebels );
       }
+
+      this.rebelGroup.nmrOfRebels = Math.max( 1,
+        this.rebelGroup.nmrOfRebels + recruit - expel );
+
+      this.rebelGroup.lastWealth = this.rebelGroup.wealth;
+
+      sim.stat.nmrOfRecruits += recruit;
+      sim.stat.nmrOfExpels += expel;
 
       return followupEvents;
     }

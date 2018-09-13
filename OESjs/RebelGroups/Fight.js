@@ -24,6 +24,7 @@ var Fight = new cLASS( {
       var followupEvents = [];
       var strongRG, weakRG, strongRGProb, weakRGProb, enterprise, index, len, i;
 
+      // Define the strong and weak Rebel Groups
       if ( this.defiant.nmrOfRebels > this.opponent.nmrOfRebels ) {
         strongRG = this.defiant;
         weakRG = this.opponent;
@@ -32,49 +33,59 @@ var Fight = new cLASS( {
         weakRG = this.defiant;
       }
 
-      strongRGProb = strongRG.nmrOfRebels /
-        ( strongRG.nmrOfRebels + weakRG.nmrOfRebels );
+      /* Rebel Groups fight only if they have rebels */
+      if ( ( strongRG.nmrOfRebels > 0 ) || ( weakRG.nmrOfRebels > 0 ) ) {
+        strongRGProb = sim.model.f.relativeStrength( strongRG, weakRG );
+        weakRGProb = sim.model.f.relativeStrength( weakRG, strongRG );
 
-      weakRGProb = weakRG.nmrOfRebels /
-        ( strongRG.nmrOfRebels + weakRG.nmrOfRebels );
-
-      if ( rand.uniform() < strongRGProb ) {
-        len = weakRG.extortedEnterprises.length;
-        if ( len >= sim.v.basket ) {
-          len = sim.v.basket;
-        }
-        for ( i = 0; i < len; i += 1 ) {
-          index = rand.uniformInt( 0, weakRG.extortedEnterprises.length - 1 );
-          enterprise = weakRG.extortedEnterprises[ index ];
-          weakRG.extortedEnterprises.splice( index, 1 );
-          enterprise.rebelGroup = strongRG;
-          enterprise.nmrOfLoot = 0;
-          strongRG.extortedEnterprises =
-            strongRG.extortedEnterprises.concat( enterprise );
-        }
-      } else {
-        if ( rand.uniform() < weakRGProb ) {
-          len = strongRG.extortedEnterprises.length;
+        /* Probability the strong Rebel Group wins the fight */
+        if ( rand.uniform() < strongRGProb ) {
+          // Define number of Enterprises to transfer
+          len = weakRG.extortedEnterprises.length;
           if ( len >= sim.v.basket ) {
+            len = sim.v.basket;
+          }
+          // Transfer random Enterprise from weak to strong Rebel Group
+          for ( i = 0; i < len; i += 1 ) {
+            index = rand.uniformInt( 0, weakRG.extortedEnterprises.length - 1 );
+            enterprise = weakRG.extortedEnterprises[ index ];
+            weakRG.extortedEnterprises.splice( index, 1 );
+            enterprise.rebelGroup = strongRG;
+            strongRG.extortedEnterprises =
+              strongRG.extortedEnterprises.concat( enterprise );
+            enterprise.nmrOfLoot = 0;
+          }
+        } else {
+          /* Probability the weak Rebel Group wins the fight */
+          if ( rand.uniform() < weakRGProb ) {
+            // Define number of Enterprises to transfer
+            len = strongRG.extortedEnterprises.length;
+            if ( len >= sim.v.basket ) {
+              len = sim.v.basket;
+            }
+            // Transfer random Enterprise from strong to weak Rebel Group
             for ( i = 0; i < len; i += 1 ) {
               index = rand.uniformInt( 0,
                 strongRG.extortedEnterprises.length - 1 );
               enterprise = strongRG.extortedEnterprises[ index ];
               strongRG.extortedEnterprises.splice( index, 1 );
               enterprise.rebelGroup = weakRG;
-              enterprise.nmrOfLoot = 0;
               weakRG.extortedEnterprises =
                 weakRG.extortedEnterprises.concat( enterprise );
+              enterprise.nmrOfLoot = 0;
             }
           }
         }
+
+        /*
+         * Fight causes the decrease of Rebel Group members proportional to the
+         * opposite Rebel Group's strength
+        */
+        strongRG.nmrOfRebels -= Math.round( strongRG.nmrOfRebels * weakRGProb );
+        weakRG.nmrOfRebels -= Math.round( weakRG.nmrOfRebels * strongRGProb );
+
+        sim.stat.nmrOfFights += 1;
       }
-
-      /* CHECK Fight is causing too many deaths */
-      strongRG.nmrOfRebels -= Math.round( strongRG.nmrOfRebels * weakRGProb );
-      weakRG.nmrOfRebels -= Math.round( weakRG.nmrOfRebels * strongRGProb );
-
-      sim.stat.nmrOfFights += 1;
 
       return followupEvents;
     }

@@ -25,27 +25,32 @@ var Report = new cLASS( {
   methods: {
     "onEvent": function () {
       var followupEvents = [];
-      var nmrOfReports, fightProb;
+      var strengthRatio, nmrOfReports, fightProb;
       var extorterId = this.extorter.id;
 
       if ( !( extorterId in this.rebelGroup.reports ) ) {
         nmrOfReports = 1;
       } else {
-        nmrOfReports = this.rebelGroup.reports[ extorterId ];
+        nmrOfReports = this.rebelGroup.reports[ extorterId ] + 1;
       }
 
-      /* CHECK How to calculate the probability to fight? */
-      fightProb = 1 / ( 1 + Math.pow( Math.E, -3 *
-        ( ( nmrOfReports * 10 ) - 5 ) ) );
+      /* CHECK Fight Probability */
+      strengthRatio =
+        sim.model.f.relativeStrength( this.rebelGroup, this.extorter );
 
-      if ( rand.uniform < fightProb ) {
+      fightProb = sim.model.f.sigmoid( 1, 1, 10,
+        sim.model.f.normalizeValue( strengthRatio ), nmrOfReports );
+
+      // Decide to Fight
+      if ( ( rand.uniform < fightProb ) &&
+        ( this.rebelGroup.nmrOfRebels > 0 ) ) {
         followupEvents.push( new Fight( {
           defiant: this.rebelGroup,
           opponent: this.extorter
         } ) );
         this.rebelGroup.reports[ extorterId ] = 0;
       } else {
-        this.rebelGroup.reports[ extorterId ] = nmrOfReports + 1;
+        this.rebelGroup.reports[ extorterId ] = nmrOfReports;
       }
 
       sim.stat.nmrOfReports += 1;

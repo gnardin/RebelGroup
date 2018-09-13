@@ -19,35 +19,36 @@ var Demand = new cLASS( {
   methods: {
     "onEvent": function () {
       var followupEvents = [];
-      var occTime = this.occTime;
-      var rebelGroup = this.rebelGroup;
-      var strengthRatio = sim.model.f.globalRelativeStrength( rebelGroup );
+      var strengthRatio;
 
-      rebelGroup.extortedEnterprises.forEach( ( enterprise ) => {
-        /**
-         * Decision to extort or loot
-         *
-         * Rebel Groups loot based on their strength with respect to the other
-         * Rebel Groups, otherwise they extort
-         *
-         * TODO
-         * Rebel Groups also loot if they receive external support that does
-         * not require them to create a deeper connection with the community
-         */
-        if ( rand.uniform() < strengthRatio ) {
-          followupEvents.push( new Loot( {
-            occTime: occTime + 1,
-            rebelGroup: rebelGroup,
-            enterprise: enterprise
-          } ) );
-        } else {
-          followupEvents.push( new Extort( {
-            occTime: occTime + 1,
-            rebelGroup: rebelGroup,
-            enterprise: enterprise
-          } ) );
-        }
-      } );
+      if ( this.rebelGroup.nmrOfRebels > 0 ) {
+        strengthRatio = sim.model.f.globalRelativeStrength( this.rebelGroup );
+        this.rebelGroup.extortedEnterprises.forEach( ( enterprise ) => {
+          /**
+           * Decision to extort or loot
+           *
+           * Rebel Groups loot based on their strength with respect to the other
+           * Rebel Groups, otherwise they extort
+           *
+           * TODO
+           * Rebel Groups also loot if they receive external support that does
+           * not require them to create a deeper connection with the community
+           */
+          if ( rand.uniform() < ( 1 - strengthRatio ) ) {
+            followupEvents.push( new Loot( {
+              occTime: this.occTime + 1,
+              rebelGroup: this.rebelGroup,
+              enterprise: enterprise
+            } ) );
+          } else {
+            followupEvents.push( new Extort( {
+              occTime: this.occTime + 1,
+              rebelGroup: this.rebelGroup,
+              enterprise: enterprise
+            } ) );
+          }
+        } );
+      }
       return followupEvents;
     }
   }

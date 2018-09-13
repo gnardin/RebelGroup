@@ -22,11 +22,11 @@ var Loot = new cLASS( {
   methods: {
     "onEvent": function () {
       var followupEvents = [];
-      var fleeProb;
       var amount = this.enterprise.wealth;
 
-      /* CHECK How to calculate the probability to flee? */
-      fleeProb = 1 / ( 1 + Math.pow( Math.E, -1 * this.enterprise.wealth ) );
+      /* CHECK Flee Probability */
+      /* TODO Replace it by a function */
+      var fleeProb = this.enterprise.fleeProb;
 
       this.rebelGroup.wealth += amount;
       this.enterprise.wealth = 0;
@@ -42,6 +42,8 @@ var Loot = new cLASS( {
           } ) );
         }
       } else {
+        // Enterprise decides to Flee or Report if looted by a different
+        // Rebel Group
         if ( rand.uniform() < fleeProb ) {
           followupEvents.push( new Flee( {
             occTime: this.occTime + 1,

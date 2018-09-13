@@ -21,17 +21,25 @@ var Flee = new cLASS( {
       var followupEvents = [];
       var rebelGroup, index;
       var rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
+      var enterprisesKey = Object.keys( cLASS[ "Enterprise" ].instances );
 
-      Object.keys( rebelGroupsObj ).forEach( ( objId ) => {
-        rebelGroup = rebelGroupsObj[ objId ];
+      // console.log( this.enterprise.id + " " +
+      //   enterprisesKey.indexOf( String( this.enterprise.id ) ) +
+      //   " " + enterprisesKey );
+      //if ( enterprisesKey.indexOf( String( this.enterprise.id ) ) !== -1 ) {
+        Object.keys( rebelGroupsObj ).forEach( ( objId ) => {
+          rebelGroup = rebelGroupsObj[ objId ];
 
-        index = rebelGroup.extortedEnterprises.indexOf( this.enterprise );
-        if ( index !== -1 ) {
-          rebelGroup.extortedEnterprises.splice( index, 1 );
-        }
-      } );
+          index = rebelGroup.extortedEnterprises.indexOf( this.enterprise );
+          if ( index !== -1 ) {
+            rebelGroup.extortedEnterprises.splice( index, 1 );
+          }
+        } );
 
-      sim.stat.nmrOfFlees += 1;
+        sim.removeObject( this.enterprise );
+
+        sim.stat.nmrOfFlees += 1;
+    //  }
 
       return followupEvents;
     }

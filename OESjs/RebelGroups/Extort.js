@@ -41,6 +41,7 @@ var Extort = new cLASS( {
       this.enterprise.accIncome = 0;
       this.enterprise.nmrOfExtortions += 1;
 
+      // Enterprise reports if extorted by a different Rebel Group
       if ( this.enterprise.rebelGroup.id !== this.rebelGroup.id ) {
         followupEvents.push( new Report( {
           occTime: this.occTime + 1,

@@ -32,6 +32,10 @@ var Enterprise = new cLASS( {
       range: "Decimal",
       label: "Accumulated Income"
     },
+    "fleeProb": {
+      range: "Decimal",
+      label: "Probability to Flee"
+    },
     "fleeThreshold": {
       range: "NonNegativeInteger",
       label: "Number of Loot to Flee"
