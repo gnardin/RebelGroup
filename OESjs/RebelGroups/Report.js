@@ -12,14 +12,9 @@ var Report = new cLASS( {
   Name: "Report",
   supertypeName: "eVENT",
   properties: {
-    "rebelGroup": {
-      range: "RebelGroup"
-    },
-    "enterprise": {
-      range: "Enterprise"
-    },
-    "extorter": {
-      range: "RebelGroup"
+    "rebelGroup": {range: "RebelGroup", label: "Rebel group"},
+    "enterprise": {range: "Enterprise", label: "Enterprise"},
+    "extorter": {range: "RebelGroup", label: "Extorter"
     }
   },
   methods: {

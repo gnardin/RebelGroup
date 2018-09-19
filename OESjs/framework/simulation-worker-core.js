@@ -159,7 +159,7 @@ RoleConstraintViolation.prototype.constructor = RoleConstraintViolation;
 /*******************************************************************************
  * @fileOverview A collection of utilities: methods, objects, etc used all over the code.
  * @author Mircea Diaconescu
- * @copyright Copyright © 2014 Gerd Wagner, Mircea Diaconescu et al,
+ * @copyright Copyright © 2014 Gerd Wagner, Mircea Diaconescu et al, 
  *            Chair of Internet Technology, Brandenburg University of Technology, Germany.
  * @date July 08, 2014, 11:04:23
  * @license The MIT License (MIT)
@@ -190,15 +190,15 @@ util.capitalizeFirstChar = function (str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 /**
- * Copy all own (property and method) slots of a number of untyped objects
+ * Copy all own (property and method) slots of a number of untyped objects 
  * to a new untyped object.
  * @author Gerd Wagner
  * @return {object}  The merge result.
  */
 util.mergeObjects = function () {
-  var i = 0, k = 0, n = arguments.length, m = 0,
+  var i = 0, k = 0, n = arguments.length, m = 0, 
       foundArrayArg = false,
-      foundObjectArg = false,
+      foundObjectArg = false, 
       arg = null, mergedResult,
       keys=[], key="";
   for (i = 0; i < n; i++) {
@@ -222,9 +222,9 @@ util.mergeObjects = function () {
         keys = Object.keys( arg);
         m = keys.length;
         for (k = 0; k < m; k++) {
-          key = keys[k];
+          key = keys[k]; 
           mergedResult[key] = arg[key];
-        }
+        }      
       } else {
         throw "util.mergeObjects: incompatible objects were found! Trying to merge "+
               "an Object with an Array! Expected Object arguments only!";
@@ -236,128 +236,84 @@ util.mergeObjects = function () {
   }
   return mergedResult;
 };
-/**
- * Given a class name (e.g. Book) create the corresponding database
- * table name (e.g., books) which is the lower case plural version
- * of the used (and provided as parameter) class name.
- * @param {string} className
- * @return the corresponding table name for the given class name
- */
-util.class2TableName = function ( className) {
-  return util.camelToUnderscore( className, true);
+/**********************************************
+ * Name conversions
+ **********************************************/
+// Example 1: EnglishTeacher => english_teachers
+// Example 2: eXPERIMENTdEF => EXPERIMENT_DEFS
+util.class2TableName = function (className) {
+  var tableName="";
+  if (className.charAt(0) === className.charAt(0).toUpperCase()) { // starts with upper case
+    if (className.charAt( className.length-1) === "y") {
+      tableName = util.camelToLowerCase( className.slice( 0, className.length-1)) + "ies";
+    } else {
+      tableName = util.camelToLowerCase( className) + "s";
+    }
+    return tableName;
+  } else { // inverse camel case (starts with lower case)
+    if (className.charAt( className.length-1) === "Y") {
+      tableName = util.invCamelToUppercase( className.slice( 0, className.length-1)) + "IES";
+    } else {
+      tableName = util.invCamelToUppercase( className) + "S";
+    }
+    return tableName;
+  }
 };
-
-/**
- * Given a property name (e.g. dateOfBirth) create the corresponding
- * table column name (e.g., date_of_birth) which is the underscore
- * notation version of the property name.
- * @param {string} propertyName
- * @return the corresponding column name for the given property name
- */
-util.property2ColumnName = function ( propertyName) {
-  return util.camelToUnderscore( propertyName);
+// Example: books => Book
+util.table2ClassName = function (tableName) {
+  var result = util.lowercaseToCamel( tableName);
+  result = result.charAt( 0).toUpperCase() + result.slice( 1);
+  // if there is an 's' at the end, drop it
+  if (result.charAt( result.length - 1) === 's') {
+    result = result.slice( 0, result.length - 1);
+  }
+  /*
+  if (!util.JsIdentifierPattern.test( result)) {
+    throw Error("util.camelToLowerCase: the provided 'identifier' (" + result +
+        ") is not a valid JS identifier!");
+  }
+  */
+  return result;
 };
-
-/**
- * Given a table name (e.g. books) create the corresponding class
- * name (e.g., Book) which is the camel case version of the table
- * name but without the ending 's' and with first letter capitalized.
- * @param {string} tableName
- * @return the corresponding class name for the given table name
- */
-util.table2ClassName = function ( tableName) {
-  return util.underscoreToCamel( tableName, true);
+// Example: dateOfBirth => date_of_birth
+util.property2ColumnName = function (propertyName) {
+  return util.camelToLowerCase( propertyName);
 };
-
-/**
- * Given a column name (e.g. date_of_birth) create the corresponding
- * property name (e.g., dateOfBirth) which is the camel case version
- * of the column name (first letter lower case also).
- * @param {string} columnName
- * @return the corresponding property name for the given column name
- */
-util.column2PropertyName = function ( columnName) {
-  return util.underscoreToCamel( columnName);
+// Example: date_of_birth => dateOfBirth
+util.column2PropertyName = function (columnName) {
+  return util.lowercaseToCamel( columnName);
 };
-
-/** REGEX to check if valid JS identifier **/
-util.JsIdentifierPattern = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc][$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc0-9\u0300-\u036f\u0483-\u0487\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u0610-\u061a\u064b-\u0669\u0670\u06d6-\u06dc\u06df-\u06e4\u06e7\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0711\u0730-\u074a\u07a6-\u07b0\u07c0-\u07c9\u07eb-\u07f3\u0816-\u0819\u081b-\u0823\u0825-\u0827\u0829-\u082d\u0859-\u085b\u08e4-\u08fe\u0900-\u0903\u093a-\u093c\u093e-\u094f\u0951-\u0957\u0962\u0963\u0966-\u096f\u0981-\u0983\u09bc\u09be-\u09c4\u09c7\u09c8\u09cb-\u09cd\u09d7\u09e2\u09e3\u09e6-\u09ef\u0a01-\u0a03\u0a3c\u0a3e-\u0a42\u0a47\u0a48\u0a4b-\u0a4d\u0a51\u0a66-\u0a71\u0a75\u0a81-\u0a83\u0abc\u0abe-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ae2\u0ae3\u0ae6-\u0aef\u0b01-\u0b03\u0b3c\u0b3e-\u0b44\u0b47\u0b48\u0b4b-\u0b4d\u0b56\u0b57\u0b62\u0b63\u0b66-\u0b6f\u0b82\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0bd7\u0be6-\u0bef\u0c01-\u0c03\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c55\u0c56\u0c62\u0c63\u0c66-\u0c6f\u0c82\u0c83\u0cbc\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cd5\u0cd6\u0ce2\u0ce3\u0ce6-\u0cef\u0d02\u0d03\u0d3e-\u0d44\u0d46-\u0d48\u0d4a-\u0d4d\u0d57\u0d62\u0d63\u0d66-\u0d6f\u0d82\u0d83\u0dca\u0dcf-\u0dd4\u0dd6\u0dd8-\u0ddf\u0df2\u0df3\u0e31\u0e34-\u0e3a\u0e47-\u0e4e\u0e50-\u0e59\u0eb1\u0eb4-\u0eb9\u0ebb\u0ebc\u0ec8-\u0ecd\u0ed0-\u0ed9\u0f18\u0f19\u0f20-\u0f29\u0f35\u0f37\u0f39\u0f3e\u0f3f\u0f71-\u0f84\u0f86\u0f87\u0f8d-\u0f97\u0f99-\u0fbc\u0fc6\u102b-\u103e\u1040-\u1049\u1056-\u1059\u105e-\u1060\u1062-\u1064\u1067-\u106d\u1071-\u1074\u1082-\u108d\u108f-\u109d\u135d-\u135f\u1712-\u1714\u1732-\u1734\u1752\u1753\u1772\u1773\u17b4-\u17d3\u17dd\u17e0-\u17e9\u180b-\u180d\u1810-\u1819\u18a9\u1920-\u192b\u1930-\u193b\u1946-\u194f\u19b0-\u19c0\u19c8\u19c9\u19d0-\u19d9\u1a17-\u1a1b\u1a55-\u1a5e\u1a60-\u1a7c\u1a7f-\u1a89\u1a90-\u1a99\u1b00-\u1b04\u1b34-\u1b44\u1b50-\u1b59\u1b6b-\u1b73\u1b80-\u1b82\u1ba1-\u1bad\u1bb0-\u1bb9\u1be6-\u1bf3\u1c24-\u1c37\u1c40-\u1c49\u1c50-\u1c59\u1cd0-\u1cd2\u1cd4-\u1ce8\u1ced\u1cf2-\u1cf4\u1dc0-\u1de6\u1dfc-\u1dff\u200c\u200d\u203f\u2040\u2054\u20d0-\u20dc\u20e1\u20e5-\u20f0\u2cef-\u2cf1\u2d7f\u2de0-\u2dff\u302a-\u302f\u3099\u309a\ua620-\ua629\ua66f\ua674-\ua67d\ua69f\ua6f0\ua6f1\ua802\ua806\ua80b\ua823-\ua827\ua880\ua881\ua8b4-\ua8c4\ua8d0-\ua8d9\ua8e0-\ua8f1\ua900-\ua909\ua926-\ua92d\ua947-\ua953\ua980-\ua983\ua9b3-\ua9c0\ua9d0-\ua9d9\uaa29-\uaa36\uaa43\uaa4c\uaa4d\uaa50-\uaa59\uaa7b\uaab0\uaab2-\uaab4\uaab7\uaab8\uaabe\uaabf\uaac1\uaaeb-\uaaef\uaaf5\uaaf6\uabe3-\uabea\uabec\uabed\uabf0-\uabf9\ufb1e\ufe00-\ufe0f\ufe20-\ufe26\ufe33\ufe34\ufe4d-\ufe4f\uff10-\uff19\uff3f]*$/;
-/**
- * Convert a camel case identifier to underscore notation.
- * E.g.: dateOfBirth => date_of_birth,
- *       TemperatureSensor => temperature_sensors (if isClass = true)
- * @param {string} identifier
- *                the identifier(class name, property name, etc) to transform
- * @param {boolean} isClass
- *                a flag which specify if the identifier is a class name
- *                because in this case, the underscore notation contains
- *                the 's' char at the end.
- * @return the underscore-notation string for the identifier
- */
-util.camelToUnderscore = function ( identifier, isClass) {
+util.camelToLowerCase = function (identifier) {
   var result = '';
-  // null or undefined identifier
-  if ( !identifier) {
-    throw "util.camelToUnderscore: the 'identifier' can't be null or undefined!";
-  }
-  // invalid JS identifier
-  if ( !util.JsIdentifierPattern.test( identifier)) {
-    throw "util.camelToUnderscore: the provided 'identifier' (" + identifier + ") is not a JS valid identifier!";
-  }
   // if the first is a A-Z char, replace it with its lower case equivalent
-  // that's much easier than to create a regular expression to consider this
-  // specific exception case (which occurs normally with class names)
   identifier = identifier.charAt( 0).toLowerCase() + identifier.slice( 1);
   // replace upper case letter with '_' followed by the lower case equivalent leter
   result = identifier.replace( /([A-Z])/g, function( $1) {
     return "_" + $1.toLowerCase();
   });
-  // if is a class, add the 's' at the end
-  if ( isClass === true) {
-    result += 's';
-  }
   return result;
 };
-/**
- * Given a underscore-notation identifier, the method
- * transform it to camel case notation.
- * E.g.: date_of_birth => dateOfBirth
- *       temperature_sensors => TemperatureSensor (if isClass = true)
- * @param {string} identifier
- *                the identifier to transform
- * @param {boolean} isClass
- *                a flag which specify if the identifier is a class name
- *                because in this case, the underscore notation contains
- *                the 's' char at the end which has to be cut-out and also
- *                the first letter has to be capitalized.
- * @return the camel case notation string for the identifier
- */
-util.underscoreToCamel = function ( identifier, isClass) {
+util.invCamelToUppercase = function (name) {
   var result = '';
-  // null or undefined identifier
-  if ( !identifier) {
-    throw "util.underscoreToCamel: the 'identifier' can't be null or undefined!";
-  }
-  // invalid JS identifier
-  if ( !util.JsIdentifierPattern.test( identifier)) {
-    throw "util.underscoreToCamel: the provided 'identifier' is not a JS valid identifier!";
-  }
+  // if the first is a a-z, replace it with corresponding upper case
+  name = name.charAt(0).toUpperCase() + name.slice( 1);
+  // replace lower case letter with '_' followed by the corresponding upper case
+  result = name.replace( /([a-z])/g, function( $1) {
+    return "_" + $1.toUpperCase();
+  });
+  return result;
+};
+util.lowercaseToCamel = function (identifier) {
+  var result = '';
   // replace upper case letter with '_' followed by the lower case equivalent letter
-  result = identifier.replace( /(\_[a-z])/g, function ( $1) {
+  result = identifier.replace( /(\_[a-z])/g, function ($1) {
     return $1.toUpperCase().replace( '_', '');
   });
-  // if is a class name, delete the 's' from the end
-  // and capitalize the first letter
-  if ( isClass === true) {
-    result = result.charAt( 0).toUpperCase() + result.slice( 1);
-    // if it has an 's' at the end, then cut it out
-    // this should be in general the case...but anyway check it
-    if ( result.charAt( result.length - 1) === 's') {
-      result = result.slice( 0, result.length - 1);
-    }
-  }
   return result;
 };
+
+/** REGEX to check if valid JS identifier **/
+util.JsIdentifierPattern = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc][$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc0-9\u0300-\u036f\u0483-\u0487\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u0610-\u061a\u064b-\u0669\u0670\u06d6-\u06dc\u06df-\u06e4\u06e7\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0711\u0730-\u074a\u07a6-\u07b0\u07c0-\u07c9\u07eb-\u07f3\u0816-\u0819\u081b-\u0823\u0825-\u0827\u0829-\u082d\u0859-\u085b\u08e4-\u08fe\u0900-\u0903\u093a-\u093c\u093e-\u094f\u0951-\u0957\u0962\u0963\u0966-\u096f\u0981-\u0983\u09bc\u09be-\u09c4\u09c7\u09c8\u09cb-\u09cd\u09d7\u09e2\u09e3\u09e6-\u09ef\u0a01-\u0a03\u0a3c\u0a3e-\u0a42\u0a47\u0a48\u0a4b-\u0a4d\u0a51\u0a66-\u0a71\u0a75\u0a81-\u0a83\u0abc\u0abe-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ae2\u0ae3\u0ae6-\u0aef\u0b01-\u0b03\u0b3c\u0b3e-\u0b44\u0b47\u0b48\u0b4b-\u0b4d\u0b56\u0b57\u0b62\u0b63\u0b66-\u0b6f\u0b82\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0bd7\u0be6-\u0bef\u0c01-\u0c03\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c55\u0c56\u0c62\u0c63\u0c66-\u0c6f\u0c82\u0c83\u0cbc\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cd5\u0cd6\u0ce2\u0ce3\u0ce6-\u0cef\u0d02\u0d03\u0d3e-\u0d44\u0d46-\u0d48\u0d4a-\u0d4d\u0d57\u0d62\u0d63\u0d66-\u0d6f\u0d82\u0d83\u0dca\u0dcf-\u0dd4\u0dd6\u0dd8-\u0ddf\u0df2\u0df3\u0e31\u0e34-\u0e3a\u0e47-\u0e4e\u0e50-\u0e59\u0eb1\u0eb4-\u0eb9\u0ebb\u0ebc\u0ec8-\u0ecd\u0ed0-\u0ed9\u0f18\u0f19\u0f20-\u0f29\u0f35\u0f37\u0f39\u0f3e\u0f3f\u0f71-\u0f84\u0f86\u0f87\u0f8d-\u0f97\u0f99-\u0fbc\u0fc6\u102b-\u103e\u1040-\u1049\u1056-\u1059\u105e-\u1060\u1062-\u1064\u1067-\u106d\u1071-\u1074\u1082-\u108d\u108f-\u109d\u135d-\u135f\u1712-\u1714\u1732-\u1734\u1752\u1753\u1772\u1773\u17b4-\u17d3\u17dd\u17e0-\u17e9\u180b-\u180d\u1810-\u1819\u18a9\u1920-\u192b\u1930-\u193b\u1946-\u194f\u19b0-\u19c0\u19c8\u19c9\u19d0-\u19d9\u1a17-\u1a1b\u1a55-\u1a5e\u1a60-\u1a7c\u1a7f-\u1a89\u1a90-\u1a99\u1b00-\u1b04\u1b34-\u1b44\u1b50-\u1b59\u1b6b-\u1b73\u1b80-\u1b82\u1ba1-\u1bad\u1bb0-\u1bb9\u1be6-\u1bf3\u1c24-\u1c37\u1c40-\u1c49\u1c50-\u1c59\u1cd0-\u1cd2\u1cd4-\u1ce8\u1ced\u1cf2-\u1cf4\u1dc0-\u1de6\u1dfc-\u1dff\u200c\u200d\u203f\u2040\u2054\u20d0-\u20dc\u20e1\u20e5-\u20f0\u2cef-\u2cf1\u2d7f\u2de0-\u2dff\u302a-\u302f\u3099\u309a\ua620-\ua629\ua66f\ua674-\ua67d\ua69f\ua6f0\ua6f1\ua802\ua806\ua80b\ua823-\ua827\ua880\ua881\ua8b4-\ua8c4\ua8d0-\ua8d9\ua8e0-\ua8f1\ua900-\ua909\ua926-\ua92d\ua947-\ua953\ua980-\ua983\ua9b3-\ua9c0\ua9d0-\ua9d9\uaa29-\uaa36\uaa43\uaa4c\uaa4d\uaa50-\uaa59\uaa7b\uaab0\uaab2-\uaab4\uaab7\uaab8\uaabe\uaabf\uaac1\uaaeb-\uaaef\uaaf5\uaaf6\uabe3-\uabea\uabec\uabed\uabf0-\uabf9\ufb1e\ufe00-\ufe0f\ufe20-\ufe26\ufe33\ufe34\ufe4d-\ufe4f\uff10-\uff19\uff3f]*$/;
 
 //***** NOT USED IN cLASSjs ************************
 /**
@@ -393,20 +349,43 @@ util.createRecordFromObject = function (obj) {
   }
   return record;
 };
+// create an alias for cloning records
+util.cloneRecord = util.createRecordFromObject;
+
 /**
- * Create a deep clone of a JS object
+ * Create a "deep" clone of a JS object at the level of own properties/slots
  * @param o  the object to be cloned
  * @return {object}
  */
 util.cloneObject = function (o) {
-  var clonedObj = Array.isArray(o) ? [] : {};
+  var clone = Array.isArray(o) ? [] : {};
   Object.keys(o).forEach( function (key) {
-    clonedObj[key] = (typeof o[key] === "object") ? util.cloneObject(o[key]) : o[key];
+    clone[key] = (typeof o[key] === "object") ? util.cloneObject(o[key]) : o[key];
   });
-  return clonedObj;
+  return clone;
 };
 /**
- * Swap two elements of an array
+ * Copy all own (property and method) slots of a number of (untyped) objects
+ * to a new (untyped) object.
+ * @author Gerd Wagner
+ * @return {object}  The merge result.
+ */
+util.mergeObjects = function () {
+  var i=0, k=0, obj=null, mergeObj={}, keys=[], key="";
+  for (i=0; i < arguments.length; i++) {
+    obj = arguments[i];
+    if (obj && typeof obj === "object") {
+      keys = Object.keys( obj);
+      for (k=0; k < keys.length; k++) {
+        key = keys[k];
+        mergeObj[key] = obj[key];
+      }
+    }
+  }
+  return mergeObj;
+};
+/**
+ * Swap two elements of an array 
  * using the ES6 method Object.assign for creating a shallow clone of an object
  * @param a  the array
  * @param i  the first index
@@ -543,20 +522,20 @@ eNUMERATION.instances = {};
  * cLASS allows defining constructor-based JavaScript classes and
  * class hierarchies based on a declarative description of the form:
  *
- *   var MyObject = new cLASS({
- *     Name: "MyObject",
- *     supertypeName: "MySuperClass",
+ *   var Student = new cLASS({
+ *     Name: "Student",
+ *     supertypeName: "Person",
  *     properties: {
- *       "myAdditionalAttribute": {range:"Integer", label:"...", max: 7, ...}
+ *       "university": {range:"String", label:"University", max: 50, ...}
  *     },
  *     methods: {
  *     }
  *   });
- *   var myObj = new MyObject({id: 1, myAdditionalAttribute: 7});
- *   // test if instance of MyObject
- *   if (myObj. .Name ==="MyObject") ...
- *   // or, alternatively,
- *   if (myObj instanceof MyObject) ...
+ *   var stud1 = new Student({id: 1, university:"MIT"});
+ *   // test if direct instance
+ *   if (stud1.constructor.Name === "Student") ...
+ *   // test if instance
+ *   if (stud1 instanceof Student) ...
  *
  * Notice that it is assumed that a class has (or inherits) an "id" attribute
  * as its standard ID attribute.
@@ -569,7 +548,7 @@ eNUMERATION.instances = {};
  ******************************************************************************/
 /* globals cLASS */
 function cLASS (classSlots) {
-  var propDs = classSlots.properties || {},  // property declarations
+  var propDefs = classSlots.properties || {},  // property declarations
       methods = classSlots.methods || {},
       supertypeName = classSlots.supertypeName,
       superclass=null, constr=null,
@@ -578,8 +557,8 @@ function cLASS (classSlots) {
   if (supertypeName && !cLASS[supertypeName]) {
     throw "Specified supertype "+ supertypeName +" has not been defined!";
   }
-  if (!Object.keys( propDs).every( function (p) {
-        return (propDs[p].range !== undefined);
+  if (!Object.keys( propDefs).every( function (p) {
+        return (propDefs[p].range !== undefined);
       }) ) {
     throw "No range defined for some property of class "+ classSlots.Name +" !";
   }
@@ -590,71 +569,78 @@ function cLASS (classSlots) {
       cLASS[supertypeName].call( this, instanceSlots);
     }
     // assign own properties
-    Object.keys( propDs).forEach( function (p) {
-      var range = propDs[p].range,
-          val, rangeClasses=[], i=0, objRef=null, validationResult=null;
+    Object.keys( propDefs).forEach( function (p) {
+      var range = propDefs[p].range, Class=null,
+          val, rangeTypes=[], i=0, validationResult=null;
       if (typeof instanceSlots === "object" && instanceSlots[p]) {
         // property p has an initialization slot
         val = instanceSlots[p];
-        validationResult = cLASS.check( p, propDs[p], val);
+        validationResult = cLASS.check( p, propDefs[p], val);
         if (!(validationResult instanceof NoConstraintViolation)) throw validationResult;
         // is range a class (or class disjunction)?
         if (typeof range === "string" && typeof val !== "object" &&
             (cLASS[range] || range.includes("|"))) {
           if (range.includes("|")) {
-            rangeClasses = range.split("|");
-            for (i=0; i < rangeClasses.length; i++) {
-              objRef = cLASS[rangeClasses[i]].instances[String(val)];
-              // convert IdRef to object reference
-              if (objRef) { this[p] = objRef; break;}
+            rangeTypes = range.split("|");
+            for (i=0; i < rangeTypes.length; i++) {
+              Class = cLASS[rangeTypes[i]];
+              if (Class) {  // type disjunct is a cLASS
+                if (Class.instances[String(val)])  {
+                  // convert IdRef to object reference
+                  this[p] = Class.instances[String(val)];
+                  break;
+                }
+              }
             }
+            if (!this[p]) this[p] = val;
           } else {  // range is a class
             // convert IdRef to object reference
             this[p] = cLASS[range].instances[String(val)] || val;
           }
         } else this[p] = val;
-        delete instanceSlots[p];
-      } else if (propDs[p].initialValue !== undefined) {
-        // no initialization slot, assign initial value
-        if (typeof propDs[p].initialValue === "function") {
+      } else if (propDefs[p].initialValue !== undefined) {  // assign initial value
+        if (typeof propDefs[p].initialValue === "function") {
           propsWithInitialValFunc.push(p);
-        } else this[p] = propDs[p].initialValue;
-      } else if (!propDs[p].optional) {
-        // assign default value to mandatory properties without an initialization slot
+        } else this[p] = propDefs[p].initialValue;
+      } else if (p === "id" && range === "AutoNumber") {    // assign auto-ID
+        if (typeof this.constructor.getAutoId === "function") this[p] = this.constructor.getAutoId();
+        else if (this.constructor.idCounter !== undefined) this[p] = ++this.constructor.idCounter;
+      } else if (!propDefs[p].optional) {  // assign default value to mandatory properties
         if (cLASS.isIntegerType(range) || cLASS.isDecimalType(range)) {
           this[p] = 0;
         } else if (range === "String") {
           this[p] = "";
         } else if (range === "Boolean") {
           this[p] = false;
-        } else if (typeof range === "string" && cLASS[range] ||
-            typeof range === "object" && ["Array", "ArrayList"].includes(range["dataType"])) {
-          this[p] = [];
-        } else if (typeof range === "object" && range["dataType"] === "Map") {
-          this[p] = {};
+        } else if (typeof range === "object") {
+          if (["Array", "ArrayList"].includes(range.dataType)) {
+            this[p] = [];
+          } else if (range["dataType"] === "Map") {
+            this[p] = {};
+          }
         }
       }
       // initialize historical properties
-      if (propDs[p].historySize) {
+      if (propDefs[p].historySize) {
         this.history = this.history || {};  // a map
-        this.history[p] = propDs[p].decimalPlaces ?
-            new cLASS.RingBuffer( propDs[p].range, propDs[p].historySize,
-                {decimalPlaces: propDs[p].decimalPlaces}) :
-            new cLASS.RingBuffer( propDs[p].range, propDs[p].historySize);
+        this.history[p] = propDefs[p].decimalPlaces ?
+            new cLASS.RingBuffer( propDefs[p].range, propDefs[p].historySize,
+                {decimalPlaces: propDefs[p].decimalPlaces}) :
+            new cLASS.RingBuffer( propDefs[p].range, propDefs[p].historySize);
       }
     }, this);
     // call the functions for initial value expressions
     propsWithInitialValFunc.forEach( function (p) {
-      this[p] = propDs[p].initialValue.call(this);
+      this[p] = propDefs[p].initialValue.call(this);
     }, this);
     // assign remaining fields not defined as properties by the object's class
     if (typeof( instanceSlots) === "object") {
       Object.keys( instanceSlots).forEach( function (f) {
-        this[f] = instanceSlots[f];
+        if (!propDefs[f]) this[f] = instanceSlots[f];
       }, this);
     }
-    // is the class not abstract and does the object have an ID slot?
-    if (!classSlots.isAbstract && "id" in this) {
+    // is the class neither a complex DT nor abstract and does the object have an ID slot?
+    if (!classSlots.isComplexDatatype && !classSlots.isAbstract && "id" in this) {
       // add new object to the population/extension of the class
       cLASS[classSlots.Name].instances[String(this.id)] = this;
     }
@@ -662,31 +648,34 @@ function cLASS (classSlots) {
   // assign class-level (meta-)properties
   constr.constructor = cLASS;
   constr.Name = classSlots.Name;
+  if (classSlots.isComplexDatatype) constr.isComplexDatatype = true;
   if (classSlots.isAbstract) constr.isAbstract = true;
   if (classSlots.shortLabel) constr.shortLabel = classSlots.shortLabel;
+  if (classSlots.primaryKey) constr.primaryKey = classSlots.primaryKey;
+  if (classSlots.tableName) constr.tableName = classSlots.tableName;
   if (supertypeName) {
     constr.supertypeName = supertypeName;
     superclass = cLASS[supertypeName];
-    // apply classical inheritance pattern
+    // apply classical inheritance pattern for methods
     constr.prototype = Object.create( superclass.prototype);
     constr.prototype.constructor = constr;
     // merge superclass property declarations with own property declarations
     constr.properties = Object.create( superclass.properties);
-   //  assign own property declarations, possibly overriding super-props
-    Object.keys( propDs).forEach( function (p) {
-      constr.properties[p] = propDs[p];
+   //  assign own property declarations, possibly overriding super-props																		 
+    Object.keys( propDefs).forEach( function (p) {
+      constr.properties[p] = propDefs[p];
     });
   } else {  // if class is root class
-    constr.properties = propDs;
+    constr.properties = propDefs;
     /***************************************************/
     constr.prototype.set = function ( prop, val) {
     /***************************************************/
       // this = object
-      var constrViol = cLASS.check( prop, this.constructor.properties[prop], val);
-      if (constrViol instanceof NoConstraintViolation) {
-        this[prop] = constrViol.checkedValue;
+      var validationResult = cLASS.check( prop, this.constructor.properties[prop], val);
+      if (validationResult instanceof NoConstraintViolation) {
+        this[prop] = validationResult.checkedValue;
       } else {
-        throw constrViol;
+        throw validationResult;
       }
     };
     /***************************************************/
@@ -742,7 +731,7 @@ function cLASS (classSlots) {
             if (range.constructor && range.constructor === cLASS) { // object reference(s)
               if (Array.isArray( val)) {
                 valuesToConvert = val.slice(0);  // clone;
-              } else {  // map from ID refs to obj refs
+              } else {  // val is a map from ID refs to obj refs
                 valuesToConvert = Object.values( val);
               }
             } else if (Array.isArray( val)) {
@@ -788,10 +777,12 @@ function cLASS (classSlots) {
         if (Array.isArray( val)) {
           valuesToConvert = val.slice(0);  // clone;
         } else console.log("The value of a multi-valued " +
-            "datatype property must be an array!");
+            "datatype property like "+ prop +"must be an array!");
       } else valuesToConvert = [val];
       valuesToConvert.forEach( function (v,i) {
-        if (eNUMERATION && range instanceof eNUMERATION) {
+        if (typeof propDecl.val2str === "function") {
+          valuesToConvert[i] = propDecl.val2str( v);
+        } else if (eNUMERATION && range instanceof eNUMERATION) {
           valuesToConvert[i] = range.labels[v-1];
         } else if (["number","string","boolean"].includes( typeof v) || !v) {
           valuesToConvert[i] = String( v);
@@ -800,13 +791,18 @@ function cLASS (classSlots) {
         } else if (Array.isArray( v)) {  // JSON-compatible array
           valuesToConvert[i] = v.slice(0);  // clone
         } else if (typeof range === "string" && cLASS[range]) {
-          if (typeof val === "object" && val.id !== undefined) {
-            valuesToConvert[i] = val.id;
+          if (typeof v === "object" && v.id !== undefined) {
+            valuesToConvert[i] = v.id;
           } else {
-            valuesToConvert[i] = "";
+            valuesToConvert[i] = v.toString();
+            propDecl.stringified = true;
+            console.log("Property "+ this.constructor.Name +"::"+ prop +" has a cLASS object value without an 'id' slot!");
           }
-        } else valuesToConvert[i] = JSON.stringify( v);
-      });
+        } else {
+          valuesToConvert[i] = JSON.stringify( v);
+          propDecl.stringified = true;
+        }
+      }, this);
       displayStr = valuesToConvert[0];
       if (propDecl.maxCard && propDecl.maxCard > 1) {
         displayStr = "[" + displayStr;
@@ -818,10 +814,11 @@ function cLASS (classSlots) {
       return displayStr;
     };
     /***************************************************/
-    /***************************************************/
-    // A class-level de-serialization method
+
+    /***************************************************
+     * A class-level de-serialization method
+     ***************************************************/
     constr.createObjectFromRecord = function (record) {
-    /***************************************************/
       var obj={};
       try {
         obj = new constr( record);
@@ -854,7 +851,7 @@ function cLASS (classSlots) {
   * @return {boolean}
   */
 cLASS.isIntegerType = function (T) {
-  return typeof(T)==="string" && T.includes('Integer') ||
+  return ["Integer","PositiveInteger","AutoNumber","NonNegativeInteger"].includes(T) ||
       T instanceof eNUMERATION;
 };
  /**
@@ -865,13 +862,13 @@ cLASS.isIntegerType = function (T) {
   * @return {boolean}
   */
  cLASS.isDecimalType = function (T) {
-   return typeof(T)==="string" &&
-       (T.includes("Decimal") || T.includes("UnitInterval"));
+   return ["Number","Decimal","Percent","ClosedUnitInterval","OpenUnitInterval"].includes(T);
  };
  /**
   * Constants
   */
  cLASS.patterns = {
+   ID: /^([a-zA-Z0-9][a-zA-Z0-9_\-]+[a-zA-Z0-9])$/,
    // defined in WHATWG HTML5 specification
    EMAIL: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
    // proposed by Diego Perini (https://gist.github.com/729294)
@@ -921,12 +918,17 @@ cLASS.isIntegerType = function (T) {
      if (Array.isArray( val) ) {
        valuesToCheck = val;
      } else if (typeof range === "string" && cLASS[range]) {
-       valuesToCheck = Object.keys( val).map( function (id) {
-         return val[id];
-       });
+       if (!decl.ordered) {
+         valuesToCheck = Object.keys( val).map( function (id) {
+           return val[id];
+         });
+       } else {
+         return new RangeConstraintViolation("Values for the ordered property "+ fld +
+             " must be arrays, and not maps!");
+       }
      } else {
        return new RangeConstraintViolation("Values for "+ fld +
-           " must be arrays or maps!");
+           " must be arrays or maps of IDs to cLASS instances!");
      }
    }
    // convert integer strings to integers
@@ -958,6 +960,14 @@ cLASS.isIntegerType = function (T) {
          if (typeof v !== "string" || v.trim() === "") {
            constrVio = new RangeConstraintViolation("Values for "+ fld +
                " must be non-empty strings!");
+         }
+       });
+       break;
+     case "Identifier":  // add regexp test
+       valuesToCheck.forEach( function (v) {
+         if (typeof v !== "string" || v.trim() === "" || !cLASS.patterns.ID.test( v)) {
+           constrVio = new RangeConstraintViolation("Values for "+ fld +
+               " must be valid identifiers/names!");
          }
        });
        break;
@@ -1000,6 +1010,17 @@ cLASS.isIntegerType = function (T) {
                " must be a non-negative integer!");
          }
        });
+       break;
+     case "AutoNumber":
+       if (valuesToCheck.length === 1) {
+         if (!Number.isInteger( valuesToCheck[0]) || valuesToCheck[0] < 1) {
+           constrVio = new RangeConstraintViolation("The value of "+ fld +
+               " must be a positive integer!");
+         }
+       } else {
+         constrVio = new RangeConstraintViolation("The value of "+ fld +
+             " must not be a collection like "+ valuesToCheck);
+       }
        break;
      case "PositiveInteger":
        valuesToCheck.forEach( function (v) {
@@ -1057,8 +1078,7 @@ cLASS.isIntegerType = function (T) {
      case "Date":
        valuesToCheck.forEach( function (v,i) {
          if (typeof v === "string" &&
-             (/\d{4}-(0\d|1[0-2])-([0-2]\d|3[0-1])/.test(v) ||
-             !isNaN( Date.parse(v)))) {
+             /\d{4}-(0\d|1[0-2])-([0-2]\d|3[0-1])/.test(v) && !isNaN( Date.parse(v))) {
            valuesToCheck[i] = new Date(v);
          } else if (!(v instanceof Date)) {
            constrVio = new RangeConstraintViolation("The value of "+ fld +
@@ -1067,8 +1087,20 @@ cLASS.isIntegerType = function (T) {
          }
        });
        break;
+     case "DateTime":
+       valuesToCheck.forEach( function (v,i) {
+         if (typeof v === "string" && !isNaN( Date.parse(v))) {
+           valuesToCheck[i] = new Date(v);
+         } else if (!(v instanceof Date)) {
+           constrVio = new RangeConstraintViolation("The value of "+ fld +
+               " must be either a Date value or an ISO date-time string. "+
+               v +" is not admissible!");
+         }
+       });
+       break;
      default:
-       if (range instanceof eNUMERATION) {
+       if (range instanceof eNUMERATION || typeof range === "string" && eNUMERATION[range]) {
+         if (typeof range === "string") range = eNUMERATION[range];
          valuesToCheck.forEach( function (v) {
            if (!Number.isInteger( v) || v < 1 || v > range.MAX) {
              constrVio = new RangeConstraintViolation("The value "+ v +
@@ -1083,70 +1115,124 @@ cLASS.isIntegerType = function (T) {
                  " is not in value list "+ range.toString());
            }
          });
-       } else if (!(typeof range === "string" && (cLASS[range] || range.includes("|")))) {
-         if (typeof range === "object" && range.dataType !== undefined) {
-           // the range is a (collection) datatype declaration record
-           valuesToCheck.forEach(function (v) {
-             var i = 0;
-             if (typeof v !== "object") {
+       } else if (typeof range === "string" && cLASS[range]) {
+         valuesToCheck.forEach( function (v, i) {
+           var recFldNames=[], propDefs={};
+           if (!cLASS[range].isComplexDatatype && !(v instanceof cLASS[range])) {
+             // convert IdRef to object reference
+             if (cLASS[range].instances[String(v)]) {
+               v = valuesToCheck[i] = cLASS[range].instances[String(v)];
+             } else if (optParams && optParams.checkRefInt) {
+               constrVio = new ReferentialIntegrityConstraintViolation("The value " + v +
+                   " of property '"+ fld +"' is not an ID of any " + range + " object!");
+             }
+           } else if (cLASS[range].isComplexDatatype && typeof v === "object") {
+             // v is a record that must comply with the complex datatype
+             recFldNames = Object.keys(v);
+             propDefs = cLASS[range].properties;
+             // test if all mandatory properties occur in v and if all fields of v are properties
+             if (Object.keys( propDefs).every( function (p) {return !!propDefs[p].optional || p in v;}) &&
+                 recFldNames.every( function (fld) {return !!propDefs[fld];})) {
+               recFldNames.forEach( function (p) {
+                 var validationResult = cLASS.check( p, propDefs[p], v[p]);
+                 if (validationResult instanceof NoConstraintViolation) {
+                   v[p] = validationResult.checkedValue;
+                 } else {
+                   throw validationResult;
+                 }
+               })
+             } else {
                constrVio = new RangeConstraintViolation("The value of " + fld +
-                   " must be an object! " + JSON.stringify(v) + " is not admissible!");
+                   " must be an instance of "+ range +" or a compatible record!"+
+                   JSON.stringify(v) + " is not admissible!");
              }
-             switch (range.dataType) {
-               case "Array":
-                 if (!Array.isArray(v)) {
-                   constrVio = new RangeConstraintViolation("The value of " + fld +
-                       " must be an array! " + JSON.stringify(v) + " is not admissible!");
-                   break;
-                 }
-                 if (v.length !== range.size) {
-                   constrVio = new RangeConstraintViolation("The value of " + fld +
-                       " must be an array of length " + range.size + "! " + JSON.stringify(v) + " is not admissible!");
-                   break;
-                 }
-                 for (i = 0; i < range.size; i++) {
-                   if (!cLASS.isOfType(v[i], range.itemType)) {
-                     constrVio = new RangeConstraintViolation("The items of " + fld +
-                         " must be of type " + range.itemType + "! " + JSON.stringify(v) +
-                         " is not admissible!");
-                   }
-                 }
-                 break;
+/* DROP
+           } else {  // v may be a (numeric or string) ID ref
+             if (typeof v === "string") {
+               if (!isNaN( parseInt(v))) v = valuesToCheck[i] = parseInt(v);
+             } else if (!Number.isInteger(v)) {
+               constrVio = new RangeConstraintViolation("The value (" + JSON.stringify(v) +
+                   ") of property '" +fld + "' is neither an integer nor a string!");
              }
-           });
-         } else if (range === Object) {
-           valuesToCheck.forEach(function (v) {
-             if (!(v instanceof Object)) {
+*/
+           }
+         });
+       } else if (typeof range === "string" && range.includes("|")) {
+         valuesToCheck.forEach( function (v, i) {
+           var rangeTypes=[];
+           rangeTypes = range.split("|");
+           if (typeof v === "object") {
+             if (!rangeTypes.some( function (rc) {
+               return v instanceof cLASS[rc];
+             })) {
+               constrVio = ReferentialIntegrityConstraintViolation("The object " + JSON.stringify(v) +
+                   " is not an instance of any class from " + range + "!");
+             } else {
+               v = valuesToCheck[i] = v.id;  // convert to IdRef
+             }
+           } else if (Number.isInteger(v)) {
+             if (optParams && optParams.checkRefInt) {
+               if (!cLASS[range].instances[String(v)]) {
+                 constrVio = new ReferentialIntegrityConstraintViolation("The value " + v +
+                     " of property '"+ fld +"' is not an ID of any " + range + " object!");
+               }
+             }
+           } else if (typeof v === "string") {
+             if (!isNaN( parseInt(v))) v = valuesToCheck[i] = parseInt(v);
+           } else {
+             constrVio = new RangeConstraintViolation("The value (" + v + ") of property '" +
+                 fld + "' is neither an integer nor a string!");
+           }
+         });
+       } else if (typeof range === "object" && range.dataType !== undefined) {
+         // the range is a (collection) datatype declaration record
+         valuesToCheck.forEach( function (v) {
+           var i = 0;
+           if (typeof v !== "object") {
+             constrVio = new RangeConstraintViolation("The value of " + fld +
+                 " must be an object! " + JSON.stringify(v) + " is not admissible!");
+           }
+           switch (range.dataType) {
+           case "Array":
+             if (!Array.isArray(v)) {
                constrVio = new RangeConstraintViolation("The value of " + fld +
-                   " must be a JS object! " + JSON.stringify(v) + " is not admissible!");
+                   " must be an array! " + JSON.stringify(v) + " is not admissible!");
+               break;
              }
-           });
-         }
-       } else if (optParams && optParams.checkRefInt) {
-         // the range is a cLASS or a cLASS disjunction
-         valuesToCheck.forEach(function (v, i) {
-           var rangeClasses = [];
-           if (cLASS[range]) {
-             if (v instanceof cLASS[range]) v = valuesToCheck[i] = v.id;  // convert to IdRef
-             else if (typeof v === "string") v = valuesToCheck[i] = parseInt(v);
-             // assuming that the ID reference represents an integer (ID)
-             if (!Number.isInteger(v)) {
-               constrVio = new RangeConstraintViolation("The value (" + val + ") of property '" +
-                   fld + "' is not an integer!");
+             if (v.length !== range.size) {
+               constrVio = new RangeConstraintViolation("The value of " + fld +
+                   " must be an array of length " + range.size + "! " + JSON.stringify(v) + " is not admissible!");
+               break;
              }
-             if (!cLASS[range].instances[String(v)]) {
-               constrVio = new ReferentialIntegrityConstraintViolation("The value " + v + " of property '" +
-                   fld + "' is not an ID of any " + range + " object!");
+             for (i = 0; i < v.length; i++) {
+               if (!cLASS.isOfType(v[i], range.itemType)) {
+                 constrVio = new RangeConstraintViolation("The items of " + fld +
+                     " must be of type " + range.itemType + "! " + JSON.stringify(v) +
+                     " is not admissible!");
+               }
              }
-           } else {  // a cLASS disjunction
-             rangeClasses = range.split("|");
-             // check referential integrity: val must be in some range class
-             if (!rangeClasses.some(function (rc) {
-                   return cLASS[rc].instances[String(v)];
-                 })) {
-               constrVio = ReferentialIntegrityConstraintViolation("The value " + val + " does not reference any of " +
-                   range + "!");
+             break;
+           case "ArrayList":
+             if (!Array.isArray(v)) {
+               constrVio = new RangeConstraintViolation("The value of " + fld +
+                   " must be an array! " + JSON.stringify(v) + " is not admissible!");
+               break;
              }
+             for (i = 0; i < v.length; i++) {
+               if (!cLASS.isOfType(v[i], range.itemType)) {
+                 constrVio = new RangeConstraintViolation("The items of " + fld +
+                     " must be of type " + range.itemType + "! " + JSON.stringify(v) +
+                     " is not admissible!");
+               }
+             }
+             break;
+           }
+         });
+       } else if (range === Object) {
+         valuesToCheck.forEach(function (v) {
+           if (!(v instanceof Object)) {
+             constrVio = new RangeConstraintViolation("The value of " + fld +
+                 " must be a JS object! " + JSON.stringify(v) + " is not admissible!");
            }
          });
        }
@@ -1188,7 +1274,7 @@ cLASS.isIntegerType = function (T) {
    /********************************************************
     ***  Check cardinality constraints  *********************
     ********************************************************/
-   if (maxCard > 1) { // (a multi-valued property can be array-valued or map-valued)
+   if (maxCard > 1) { // (a multi-valued property can be array- or map-valued)
      // check minimum cardinality constraint
      if (minCard > 0 && valuesToCheck.length < minCard) {
        return new CardinalityConstraintViolation("A collection of at least "+
@@ -1200,9 +1286,9 @@ cLASS.isIntegerType = function (T) {
            fld +" must not have more than "+ maxCard +" members!");
      }
    }
-   val = maxCard === 1 ? valuesToCheck[0] : valuesToCheck;
+   //val = maxCard === 1 ? valuesToCheck[0] : valuesToCheck;
    // return deserialized value available in validationResult.checkedValue
-   return new NoConstraintViolation( val);
+   return new NoConstraintViolation( maxCard === 1 ? valuesToCheck[0] : valuesToCheck);
  };
  /**
   * Map range datatype to JS datatype.
@@ -1225,6 +1311,7 @@ cLASS.isIntegerType = function (T) {
      case "NonNegativeInteger":
      case "PositiveInteger":
      case "Number":
+     case "AutoNumber":
      case "Decimal":
      case "Percent":
      case "ClosedUnitInterval":
@@ -1372,115 +1459,318 @@ cLASS.RingBuffer.prototype.toString = function (n) {
    return sum / N;
  };
 
- /**
- * @fileOverview  A library of XHR-based HTTP messaging methods.
- *                It uses JS Promises in the underlayer.
- * @author Gerd Wagner
- * @copyright Copyright 2015 Gerd Wagner, Chair of Internet Technology,
- *   Brandenburg University of Technology, Germany.
- * @license The MIT License (MIT)
- */
-var xhr = {
-  URL_PATTERN: /\b(https?):\/\/[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|??]/,
-  /**
-   * Default response handler, used if
-   * a custom one is not provided by the caller
-   * of GET, PUT, POST, DELETE or OPTIONS.
-   */
-  defaultResponseHandler: function(rsp) {
-    if (rsp.status === 200 || rsp.status === 201 || rsp.status === 304)
-      console.log("Response: " + rsp.responseText);
-     else console.log("Error " + rsp.status +": "+ rsp.statusText);
-   },
-  /**
-   * Utility method encapsulating common code
-   * required to initiate the specific XHR request.
-   */
-  initiateRequest: function (params, type) {
-    params.method = type;
-    if (typeof params.handleResponse !== "function")
-      params.handleResponse = xhr.defaultResponseHandler;
-    xhr.makeRequest( params)
-    .then(function (p) {params.handleResponse(p)})
-    .catch(function (e) {console.log(e)});
-  },
-  /**
-   * Make an XHR GET request
-   * @param params  Contains parameter slots
-   */
-  OPTIONS: function (params) {
-    xhr.initiateRequest(params, "OPTIONS");
-  },
-  /**
-   * Make an XHR GET request
-   * @param params  Contains parameter slots
-   */
-  GET: function (params) {
-    xhr.initiateRequest(params, "GET");
-  },
-  /**
-   * Make an XHR POST request
-   * @param params  Contains parameter slots
-   */
-  POST: function (params) {
-    xhr.initiateRequest(params, "POST");
-  },
-  /**
-   * Make an XHR PUT request
-   * @param params  Contains parameter slots
-   */
-  PUT: function (params) {
-    xhr.initiateRequest(params, "PUT");
-  },
-  /**
-   * Make an XHR DELETE request
-   * @param params  Contains parameter slots
-   */
-  DELETE: function (params) {
-    xhr.initiateRequest(params, "DELETE");
-  },
-  /**
-   * Make an XHR request
-   * @param {{method: string?, url: string,
-   *          reqFormat: string?, respFormat: string?,
-   *          handleResponse: function?,
-   *          requestHeaders: Map?}
-   *        } params  The parameter slots.
-   */
-  makeRequest: function (params) {
+'use strict';
+
+(function() {
+  function toArray(arr) {
+    return Array.prototype.slice.call(arr);
+  }
+
+  function promisifyRequest(request) {
     return new Promise(function(resolve, reject) {
-      var req=null, url="", method="",
-          reqFormat="", respFormat="";
-      if (!params.url) {
-        reject(new Error("Missing value for url parameter in XHR GET request!"));
-      } else if (!xhr.URL_PATTERN.test( params.url)) {
-        reject(new Error("Invalid URL in XHR GET request!"));
-      } else {
-        url = params.url;
-        req = new XMLHttpRequest();
-        method = (params.method) ? params.method : "GET";  // default
-        reqFormat = (params.reqFormat) ? params.reqFormat :
-            "application/x-www-form-urlencoded";  // default
-        respFormat = (params.respFormat) ? params.respFormat : "application/json";  // default
-      }
-      req.open( method, url, true);
-      req.onload = function (e) {resolve(e.target);};
-      req.onerror = reject;
-      if (params.requestHeaders) {
-        Object.keys( params.requestHeaders).forEach( function (rH) {
-          req.setRequestHeader( rH, params.requestHeaders[rH]);
-        });
-      }
-      req.setRequestHeader("Accept", respFormat);
-      if (method === "GET" || method === "DELETE") {
-        req.send("");
-      } else {  // POST and PUT
-        req.setRequestHeader("Content-Type", reqFormat);
-        req.send( params.msgBody);
-      }
+      request.onsuccess = function() {
+        resolve(request.result);
+      };
+
+      request.onerror = function() {
+        reject(request.error);
+      };
     });
   }
-};
+
+  function promisifyRequestCall(obj, method, args) {
+    var request;
+    var p = new Promise(function(resolve, reject) {
+      request = obj[method].apply(obj, args);
+      promisifyRequest(request).then(resolve, reject);
+    });
+
+    p.request = request;
+    return p;
+  }
+
+  function promisifyCursorRequestCall(obj, method, args) {
+    var p = promisifyRequestCall(obj, method, args);
+    return p.then(function(value) {
+      if (!value) return;
+      return new Cursor(value, p.request);
+    });
+  }
+
+  function proxyProperties(ProxyClass, targetProp, properties) {
+    properties.forEach(function(prop) {
+      Object.defineProperty(ProxyClass.prototype, prop, {
+        get: function() {
+          return this[targetProp][prop];
+        },
+        set: function(val) {
+          this[targetProp][prop] = val;
+        }
+      });
+    });
+  }
+
+  function proxyRequestMethods(ProxyClass, targetProp, Constructor, properties) {
+    properties.forEach(function(prop) {
+      if (!(prop in Constructor.prototype)) return;
+      ProxyClass.prototype[prop] = function() {
+        return promisifyRequestCall(this[targetProp], prop, arguments);
+      };
+    });
+  }
+
+  function proxyMethods(ProxyClass, targetProp, Constructor, properties) {
+    properties.forEach(function(prop) {
+      if (!(prop in Constructor.prototype)) return;
+      ProxyClass.prototype[prop] = function() {
+        return this[targetProp][prop].apply(this[targetProp], arguments);
+      };
+    });
+  }
+
+  function proxyCursorRequestMethods(ProxyClass, targetProp, Constructor, properties) {
+    properties.forEach(function(prop) {
+      if (!(prop in Constructor.prototype)) return;
+      ProxyClass.prototype[prop] = function() {
+        return promisifyCursorRequestCall(this[targetProp], prop, arguments);
+      };
+    });
+  }
+
+  function Index(index) {
+    this._index = index;
+  }
+
+  proxyProperties(Index, '_index', [
+    'name',
+    'keyPath',
+    'multiEntry',
+    'unique'
+  ]);
+
+  proxyRequestMethods(Index, '_index', IDBIndex, [
+    'get',
+    'getKey',
+    'getAll',
+    'getAllKeys',
+    'count'
+  ]);
+
+  proxyCursorRequestMethods(Index, '_index', IDBIndex, [
+    'openCursor',
+    'openKeyCursor'
+  ]);
+
+  function Cursor(cursor, request) {
+    this._cursor = cursor;
+    this._request = request;
+  }
+
+  proxyProperties(Cursor, '_cursor', [
+    'direction',
+    'key',
+    'primaryKey',
+    'value'
+  ]);
+
+  proxyRequestMethods(Cursor, '_cursor', IDBCursor, [
+    'update',
+    'delete'
+  ]);
+
+  // proxy 'next' methods
+  ['advance', 'continue', 'continuePrimaryKey'].forEach(function(methodName) {
+    if (!(methodName in IDBCursor.prototype)) return;
+    Cursor.prototype[methodName] = function() {
+      var cursor = this;
+      var args = arguments;
+      return Promise.resolve().then(function() {
+        cursor._cursor[methodName].apply(cursor._cursor, args);
+        return promisifyRequest(cursor._request).then(function(value) {
+          if (!value) return;
+          return new Cursor(value, cursor._request);
+        });
+      });
+    };
+  });
+
+  function ObjectStore(store) {
+    this._store = store;
+  }
+
+  ObjectStore.prototype.createIndex = function() {
+    return new Index(this._store.createIndex.apply(this._store, arguments));
+  };
+
+  ObjectStore.prototype.index = function() {
+    return new Index(this._store.index.apply(this._store, arguments));
+  };
+
+  proxyProperties(ObjectStore, '_store', [
+    'name',
+    'keyPath',
+    'indexNames',
+    'autoIncrement'
+  ]);
+
+  proxyRequestMethods(ObjectStore, '_store', IDBObjectStore, [
+    'put',
+    'add',
+    'delete',
+    'clear',
+    'get',
+    'getAll',
+    'getKey',
+    'getAllKeys',
+    'count'
+  ]);
+
+  proxyCursorRequestMethods(ObjectStore, '_store', IDBObjectStore, [
+    'openCursor',
+    'openKeyCursor'
+  ]);
+
+  proxyMethods(ObjectStore, '_store', IDBObjectStore, [
+    'deleteIndex'
+  ]);
+
+  function Transaction(idbTransaction) {
+    this._tx = idbTransaction;
+    this.complete = new Promise(function(resolve, reject) {
+      idbTransaction.oncomplete = function() {
+        resolve();
+      };
+      idbTransaction.onerror = function() {
+        reject(idbTransaction.error);
+      };
+      idbTransaction.onabort = function() {
+        reject(idbTransaction.error);
+      };
+    });
+  }
+
+  Transaction.prototype.objectStore = function() {
+    return new ObjectStore(this._tx.objectStore.apply(this._tx, arguments));
+  };
+
+  proxyProperties(Transaction, '_tx', [
+    'objectStoreNames',
+    'mode'
+  ]);
+
+  proxyMethods(Transaction, '_tx', IDBTransaction, [
+    'abort'
+  ]);
+
+  function UpgradeDB(db, oldVersion, transaction) {
+    this._db = db;
+    this.oldVersion = oldVersion;
+    this.transaction = new Transaction(transaction);
+  }
+
+  UpgradeDB.prototype.createObjectStore = function() {
+    return new ObjectStore(this._db.createObjectStore.apply(this._db, arguments));
+  };
+
+  proxyProperties(UpgradeDB, '_db', [
+    'name',
+    'version',
+    'objectStoreNames'
+  ]);
+
+  proxyMethods(UpgradeDB, '_db', IDBDatabase, [
+    'deleteObjectStore',
+    'close'
+  ]);
+
+  function DB(db) {
+    this._db = db;
+  }
+
+  DB.prototype.transaction = function() {
+    return new Transaction(this._db.transaction.apply(this._db, arguments));
+  };
+
+  proxyProperties(DB, '_db', [
+    'name',
+    'version',
+    'objectStoreNames'
+  ]);
+
+  proxyMethods(DB, '_db', IDBDatabase, [
+    'close'
+  ]);
+
+  // Add cursor iterators
+  // TODO: remove this once browsers do the right thing with promises
+  ['openCursor', 'openKeyCursor'].forEach(function(funcName) {
+    [ObjectStore, Index].forEach(function(Constructor) {
+      Constructor.prototype[funcName.replace('open', 'iterate')] = function() {
+        var args = toArray(arguments);
+        var callback = args[args.length - 1];
+        var nativeObject = this._store || this._index;
+        var request = nativeObject[funcName].apply(nativeObject, args.slice(0, -1));
+        request.onsuccess = function() {
+          callback(request.result);
+        };
+      };
+    });
+  });
+
+  // polyfill getAll
+  [Index, ObjectStore].forEach(function(Constructor) {
+    if (Constructor.prototype.getAll) return;
+    Constructor.prototype.getAll = function(query, count) {
+      var instance = this;
+      var items = [];
+
+      return new Promise(function(resolve) {
+        instance.iterateCursor(query, function(cursor) {
+          if (!cursor) {
+            resolve(items);
+            return;
+          }
+          items.push(cursor.value);
+
+          if (count !== undefined && items.length == count) {
+            resolve(items);
+            return;
+          }
+          cursor.continue();
+        });
+      });
+    };
+  });
+
+  var exp = {
+    open: function(name, version, upgradeCallback) {
+      var p = promisifyRequestCall(indexedDB, 'open', [name, version]);
+      var request = p.request;
+
+      request.onupgradeneeded = function(event) {
+        if (upgradeCallback) {
+          upgradeCallback(new UpgradeDB(request.result, event.oldVersion, request.transaction));
+        }
+      };
+
+      return p.then(function(db) {
+        return new DB(db);
+      });
+    },
+    delete: function(name) {
+      return promisifyRequestCall(indexedDB, 'deleteDatabase', [name]);
+    }
+  };
+
+  if (typeof module !== 'undefined') {
+    module.exports = exp;
+    module.exports.default = module.exports;
+  }
+  else {
+    self.idb = exp;
+  }
+}());
+
 /**
  * @fileOverview  This file contains the definition of the library class
  * sTORAGEmANAGER.
@@ -1503,7 +1793,7 @@ function sTORAGEmANAGER( storageAdapter) {
       !(["LocalStorage","IndexedDB","MariaDB"].includes( storageAdapter.name))) {
     throw new ConstraintViolation("Invalid storage adapter name!");
   } else if (!storageAdapter.dbName) {
-    throw new ConstraintViolation("Storage adapter:missing DB name!");
+    throw new ConstraintViolation("Storage adapter: missing DB name!");
   } else {
     this.adapter = storageAdapter;
     // if "LocalStorage", create a main memory DB
@@ -1523,15 +1813,24 @@ function sTORAGEmANAGER( storageAdapter) {
  * Generic method for creating an empty DB
  * @method
  */
-sTORAGEmANAGER.prototype.createEmptyDb = function () {
+sTORAGEmANAGER.prototype.createEmptyDb = function (classes) {
   var adapterName = this.adapter.name,
       dbName = this.adapter.dbName;
   return new Promise( function (resolve) {
     var modelClasses=[];
-    Object.keys( cLASS).forEach( function (key) {
-      // collect all non-abstract cLASSes
-      if (cLASS[key].instances) modelClasses.push( cLASS[key]);
-    });
+    if (Array.isArray( classes) && classes.length > 0) {
+      modelClasses = classes;
+    } else {
+      Object.keys( cLASS).forEach( function (key) {
+        // test if cLASS[key] represents a cLASS
+        if (typeof cLASS[key] === "function" && cLASS[key].properties) {
+          // collect all non-abstract cLASSes that are not datatype classes
+          if (!cLASS[key].isAbstract && !cLASS[key].isComplexDatatype) {
+            modelClasses.push( cLASS[key]);
+          }
+        }
+      });
+    }
     sTORAGEmANAGER.adapters[adapterName].createEmptyDb( dbName, modelClasses)
     .then( resolve);
   });
@@ -1540,37 +1839,54 @@ sTORAGEmANAGER.prototype.createEmptyDb = function () {
  * Generic method for creating and "persisting" new model objects
  * @method
  * @param {object} mClass  The model cLASS concerned
- * @param {object} records  The object creation slots
+ * @param {object} rec  A record or record list
  */
-sTORAGEmANAGER.prototype.add = function (mClass, records) {
+sTORAGEmANAGER.prototype.add = function (mClass, rec) {
   var adapterName = this.adapter.name,
-      dbName = this.adapter.dbName;
-  return new Promise( function (resolve) {
-    var newObj=null, objID="";
-    if (Array.isArray( records)) {  // bulk insertion
-      sTORAGEmANAGER.adapters[adapterName].add( dbName, mClass, records)
-      .then( function () {
-        console.log( records.length +" "+ mClass.Name +"s added.");
-        if (typeof resolve === "function") resolve();
-
-      });
-    } else {  // single record insertion
-      try {
-        newObj = new mClass( records);  // check constraints
-        objID = newObj.id;  // save object ID
-        if (newObj) {
-          sTORAGEmANAGER.adapters[adapterName].add( dbName, mClass, newObj)
-          .then( function () {
-            console.log( mClass.Name +" "+ objID +" added.");
-            if (typeof resolve === "function") resolve();
-          });
-        }
-      } catch (e) {
-        if (e instanceof ConstraintViolation) {
-          console.log( e.constructor.name +": "+ e.message);
-        } else console.log( e);
+      dbName = this.adapter.dbName,
+      createLog = this.createLog,
+      checkConstraints = this.validateBeforeSave,
+      records=[], validRecords=[];
+  if (typeof rec === "object" && !Array.isArray(rec)) {
+    records = [rec];
+  } else if (Array.isArray(rec) && rec.every( function (r) {
+             return typeof r === "object" && !Array.isArray(r)})) {
+    records = rec;
+  } else throw Error("2nd argument of 'add' must be a record or record list!");
+  // create auto-IDs if required
+  if (mClass.properties.id && mClass.properties.id.range === "AutoNumber") {
+    records.forEach( function (r) {
+      if (!r.id) {  // do not overwrite assigned ID values
+        if (typeof mClass.getAutoId === "function") r.id = mClass.getAutoId();
+        else if (mClass.idCounter !== undefined) r.id = ++mClass.idCounter;
       }
-    }
+    })
+  }
+  // check constraints before save if required
+  if (checkConstraints) {
+    records.forEach( function (r) {
+      var newObj=null;
+      if (r instanceof mClass) {
+        validRecords.push( r);
+      } else {
+        try {newObj = new mClass( r);}  // check constraints
+        catch (e) {
+          if (e instanceof ConstraintViolation) {
+            console.log( e.constructor.name +": "+ e.message);
+          } else console.log( e);
+        }
+        if (newObj) validRecords.push( newObj);
+      }
+    });
+    records = validRecords;
+  }
+  return new Promise( function (resolve) {
+    sTORAGEmANAGER.adapters[adapterName].add( dbName, mClass, records).then( function () {
+      if (createLog) console.log( records.length +" "+ mClass.Name +"(s) added.");
+      if (typeof resolve === "function") resolve();
+    }).catch( function (error) {
+      console.log( error.name +": "+ error.message);
+    });
   });
 };
 /**
@@ -1605,7 +1921,23 @@ sTORAGEmANAGER.prototype.retrieveAll = function (mc) {
       dbName = this.adapter.dbName;
   return new Promise( function (resolve) {
     sTORAGEmANAGER.adapters[adapterName].retrieveAll( dbName, mc)
-    .then( resolve);
+    .then( function (records) {
+      var i=0, newObj=null;
+      if (this.createLog) {
+        console.log( records.length +" "+ mcName +" records retrieved.")
+      }
+      if (this.validateAfterRetrieve) {
+        for (i=0; i < records.length; i++) {
+          try {
+            newObj = new mc( records[i]);
+          } catch (e) {
+            if (e instanceof ConstraintViolation) {
+              console.log( e.constructor.name +": "+ e.message);
+            } else console.log( e.name +": "+ e.message);
+          }
+        }
+      }
+    }).then( resolve);
   });
 };
 /**
@@ -1617,7 +1949,7 @@ sTORAGEmANAGER.prototype.retrieveAll = function (mc) {
  */
 sTORAGEmANAGER.prototype.update = function (mc, id, slots) {
   var adapterName = this.adapter.name,
-      dbName = this.adapter.dbName,
+      dbName = this.adapter.dbName, 
       currentSM = this;
   return new Promise( function (resolve) {
     var objectBeforeUpdate = null, properties = mc.properties,
@@ -1864,7 +2196,7 @@ sTORAGEmANAGER.adapters["LocalStorage"] = {
   clearTable: function (dbName, mc) {
   //------------------------------------------------
     return new Promise( function (resolve) {
-      var tableName = util.class2TableName( mc.Name);
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
       mc.instances = {};
       try {
         localStorage[tableName] = JSON.stringify({});
@@ -1881,9 +2213,9 @@ sTORAGEmANAGER.adapters["LocalStorage"] = {
     return new Promise( function (resolve) {
       Object.keys( cLASS).forEach( function (key) {
         var tableName="";
-        if (cLASS[key].instances) {
+        if (!cLASS[key].isComplexDatatype && Object.keys( cLASS[key].instances).length > 0) {
           cLASS[key].instances = {};
-          tableName = util.class2TableName( cLASS[key].Name);
+          tableName = mc.tableName || util.class2TableName( cLASS[key].Name);
           try {
             localStorage[tableName] = JSON.stringify({});
           } catch (e) {
@@ -1917,6 +2249,136 @@ sTORAGEmANAGER.adapters["LocalStorage"] = {
         }
       }
     });
+  }
+};
+/**
+ * @fileOverview  Storage management methods for the "IndexedDB" adapter
+ * @author Gerd Wagner
+ * @copyright Copyright 2017 Gerd Wagner, Chair of Internet Technology,
+ *   Brandenburg University of Technology, Germany.
+ * @license The MIT License (MIT)
+ */
+sTORAGEmANAGER.adapters["IndexedDB"] = {
+  //------------------------------------------------
+  createEmptyDb: function (dbName, modelClasses) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      idb.open( dbName, 1, function (upgradeDb) {
+        modelClasses.forEach( function (mc) {
+          var tableName = mc.tableName || util.class2TableName( mc.Name),
+              keyPath = mc.primaryKey || "id";
+          if (!upgradeDb.objectStoreNames.contains( tableName)) {
+            upgradeDb.createObjectStore( tableName, {keyPath: keyPath});
+          }
+        })
+      }).then( resolve);
+    });
+  },
+  //------------------------------------------------
+  add: function (dbName, mc, records) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( tableName, "readwrite");
+        var os = tx.objectStore( tableName);
+        // Promise.all takes a list of promises and resolves if all of them do
+        return Promise.all( records.map( function (rec) {return os.add( rec);}))
+            .then( function () {return tx.complete;});
+      }).then( resolve)
+      .catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  retrieve: function (dbName, mc, id) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( tableName, "readonly");
+        var os = tx.objectStore( tableName);
+        return os.get( id);
+      }).then( function( result) {
+        if (result === undefined) result = null;
+        resolve( result);
+      }).catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  retrieveAll: function (dbName, mc) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( tableName, "readonly");
+        var os = tx.objectStore( tableName);
+        return os.getAll();
+      }).then( function (results) {
+        if (results === undefined) results = [];
+        resolve( results);
+      }).catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  update: function (dbName, mc, id, slots) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( tableName, "readwrite");
+        var os = tx.objectStore( tableName);
+        slots["id"] = id;
+        os.put( slots);
+        return tx.complete;
+      }).then( resolve)
+      .catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  destroy: function (dbName, mc, id) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( tableName, "readwrite");
+        var os = tx.objectStore( tableName);
+        os.delete( id);
+        return tx.complete;
+      }).then( resolve)
+      .catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  clearTable: function (dbName, mc) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( tableName, "readwrite");
+        var os = tx.objectStore( tableName);
+        os.clear();
+        return tx.complete;
+      }).then( resolve)
+      .catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  clearDB: function (dbName) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( idbCx.objectStoreNames, "readwrite");
+        // Promise.all takes a list of promises and resolves if all of them do
+        return Promise.all( Array.from( idbCx.objectStoreNames,
+            function (osName) {return tx.objectStore( osName).clear();}))
+            .then( function () {return tx.complete;});
+      }).then( resolve)
+      .catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  saveOnUnload: function (dbName) {  // not yet implemented
+  //------------------------------------------------
   }
 };
 /**
@@ -2280,7 +2742,7 @@ Random.prototype.shuffleArray = function (a) {
 /*******************************************************************************
  * Binary Heap function based on the Appendix 2 Binary Heaps Haverbeke, M.
  * Eloquent JavaScript 3rd Edition
- *
+ * 
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany.
  * @license The MIT License (MIT)
  * @author Luis Gustavo Nardin
@@ -2296,7 +2758,7 @@ BinaryHeap.prototype.push = function ( element ) {
 BinaryHeap.prototype.pop = function () {
   var result = this.content[0];
   var end = this.content.pop();
-
+  
   if ( this.content.length > 0 ) {
     this.content[0] = end;
     this.sinkDown( 0 );
@@ -2304,18 +2766,18 @@ BinaryHeap.prototype.pop = function () {
   return result;
 };
 BinaryHeap.prototype.remove = function ( element ) {
-  var length = this.content.length;
+  var len = this.content.length;
   var end;
-  for ( var i = 0; i < length; i += 1 ) {
+  for ( var i = 0; i < len; i += 1 ) {
     if ( this.content[i] !== element ) {
       continue;
     }
-
+    
     end = this.content.pop();
-    if ( i === length - 1 ) {
+    if ( i === len - 1 ) {
       break;
     }
-
+    
     this.content[i] = end;
     this.bubbleUp( i );
     this.sinkDown( i );
@@ -2341,16 +2803,17 @@ BinaryHeap.prototype.size = function () {
   return this.content.length;
 };
 BinaryHeap.prototype.bubbleUp = function ( n ) {
-  var element = this.content[n], score = this.scoreFunction( element );
+  var element = this.content[n];
+  var score = this.scoreFunction( element );
   var parentN, parent;
-
+  
   while ( n > 0 ) {
     parentN = Math.floor( (n + 1) / 2 ) - 1;
     parent = this.content[parentN];
     if ( score >= this.scoreFunction( parent ) ) {
       break;
     }
-
+    
     this.content[parentN] = element;
     this.content[n] = parent;
     n = parentN;
@@ -2359,9 +2822,10 @@ BinaryHeap.prototype.bubbleUp = function ( n ) {
 BinaryHeap.prototype.sinkDown =
     function ( n ) {
       var length = this.content.length;
-      var element = this.content[n], elemScore = this.scoreFunction( element );
+      var element = this.content[n];
+      var elemScore = this.scoreFunction( element );
       var swap, child1, child2, child1N, child2N, child1Score, child2Score;
-
+      
       while ( true ) {
         child2N = (n + 1) * 2;
         child1N = child2N - 1;
@@ -2404,7 +2868,8 @@ var sim = sim || {};
 
 oes.defaults = {
   license: "CC BY-SA",
-  imgFolder: "img/"
+  imgFolder: "img/",
+  validateOnInput: false,
 };
 oes.predfinedProperties = ["shortLabel", "history"];
 
@@ -2836,29 +3301,76 @@ oes.Departure = new cLASS({
     "workObject": {range: "wORKoBJECT"}
   }
 });
+
+/**
+ * A complex datatype for experiment parameter definitions
+ *
+ * @author Gerd Wagner
+ */
+oes.ExperimentParamDef = new cLASS({
+  Name: "eXPERIMENTpARAMdEF",
+  isComplexDatatype: true,  // do not collect instances
+  properties: {
+    "name": {range: "Identifier", label:"Name"},
+    "values": {
+      range: cLASS.ArrayList("Number"),
+      label:"Values",
+      val2str: function (v) {
+        return v.toString();  // JSON.stringify( v);
+      },
+      str2val: function (str) {
+        return JSON.parse( str);
+      },
+    }
+  }
+});
 //=================================================
 /**
  * Classes for storing experiment data
+ *
+ * An experiment is defined for a scenario, which is defined for a model.
  */
-oes.Experiment = new cLASS({
-  Name: "eXPERIMENT",
+oes.ExperimentDef = new cLASS({
+  Name: "eXPERIMENTdEF",
   properties: {
-    "id": {range: "NonEmptyString"},  // possibly the simulation ID
+    "id": {range: "AutoNumber"},
+    "model": {range: "NonEmptyString", label:"Model name"},
+    "scenarioNo": {range: "PositiveInteger", label:"Scenario number"},
+    "experimentNo": {range: "PositiveInteger", label:"Experiment number"},
+    "experimentTitle": {range: "NonEmptyString", optional:true, label:"Experiment title"},
     "replications": {range:"PositiveInteger", label:"Number of replications"},
-    "parameterNames": {range: Array, label: "Experiment parameter names"},
-    "parameterValueSetDefs": {range: Array, label: "Parameter value set definitions"},
+    "parameterDefs": {range: "eXPERIMENTpARAMdEF", minCard: 0, maxCard: Infinity,
+        ordered:true, label:"Parameter definitions"},
     "seeds": {range: Array, optional:true}  // seeds.length = #replications
   }
 });
+oes.ExperimentDef.idCounter = 0;  // retrieve actual value from IDB
+
+oes.ExperimentRun = new cLASS({
+  Name: "eXPERIMENTrUN",
+  properties: {
+    "id": {range: "AutoNumber"},  // possibly a timestamp
+    "experimentDef": {range: "eXPERIMENTdEF"},
+    "dateTime": {range: "DateTime"}
+  }
+});
+oes.ExperimentRun.getAutoId = function () {
+  return (new Date()).getTime();
+};
+
 oes.ExperimentScenarioRun = new cLASS({
   Name: "eXPERIMENTsCENARIOrUN",
   properties: {
-    "experimentRunId": {range: "NonEmptyString"},  // possibly a timestamp
+    "id": {range: "AutoNumber"},  // possibly a timestamp
+    "experimentRun": {range: "eXPERIMENTrUN"},
     "experimentScenarioNo": {range: "PositiveInteger"},
     "parameterValueCombination": {range: Array},
     "outputStatistics": {range: Object}
   }
 });
+oes.ExperimentScenarioRun.getAutoId = function () {
+  return (new Date()).getTime();
+};
 
 /**
  * Define lists of predefined cLASSes as reserved names for constraint checks
@@ -2895,10 +3407,16 @@ sim.scenario = {
 sim.experiment = {
   objectName: "experiment",
   properties: {
+    "experimentNo": {range:"AutoNumber", label:"Experiment number",
+      hint:"Automatically assigned sequence number for experiment"},
+    "experimentTitle": {range:"String", optional: true, label:"Experiment title"},
     "replications": {range:"PositiveInteger", label:"Number of replications",
         hint:"Number of replications/repetitions per scenario"},
-    "parameters": {range: Array, label:"Experiment parameters",
-        hint:"Parameter name and value set specification"},
+    "parameterDefs": {
+        range: "eXPERIMENTpARAMdEF", maxCard: Infinity,
+        label:"Experiment parameters",
+        hint:"Define experiment parameters by name and value set specification"
+    },
     "seeds": {range: Array, optional: true},
   },
   replications: 0,
@@ -2921,8 +3439,10 @@ sim.config = {
   objectName: "config",
   properties: {
     "createLog": {range:"Boolean", optional: true, label:"Log", hint:"Create simulation log (y/n)"},
-    "visualize": {range:"Boolean", optional: true, initialValue: true, label:"Visualization"},
-    "stepDuration": {range:"NonNegativeInteger", optional: true, label:"Step duration:"},
+    "visualize": {range:"Boolean", optional: true, initialValue: true, label:"Visualization",
+        hint:"Enable the visualization of a simulation run"},
+    "stepDuration": {range:"NonNegativeInteger", optional: true, label:"Step duration:",
+        hint:"How long is a simulation step to take?"},
     "userInteractive": {range:"Boolean", optional: true, label:"User-interactive"}
   }
 };
@@ -3186,6 +3706,27 @@ oes.verifySimulation = function () {
  * @method
  * @author Gerd Wagner
  */
+oes.setupStorageManagement = function (dbName) {
+  var storageAdapter = {dbName: dbName};
+  if (!('indexedDB' in self)) {
+    console.log("This browser doesn't support IndexedDB. Falling back to LocalStorage.");
+    storageAdapter.name = "LocalStorage";
+  } else {
+    storageAdapter.name = "IndexedDB";
+  }
+  sim.storeMan = new sTORAGEmANAGER( storageAdapter);
+  //sim.storeMan.createEmptyDb().then( oes.setupFrontEndSimEnv);
+  // last step in setupFrontEndSimEnv, then wait for user actions
+  sim.storeMan.createEmptyDb([oes.ExperimentRun, oes.ExperimentScenarioRun]).then( function () {
+    console.log("Empty IndexedDB created.");
+  });
+};
+/**
+ * Set up front-end simulation environment
+ *
+ * @method
+ * @author Gerd Wagner
+ */
 oes.setupFrontEndSimEnv = function () {
   var errors=[], el=null;
   sim.initializeSimulator();
@@ -3218,7 +3759,7 @@ oes.setupFrontEndSimEnv = function () {
 
 /*******************************************************************************
  * EventList maintains an ordered list of events using Binary Heap
- *
+ * 
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany.
  * @license The MIT License (MIT)
  * @author Luis Gustavo Nardin
@@ -3245,6 +3786,9 @@ oes.EventList.prototype.getNextEvent = function () {
   } else {
     return null;
   }
+};
+oes.EventList.prototype.getAllEvents = function () {
+  return this.heap.content;
 };
 oes.EventList.prototype.isEmpty = function () {
   return this.heap.isEmpty();
@@ -3420,8 +3964,8 @@ oes.stat.prepareTimeSeriesCompression = function (maxLength) {
     + oes.stat.timeSeriesCompressionSteps + " (1 means no compression)");
 };
 /**
- * Reset the statistics variables. This means that any computed
- * value is reset to the initial value and all the connection with
+ * Reset the statistics variables. This means that any computed 
+ * value is reset to the initial value and all the connection with 
  * object(s) references are recreated.
  */
 oes.stat.reset = function () {
@@ -3550,8 +4094,8 @@ oes.stat.computePopulationAggregate = function (statVar) {
   return aggr;
 };
 /**
- * Compute the values of the statistic variables which are only required
- * to be computed at the simulation end. This method has to be called when
+ * Compute the values of the statistic variables which are only required 
+ * to be computed at the simulation end. This method has to be called when 
  * the simulation ends.
  */
 oes.stat.computeOnlyAtEndStatistics = function () {
@@ -3699,8 +4243,8 @@ sim.addObjects = function (objArr) {
  * @method
  * @param o  the object to be removed
  */
-sim.removeObject = function ( o ) {
-  var ObjectClass = null;
+sim.removeObject = function (o) {
+  var ObjectClass=null;
   if (!(o instanceof oes.Object)) {
     console.log( JSON.stringify(o) +" is not an OES object!");
     return;
@@ -3714,8 +4258,8 @@ sim.removeObject = function ( o ) {
   delete ObjectClass.instances[String(o.id)];
   delete sim.objects[String(o.id)];
 };
-sim.removeObjectById = function ( id ) {
-  var ObjectClass = null;
+sim.removeObjectById = function (id) {
+  var ObjectClass=null;
   if (typeof id === "string") id = parseInt(id);
   if (!Number.isInteger( id)) {
     console.log( JSON.stringify(id) +" is not an integer!");
@@ -3726,8 +4270,8 @@ sim.removeObjectById = function ( id ) {
     return;
   }
   ObjectClass = o.constructor;
-  delete ObjectClass.instances[String(id)];
-  delete sim.objects[String(id)];
+  delete ObjectClass.instances[id];
+  delete sim.objects[id];
 };
 /*******************************************************
  Schedule an event by adding it to the FEL
@@ -3754,7 +4298,7 @@ sim.initializeModelVariables = function (expParamSlots) {
     if (expParamSlots && expParamSlots[varName]) {
       // assign experiment parameter value
       sim.v[varName] = expParamSlots[varName];
-    } else if (sim.v[varName] === undefined) {
+    } else /* if (sim.v[varName] === undefined) */ {
       if (typeof mv === "object") {
         sim.v[varName] = mv.fieldValue !== undefined ? mv.fieldValue : mv.initialValue;
       } else {
@@ -3780,7 +4324,9 @@ sim.createInitialObjEvt = function () {
     cLASS[objTypeName].instances = {};
   });
   // allow parametrized object/event definitions
-  if (sim.scenario.setupInitialState) sim.scenario.setupInitialState();
+  if (typeof sim.scenario.setupInitialState === "function") {
+    sim.scenario.setupInitialState();
+  }
   initialObjDefs = initState.objects || null;
   initialEvtDefs = initState.events || null;
   // register initial objects
@@ -3921,7 +4467,7 @@ sim.updateInitialStateObjects = function () {
  * Initialize the simulator on start up
  * Settings that do not vary across scenarios in an experiment
  ************************************************************/
-sim.initializeSimulator = function () {
+sim.initializeSimulator = function (dbName) {
   var x=0;
   sim.FEL = new oes.EventList();  // the Future Events List (FEL)
   // complete model definition by setting objectTypes and eventTypes if not defined
@@ -3963,6 +4509,7 @@ sim.initializeSimulator = function () {
   } else {  // use the JS built-in RNG
     rand = new Random();
   }
+  if (dbName) oes.setupStorageManagement( dbName);
 };
 /*************************************************************
  * Initialize a simulation run
@@ -4022,9 +4569,13 @@ sim.runScenario = function (useWorker) {
     sim.initializeSimulationRun();
     while (sim.time < sim.scenario.simulationEndTime) {
       sim.runStep();
-      // update the progress bar
+      // update the progress bar and the simulation step/time
       if (sim.time > nextProgressIncrement) {
-        self.postMessage({progressIncrement: 10});
+        self.postMessage({
+            progressIncrement: 10,
+            simStep: sim.step,
+            simTime: sim.time
+        });
         nextProgressIncrement += simTimeTenth;
       }
       // end simulation if no time increment and no more events
@@ -4051,7 +4602,7 @@ sim.runStep = function (followupEvents) {
       nextEvtTime = sim.FEL.getNextOccurrenceTime(),  // 0 if there is no next event
       stepStartTime = (new Date()).getTime(),
       totalStepTime = 0, stepDiffTimeDelay = 0,
-      ui = sim.scenario.userInteractions,  // shortcut
+      uia = sim.scenario.userInteractions,  // shortcut
       uiViewModel=null, eventTypeName="", logInfo={};
   function advanceSimulationTime () {
     // increment the step counter
@@ -4293,13 +4844,13 @@ sim.runStep = function (followupEvents) {
           break;
         default:  //***** all types of user-defined events *****
           // check if a user interaction has been triggered
-          if (sim.config.userInteractive && ui && ui[eventTypeName]) {
+          if (sim.config.userInteractive && uia && uia[eventTypeName]) {
             // check also the triggering event condition, if defined
-            if (!ui[eventTypeName].trigEvtCondition || ui[eventTypeName].trigEvtCondition(e)) {
+            if (!uia[eventTypeName].trigEvtCondition || uia[eventTypeName].trigEvtCondition(e)) {
               // make sure that the user interaction triggering event is last in nextEvents list
               if (i === nextEvents.length - 1) {
                 sim.currentEvents[eventTypeName] = e;
-                uiViewModel = ui[eventTypeName];
+                uiViewModel = uia[eventTypeName];
                 Object.keys( uiViewModel.outputFields).forEach( function (outFldN) {
                   var fldEl = uiViewModel.dataBinding[outFldN],
                       val = uiViewModel.outputFields[outFldN].fieldValue;
@@ -4374,12 +4925,22 @@ sim.runStep = function (followupEvents) {
  ********************************************************/
 sim.runExperiment = function () {
   var exp = sim.experiment, cp=[], valueSets=[], i=0, j=0, k=0, M=0,
-      N = exp.parameters.length, increm=0, x=0, expPar={},
+      N = exp.parameterDefs.length, increm=0, x=0, expPar={},
       valueCombination=[], expParamSlots={},
       tenthRunLength=0,  // a tenth of the total run time
       nextProgressIncrementStep=0;  // thresholds for updating the progress bar
+  exp.runId = oes.ExperimentRun.getAutoId();
+  try {
+    sim.storeMan.add( oes.ExperimentRun, {
+      id: exp.runId,
+      experimentDef: exp.id,
+      dateTime: (new Date()).toISOString(),
+    });
+  } catch (e) {
+    console.log( JSON.stringify(e));
+  }
   for (i=0; i < N; i++) {
-    expPar = exp.parameters[i];
+    expPar = exp.parameterDefs[i];
     if (!expPar.values) {
       // create value set
       expPar.values = [];
@@ -4408,7 +4969,7 @@ sim.runExperiment = function () {
     });
     // create experiment parameter slots for assigning corresponding model variables
     for (j=0; j < N; j++) {
-      expParamSlots[exp.parameters[j].name] = valueCombination[j];
+      expParamSlots[exp.parameterDefs[j].name] = valueCombination[j];
     }
     // run experiment scenario replications
     for (k=0; k < exp.replications; k++) {
@@ -4436,6 +4997,14 @@ sim.runExperiment = function () {
         self.postMessage({progressIncrement: 10});
         nextProgressIncrementStep += tenthRunLength;
       }
+      if (sim.experiment.storeEachExperimentScenarioRun) {
+        sim.storeMan.add( oes.ExperimentScenarioRun, {
+          experimentRun: exp.runId,
+          experimentScenarioNo: i,
+          parameterValueCombination: exp.scenarios[i].parameterValues,
+          outputStatistics: exp.scenarios[i].stat
+        });
+      }
     }
     // compute average values
     Object.keys( sim.model.statistics).forEach( function (varName) {
@@ -4449,6 +5018,19 @@ sim.runExperiment = function () {
       expScenParamValues: exp.scenarios[i].parameterValues,
       expScenStat: exp.scenarios[i].stat
     });
+    if (!sim.experiment.storeEachExperimentScenarioRun) {
+      // store the average statistics aggregated over all exp. scenario runs
+      try {
+        sim.storeMan.add( oes.ExperimentScenarioRun, {
+          experimentRun: exp.runId,
+          experimentScenarioNo: i,
+          parameterValueCombination: exp.scenarios[i].parameterValues,
+          outputStatistics: exp.scenarios[i].stat
+        });
+      } catch (e) {
+        console.log( JSON.stringify(e));
+      }
+    }
   }
   self.postMessage({endOfExp: true});
 };

@@ -7,9 +7,14 @@ body {
   padding: 8px;
 }
 
+.oBJECTvIEW h2 {
+  font-size: 110%;
+  margin-top: 0.2em;
+}
 table { 
   border-collapse:collapse;
   margin: 1em 0;
+  empty-cells: show;
 }  
 table, td, th { 
   border: thin solid black;
@@ -18,8 +23,41 @@ table, td, th {
 thead, th {
   background: aliceblue;
 }
-/* Center the class name of a class population widget */
-table.PopTable>thead>tr:first-child  {
+
+/****************************************
+ Fixed-height tables with scrollable body
+ assuming scrollbar width is 16px
+
+ Issues: (1) does not scroll horizontally
+ (2) renders thead underneath tbody
+
+ ****************************************/
+/*
+table.RecTbl {
+  display: table;
+  width: 100%;
+}
+table.RecTbl thead {
+  display: table;
+  table-layout: fixed;
+  width: calc(100% - 16px);
+}
+table.RecTbl tbody {
+  display: block;
+  width: calc(100% - 16px);
+  height: 10em;
+  overflow: auto;
+  overflow-y: scroll;
+}
+table.RecTbl tr {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+  text-align: left;
+}
+*/
+/* Center the class name of a record table widget */
+table.RecTbl > thead > tr:first-child  {
   text-align: center;
 }
 
@@ -54,9 +92,8 @@ menu li button {
   to {transform:scale(1); background-color:rgba(0,0,0, 0.5);}
 }
 .modal {
-  width: 680px;
+  width: 40em;
   max-width: 100%;
-  height: 300px;
   max-height: 100%;
   overflow: auto;
   position: absolute;
@@ -96,8 +133,6 @@ menu li button {
 }
 .modal .closeButton:hover,
 .modal .closeButton:focus {
-  color: black;
-  text-decoration: none;
   cursor: pointer;
 }
 [draggable=true] {
@@ -130,14 +165,16 @@ form > div.I-O-field > label {
 form div.field-group > label {
   display: inline-block;
   width: 20em;
-  margin-left: 1em;
-}
-form div.field-group > label:first-child {
-  margin-left: 0;
+  margin-right: 1em;
 }
 form div.field-group > label > output {
   position: absolute;
   left: 12em;
+}
+form div.field-group > table.RecTbl {
+  display: inline-block;
+  margin: 0;
+  vertical-align: top;
 }
 form output {
   min-width: 2em;
@@ -177,26 +214,91 @@ form fieldset {
   margin-bottom: 1em;  
 }
 form fieldset > label {
-  margin-right: 1em;  
+  margin-right: 1em;
 }
 form fieldset > label > input[type="radio"],
     form > fieldset > label > input[type="checkbox"] {
   margin-right: 0.5em;  
 }
 
+/* Record List Widget */
+td[contenteditable] {
+  background-color: hsl( 120, 100%, 95%); /* 120 = green */
+}
 /* In addition to vIEW.css */
 
 #sim4eduinfo {
+    display: inline-block;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+#model-menu {
+    display: inline-block;
     font-size: 90%;
+    margin-top: 0;
+    margin-bottom: 0.67em;
+    margin-left: 1em;
 }
-body>div#frontMatter>h1 {
-    margin-top: 0.2em;
+#model-menu button {
+    display: inline-block;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-right: 0.5em;
 }
-body>div#frontMatter>h1>div {
+button:hover,
+button:focus {
+    cursor: pointer;
+}
+#model-menu button#spaceSizeDefBtn {
+    margin-left: 1em;
+    background-color: azure;
+}
+#model-menu form {
+    /* position: relative; */
+    vertical-align: top;
+    margin-right: 0.5em;
+    border: 1px solid;
+    padding: 2px;
+}
+#model-menu form div.field-group > label {
+    width: auto;
+}
+#showCodeForm p {
+    margin: 0;
+}
+#showCodeForm div {
+    margin-top: 0.3em;
+}
+form span.closeButton {
+    float: right;
+    font-size: 120%;
+    margin-top: -0.2em;
+}
+form span.closeButton:hover,
+form span.closeButton:focus {
+    color: red;
+    cursor: pointer;
+}
+
+#frontMatter > h1 {
+    margin: 0.2em 0;
+}
+#frontMatter h1 > div {
     display: inline-block;
     margin-left: 2em;
     font-size: 45%;
     width: 5em;
+}
+#scenario {
+    border-left: 0.5em solid gainsboro;
+}
+#scenario > h2 {
+    margin-top: 0;
+    background-color: gainsboro;
+    color: whitesmoke;
+}
+#scenario > div {
+    margin-left: 6px;
 }
 body > footer {
     margin-top: 3em;
@@ -227,10 +329,9 @@ progress {
     margin: 1em 0;
 }
 
+/* overrides vIEW CSS rules */
 form[id="scenario"] div.field-group > label,
-form[id="sim"] div.field-group > label
-{
-    display: inline-block;
+form[id="sim"] div.field-group > label {
     width: auto;
 }
 form[id="scenario"] div.field-group > label:not(:first-child),
@@ -244,10 +345,6 @@ form[id="sim"] div.field-group > label > output
     position: static; left: 0;
 }
 
-table {
-  empty-cells: show;
-  border-collapse: collapse;
-}
 /* Styles for DOM-Grid */
 table#visCanvas {
   table-layout: fixed;
@@ -276,12 +373,12 @@ table[id="space-view"] td div.object-view {
   width: 100% !important;
 }*/
 .expandablePanel {
-  outline: solid grey;
+  border: 3px solid grey;
   padding: 5px;
   margin: 1em 0;
 }
 .expandablePanel > h2 {
-  font-size: 1.5em;
+  font-size: 1.2em;
   color: grey;
   margin-top: 0;
   margin-bottom: 0;
@@ -308,4 +405,9 @@ form[id="expost-statistics"] h3 {
 div[id="time-series-chart"] {
     width: 100%;
     height: 450px;
+}
+
+#InitialStateObjectsUI table.PopTable {
+    max-height: 7em;
+    scroll: auto
 }

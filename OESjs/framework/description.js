@@ -115,13 +115,15 @@ oes.ui.setupDescription = function () {
     document.title = "OES " + (sim.scenario.name || sim.model.name);
   }
   // create page heading
-  pageTitleEl = document.querySelector("body > div#frontMatter > h1");
+  pageTitleEl = document.querySelector("#frontMatter h1");
   if (!pageTitleEl) {
     pageTitleEl = document.createElement("h1");
     frontMatterEl.insertBefore( pageTitleEl, frontMatterEl.firstElementChild);
+    pageTitleEl.innerHTML = "<span>"+ simTitle +"</span>";
+  } else {
+    pageTitleEl.innerHTML = "<span>"+ pageTitleEl.textContent +"</span>";
   }
   pageTitleEl.id = "title";
-  pageTitleEl.innerHTML = "<span>"+ simTitle +"</span>";
   if (simTitle.length > 38) pageTitleEl.style.fontSize = "140%";
   el = document.createElement("h2");
   el.innerHTML = "Model name: "+ simName +

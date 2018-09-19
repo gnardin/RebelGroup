@@ -12,9 +12,7 @@ var Expand = new cLASS( {
   Name: "Expand",
   supertypeName: "eVENT",
   properties: {
-    "rebelGroup": {
-      range: "RebelGroup"
-    }
+    "rebelGroup": {range: "RebelGroup", label: "Rebel group"}
   },
   methods: {
     "onEvent": function () {

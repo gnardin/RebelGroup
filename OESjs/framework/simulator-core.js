@@ -159,7 +159,7 @@ RoleConstraintViolation.prototype.constructor = RoleConstraintViolation;
 /*******************************************************************************
  * @fileOverview A collection of utilities: methods, objects, etc used all over the code.
  * @author Mircea Diaconescu
- * @copyright Copyright © 2014 Gerd Wagner, Mircea Diaconescu et al,
+ * @copyright Copyright © 2014 Gerd Wagner, Mircea Diaconescu et al, 
  *            Chair of Internet Technology, Brandenburg University of Technology, Germany.
  * @date July 08, 2014, 11:04:23
  * @license The MIT License (MIT)
@@ -190,15 +190,15 @@ util.capitalizeFirstChar = function (str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 /**
- * Copy all own (property and method) slots of a number of untyped objects
+ * Copy all own (property and method) slots of a number of untyped objects 
  * to a new untyped object.
  * @author Gerd Wagner
  * @return {object}  The merge result.
  */
 util.mergeObjects = function () {
-  var i = 0, k = 0, n = arguments.length, m = 0,
+  var i = 0, k = 0, n = arguments.length, m = 0, 
       foundArrayArg = false,
-      foundObjectArg = false,
+      foundObjectArg = false, 
       arg = null, mergedResult,
       keys=[], key="";
   for (i = 0; i < n; i++) {
@@ -222,9 +222,9 @@ util.mergeObjects = function () {
         keys = Object.keys( arg);
         m = keys.length;
         for (k = 0; k < m; k++) {
-          key = keys[k];
+          key = keys[k]; 
           mergedResult[key] = arg[key];
-        }
+        }      
       } else {
         throw "util.mergeObjects: incompatible objects were found! Trying to merge "+
               "an Object with an Array! Expected Object arguments only!";
@@ -236,128 +236,84 @@ util.mergeObjects = function () {
   }
   return mergedResult;
 };
-/**
- * Given a class name (e.g. Book) create the corresponding database
- * table name (e.g., books) which is the lower case plural version
- * of the used (and provided as parameter) class name.
- * @param {string} className
- * @return the corresponding table name for the given class name
- */
-util.class2TableName = function ( className) {
-  return util.camelToUnderscore( className, true);
+/**********************************************
+ * Name conversions
+ **********************************************/
+// Example 1: EnglishTeacher => english_teachers
+// Example 2: eXPERIMENTdEF => EXPERIMENT_DEFS
+util.class2TableName = function (className) {
+  var tableName="";
+  if (className.charAt(0) === className.charAt(0).toUpperCase()) { // starts with upper case
+    if (className.charAt( className.length-1) === "y") {
+      tableName = util.camelToLowerCase( className.slice( 0, className.length-1)) + "ies";
+    } else {
+      tableName = util.camelToLowerCase( className) + "s";
+    }
+    return tableName;
+  } else { // inverse camel case (starts with lower case)
+    if (className.charAt( className.length-1) === "Y") {
+      tableName = util.invCamelToUppercase( className.slice( 0, className.length-1)) + "IES";
+    } else {
+      tableName = util.invCamelToUppercase( className) + "S";
+    }
+    return tableName;
+  }
 };
-
-/**
- * Given a property name (e.g. dateOfBirth) create the corresponding
- * table column name (e.g., date_of_birth) which is the underscore
- * notation version of the property name.
- * @param {string} propertyName
- * @return the corresponding column name for the given property name
- */
-util.property2ColumnName = function ( propertyName) {
-  return util.camelToUnderscore( propertyName);
+// Example: books => Book
+util.table2ClassName = function (tableName) {
+  var result = util.lowercaseToCamel( tableName);
+  result = result.charAt( 0).toUpperCase() + result.slice( 1);
+  // if there is an 's' at the end, drop it
+  if (result.charAt( result.length - 1) === 's') {
+    result = result.slice( 0, result.length - 1);
+  }
+  /*
+  if (!util.JsIdentifierPattern.test( result)) {
+    throw Error("util.camelToLowerCase: the provided 'identifier' (" + result +
+        ") is not a valid JS identifier!");
+  }
+  */
+  return result;
 };
-
-/**
- * Given a table name (e.g. books) create the corresponding class
- * name (e.g., Book) which is the camel case version of the table
- * name but without the ending 's' and with first letter capitalized.
- * @param {string} tableName
- * @return the corresponding class name for the given table name
- */
-util.table2ClassName = function ( tableName) {
-  return util.underscoreToCamel( tableName, true);
+// Example: dateOfBirth => date_of_birth
+util.property2ColumnName = function (propertyName) {
+  return util.camelToLowerCase( propertyName);
 };
-
-/**
- * Given a column name (e.g. date_of_birth) create the corresponding
- * property name (e.g., dateOfBirth) which is the camel case version
- * of the column name (first letter lower case also).
- * @param {string} columnName
- * @return the corresponding property name for the given column name
- */
-util.column2PropertyName = function ( columnName) {
-  return util.underscoreToCamel( columnName);
+// Example: date_of_birth => dateOfBirth
+util.column2PropertyName = function (columnName) {
+  return util.lowercaseToCamel( columnName);
 };
-
-/** REGEX to check if valid JS identifier **/
-util.JsIdentifierPattern = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc][$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc0-9\u0300-\u036f\u0483-\u0487\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u0610-\u061a\u064b-\u0669\u0670\u06d6-\u06dc\u06df-\u06e4\u06e7\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0711\u0730-\u074a\u07a6-\u07b0\u07c0-\u07c9\u07eb-\u07f3\u0816-\u0819\u081b-\u0823\u0825-\u0827\u0829-\u082d\u0859-\u085b\u08e4-\u08fe\u0900-\u0903\u093a-\u093c\u093e-\u094f\u0951-\u0957\u0962\u0963\u0966-\u096f\u0981-\u0983\u09bc\u09be-\u09c4\u09c7\u09c8\u09cb-\u09cd\u09d7\u09e2\u09e3\u09e6-\u09ef\u0a01-\u0a03\u0a3c\u0a3e-\u0a42\u0a47\u0a48\u0a4b-\u0a4d\u0a51\u0a66-\u0a71\u0a75\u0a81-\u0a83\u0abc\u0abe-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ae2\u0ae3\u0ae6-\u0aef\u0b01-\u0b03\u0b3c\u0b3e-\u0b44\u0b47\u0b48\u0b4b-\u0b4d\u0b56\u0b57\u0b62\u0b63\u0b66-\u0b6f\u0b82\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0bd7\u0be6-\u0bef\u0c01-\u0c03\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c55\u0c56\u0c62\u0c63\u0c66-\u0c6f\u0c82\u0c83\u0cbc\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cd5\u0cd6\u0ce2\u0ce3\u0ce6-\u0cef\u0d02\u0d03\u0d3e-\u0d44\u0d46-\u0d48\u0d4a-\u0d4d\u0d57\u0d62\u0d63\u0d66-\u0d6f\u0d82\u0d83\u0dca\u0dcf-\u0dd4\u0dd6\u0dd8-\u0ddf\u0df2\u0df3\u0e31\u0e34-\u0e3a\u0e47-\u0e4e\u0e50-\u0e59\u0eb1\u0eb4-\u0eb9\u0ebb\u0ebc\u0ec8-\u0ecd\u0ed0-\u0ed9\u0f18\u0f19\u0f20-\u0f29\u0f35\u0f37\u0f39\u0f3e\u0f3f\u0f71-\u0f84\u0f86\u0f87\u0f8d-\u0f97\u0f99-\u0fbc\u0fc6\u102b-\u103e\u1040-\u1049\u1056-\u1059\u105e-\u1060\u1062-\u1064\u1067-\u106d\u1071-\u1074\u1082-\u108d\u108f-\u109d\u135d-\u135f\u1712-\u1714\u1732-\u1734\u1752\u1753\u1772\u1773\u17b4-\u17d3\u17dd\u17e0-\u17e9\u180b-\u180d\u1810-\u1819\u18a9\u1920-\u192b\u1930-\u193b\u1946-\u194f\u19b0-\u19c0\u19c8\u19c9\u19d0-\u19d9\u1a17-\u1a1b\u1a55-\u1a5e\u1a60-\u1a7c\u1a7f-\u1a89\u1a90-\u1a99\u1b00-\u1b04\u1b34-\u1b44\u1b50-\u1b59\u1b6b-\u1b73\u1b80-\u1b82\u1ba1-\u1bad\u1bb0-\u1bb9\u1be6-\u1bf3\u1c24-\u1c37\u1c40-\u1c49\u1c50-\u1c59\u1cd0-\u1cd2\u1cd4-\u1ce8\u1ced\u1cf2-\u1cf4\u1dc0-\u1de6\u1dfc-\u1dff\u200c\u200d\u203f\u2040\u2054\u20d0-\u20dc\u20e1\u20e5-\u20f0\u2cef-\u2cf1\u2d7f\u2de0-\u2dff\u302a-\u302f\u3099\u309a\ua620-\ua629\ua66f\ua674-\ua67d\ua69f\ua6f0\ua6f1\ua802\ua806\ua80b\ua823-\ua827\ua880\ua881\ua8b4-\ua8c4\ua8d0-\ua8d9\ua8e0-\ua8f1\ua900-\ua909\ua926-\ua92d\ua947-\ua953\ua980-\ua983\ua9b3-\ua9c0\ua9d0-\ua9d9\uaa29-\uaa36\uaa43\uaa4c\uaa4d\uaa50-\uaa59\uaa7b\uaab0\uaab2-\uaab4\uaab7\uaab8\uaabe\uaabf\uaac1\uaaeb-\uaaef\uaaf5\uaaf6\uabe3-\uabea\uabec\uabed\uabf0-\uabf9\ufb1e\ufe00-\ufe0f\ufe20-\ufe26\ufe33\ufe34\ufe4d-\ufe4f\uff10-\uff19\uff3f]*$/;
-/**
- * Convert a camel case identifier to underscore notation.
- * E.g.: dateOfBirth => date_of_birth,
- *       TemperatureSensor => temperature_sensors (if isClass = true)
- * @param {string} identifier
- *                the identifier(class name, property name, etc) to transform
- * @param {boolean} isClass
- *                a flag which specify if the identifier is a class name
- *                because in this case, the underscore notation contains
- *                the 's' char at the end.
- * @return the underscore-notation string for the identifier
- */
-util.camelToUnderscore = function ( identifier, isClass) {
+util.camelToLowerCase = function (identifier) {
   var result = '';
-  // null or undefined identifier
-  if ( !identifier) {
-    throw "util.camelToUnderscore: the 'identifier' can't be null or undefined!";
-  }
-  // invalid JS identifier
-  if ( !util.JsIdentifierPattern.test( identifier)) {
-    throw "util.camelToUnderscore: the provided 'identifier' (" + identifier + ") is not a JS valid identifier!";
-  }
   // if the first is a A-Z char, replace it with its lower case equivalent
-  // that's much easier than to create a regular expression to consider this
-  // specific exception case (which occurs normally with class names)
   identifier = identifier.charAt( 0).toLowerCase() + identifier.slice( 1);
   // replace upper case letter with '_' followed by the lower case equivalent leter
   result = identifier.replace( /([A-Z])/g, function( $1) {
     return "_" + $1.toLowerCase();
   });
-  // if is a class, add the 's' at the end
-  if ( isClass === true) {
-    result += 's';
-  }
   return result;
 };
-/**
- * Given a underscore-notation identifier, the method
- * transform it to camel case notation.
- * E.g.: date_of_birth => dateOfBirth
- *       temperature_sensors => TemperatureSensor (if isClass = true)
- * @param {string} identifier
- *                the identifier to transform
- * @param {boolean} isClass
- *                a flag which specify if the identifier is a class name
- *                because in this case, the underscore notation contains
- *                the 's' char at the end which has to be cut-out and also
- *                the first letter has to be capitalized.
- * @return the camel case notation string for the identifier
- */
-util.underscoreToCamel = function ( identifier, isClass) {
+util.invCamelToUppercase = function (name) {
   var result = '';
-  // null or undefined identifier
-  if ( !identifier) {
-    throw "util.underscoreToCamel: the 'identifier' can't be null or undefined!";
-  }
-  // invalid JS identifier
-  if ( !util.JsIdentifierPattern.test( identifier)) {
-    throw "util.underscoreToCamel: the provided 'identifier' is not a JS valid identifier!";
-  }
+  // if the first is a a-z, replace it with corresponding upper case
+  name = name.charAt(0).toUpperCase() + name.slice( 1);
+  // replace lower case letter with '_' followed by the corresponding upper case
+  result = name.replace( /([a-z])/g, function( $1) {
+    return "_" + $1.toUpperCase();
+  });
+  return result;
+};
+util.lowercaseToCamel = function (identifier) {
+  var result = '';
   // replace upper case letter with '_' followed by the lower case equivalent letter
-  result = identifier.replace( /(\_[a-z])/g, function ( $1) {
+  result = identifier.replace( /(\_[a-z])/g, function ($1) {
     return $1.toUpperCase().replace( '_', '');
   });
-  // if is a class name, delete the 's' from the end
-  // and capitalize the first letter
-  if ( isClass === true) {
-    result = result.charAt( 0).toUpperCase() + result.slice( 1);
-    // if it has an 's' at the end, then cut it out
-    // this should be in general the case...but anyway check it
-    if ( result.charAt( result.length - 1) === 's') {
-      result = result.slice( 0, result.length - 1);
-    }
-  }
   return result;
 };
+
+/** REGEX to check if valid JS identifier **/
+util.JsIdentifierPattern = /^(?!(?:do|if|in|for|let|new|try|var|case|else|enum|eval|false|null|this|true|void|with|break|catch|class|const|super|throw|while|yield|delete|export|import|public|return|static|switch|typeof|default|extends|finally|package|private|continue|debugger|function|arguments|interface|protected|implements|instanceof)$)[$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc][$A-Z\_a-z\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc0-9\u0300-\u036f\u0483-\u0487\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u0610-\u061a\u064b-\u0669\u0670\u06d6-\u06dc\u06df-\u06e4\u06e7\u06e8\u06ea-\u06ed\u06f0-\u06f9\u0711\u0730-\u074a\u07a6-\u07b0\u07c0-\u07c9\u07eb-\u07f3\u0816-\u0819\u081b-\u0823\u0825-\u0827\u0829-\u082d\u0859-\u085b\u08e4-\u08fe\u0900-\u0903\u093a-\u093c\u093e-\u094f\u0951-\u0957\u0962\u0963\u0966-\u096f\u0981-\u0983\u09bc\u09be-\u09c4\u09c7\u09c8\u09cb-\u09cd\u09d7\u09e2\u09e3\u09e6-\u09ef\u0a01-\u0a03\u0a3c\u0a3e-\u0a42\u0a47\u0a48\u0a4b-\u0a4d\u0a51\u0a66-\u0a71\u0a75\u0a81-\u0a83\u0abc\u0abe-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ae2\u0ae3\u0ae6-\u0aef\u0b01-\u0b03\u0b3c\u0b3e-\u0b44\u0b47\u0b48\u0b4b-\u0b4d\u0b56\u0b57\u0b62\u0b63\u0b66-\u0b6f\u0b82\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0bd7\u0be6-\u0bef\u0c01-\u0c03\u0c3e-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c55\u0c56\u0c62\u0c63\u0c66-\u0c6f\u0c82\u0c83\u0cbc\u0cbe-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cd5\u0cd6\u0ce2\u0ce3\u0ce6-\u0cef\u0d02\u0d03\u0d3e-\u0d44\u0d46-\u0d48\u0d4a-\u0d4d\u0d57\u0d62\u0d63\u0d66-\u0d6f\u0d82\u0d83\u0dca\u0dcf-\u0dd4\u0dd6\u0dd8-\u0ddf\u0df2\u0df3\u0e31\u0e34-\u0e3a\u0e47-\u0e4e\u0e50-\u0e59\u0eb1\u0eb4-\u0eb9\u0ebb\u0ebc\u0ec8-\u0ecd\u0ed0-\u0ed9\u0f18\u0f19\u0f20-\u0f29\u0f35\u0f37\u0f39\u0f3e\u0f3f\u0f71-\u0f84\u0f86\u0f87\u0f8d-\u0f97\u0f99-\u0fbc\u0fc6\u102b-\u103e\u1040-\u1049\u1056-\u1059\u105e-\u1060\u1062-\u1064\u1067-\u106d\u1071-\u1074\u1082-\u108d\u108f-\u109d\u135d-\u135f\u1712-\u1714\u1732-\u1734\u1752\u1753\u1772\u1773\u17b4-\u17d3\u17dd\u17e0-\u17e9\u180b-\u180d\u1810-\u1819\u18a9\u1920-\u192b\u1930-\u193b\u1946-\u194f\u19b0-\u19c0\u19c8\u19c9\u19d0-\u19d9\u1a17-\u1a1b\u1a55-\u1a5e\u1a60-\u1a7c\u1a7f-\u1a89\u1a90-\u1a99\u1b00-\u1b04\u1b34-\u1b44\u1b50-\u1b59\u1b6b-\u1b73\u1b80-\u1b82\u1ba1-\u1bad\u1bb0-\u1bb9\u1be6-\u1bf3\u1c24-\u1c37\u1c40-\u1c49\u1c50-\u1c59\u1cd0-\u1cd2\u1cd4-\u1ce8\u1ced\u1cf2-\u1cf4\u1dc0-\u1de6\u1dfc-\u1dff\u200c\u200d\u203f\u2040\u2054\u20d0-\u20dc\u20e1\u20e5-\u20f0\u2cef-\u2cf1\u2d7f\u2de0-\u2dff\u302a-\u302f\u3099\u309a\ua620-\ua629\ua66f\ua674-\ua67d\ua69f\ua6f0\ua6f1\ua802\ua806\ua80b\ua823-\ua827\ua880\ua881\ua8b4-\ua8c4\ua8d0-\ua8d9\ua8e0-\ua8f1\ua900-\ua909\ua926-\ua92d\ua947-\ua953\ua980-\ua983\ua9b3-\ua9c0\ua9d0-\ua9d9\uaa29-\uaa36\uaa43\uaa4c\uaa4d\uaa50-\uaa59\uaa7b\uaab0\uaab2-\uaab4\uaab7\uaab8\uaabe\uaabf\uaac1\uaaeb-\uaaef\uaaf5\uaaf6\uabe3-\uabea\uabec\uabed\uabf0-\uabf9\ufb1e\ufe00-\ufe0f\ufe20-\ufe26\ufe33\ufe34\ufe4d-\ufe4f\uff10-\uff19\uff3f]*$/;
 
 //***** NOT USED IN cLASSjs ************************
 /**
@@ -393,20 +349,43 @@ util.createRecordFromObject = function (obj) {
   }
   return record;
 };
+// create an alias for cloning records
+util.cloneRecord = util.createRecordFromObject;
+
 /**
- * Create a deep clone of a JS object
+ * Create a "deep" clone of a JS object at the level of own properties/slots
  * @param o  the object to be cloned
  * @return {object}
  */
 util.cloneObject = function (o) {
-  var clonedObj = Array.isArray(o) ? [] : {};
+  var clone = Array.isArray(o) ? [] : {};
   Object.keys(o).forEach( function (key) {
-    clonedObj[key] = (typeof o[key] === "object") ? util.cloneObject(o[key]) : o[key];
+    clone[key] = (typeof o[key] === "object") ? util.cloneObject(o[key]) : o[key];
   });
-  return clonedObj;
+  return clone;
 };
 /**
- * Swap two elements of an array
+ * Copy all own (property and method) slots of a number of (untyped) objects
+ * to a new (untyped) object.
+ * @author Gerd Wagner
+ * @return {object}  The merge result.
+ */
+util.mergeObjects = function () {
+  var i=0, k=0, obj=null, mergeObj={}, keys=[], key="";
+  for (i=0; i < arguments.length; i++) {
+    obj = arguments[i];
+    if (obj && typeof obj === "object") {
+      keys = Object.keys( obj);
+      for (k=0; k < keys.length; k++) {
+        key = keys[k];
+        mergeObj[key] = obj[key];
+      }
+    }
+  }
+  return mergeObj;
+};
+/**
+ * Swap two elements of an array 
  * using the ES6 method Object.assign for creating a shallow clone of an object
  * @param a  the array
  * @param i  the first index
@@ -543,20 +522,20 @@ eNUMERATION.instances = {};
  * cLASS allows defining constructor-based JavaScript classes and
  * class hierarchies based on a declarative description of the form:
  *
- *   var MyObject = new cLASS({
- *     Name: "MyObject",
- *     supertypeName: "MySuperClass",
+ *   var Student = new cLASS({
+ *     Name: "Student",
+ *     supertypeName: "Person",
  *     properties: {
- *       "myAdditionalAttribute": {range:"Integer", label:"...", max: 7, ...}
+ *       "university": {range:"String", label:"University", max: 50, ...}
  *     },
  *     methods: {
  *     }
  *   });
- *   var myObj = new MyObject({id: 1, myAdditionalAttribute: 7});
- *   // test if instance of MyObject
- *   if (myObj. .Name ==="MyObject") ...
- *   // or, alternatively,
- *   if (myObj instanceof MyObject) ...
+ *   var stud1 = new Student({id: 1, university:"MIT"});
+ *   // test if direct instance
+ *   if (stud1.constructor.Name === "Student") ...
+ *   // test if instance
+ *   if (stud1 instanceof Student) ...
  *
  * Notice that it is assumed that a class has (or inherits) an "id" attribute
  * as its standard ID attribute.
@@ -569,7 +548,7 @@ eNUMERATION.instances = {};
  ******************************************************************************/
 /* globals cLASS */
 function cLASS (classSlots) {
-  var propDs = classSlots.properties || {},  // property declarations
+  var propDefs = classSlots.properties || {},  // property declarations
       methods = classSlots.methods || {},
       supertypeName = classSlots.supertypeName,
       superclass=null, constr=null,
@@ -578,8 +557,8 @@ function cLASS (classSlots) {
   if (supertypeName && !cLASS[supertypeName]) {
     throw "Specified supertype "+ supertypeName +" has not been defined!";
   }
-  if (!Object.keys( propDs).every( function (p) {
-        return (propDs[p].range !== undefined);
+  if (!Object.keys( propDefs).every( function (p) {
+        return (propDefs[p].range !== undefined);
       }) ) {
     throw "No range defined for some property of class "+ classSlots.Name +" !";
   }
@@ -590,71 +569,78 @@ function cLASS (classSlots) {
       cLASS[supertypeName].call( this, instanceSlots);
     }
     // assign own properties
-    Object.keys( propDs).forEach( function (p) {
-      var range = propDs[p].range,
-          val, rangeClasses=[], i=0, objRef=null, validationResult=null;
+    Object.keys( propDefs).forEach( function (p) {
+      var range = propDefs[p].range, Class=null,
+          val, rangeTypes=[], i=0, validationResult=null;
       if (typeof instanceSlots === "object" && instanceSlots[p]) {
         // property p has an initialization slot
         val = instanceSlots[p];
-        validationResult = cLASS.check( p, propDs[p], val);
+        validationResult = cLASS.check( p, propDefs[p], val);
         if (!(validationResult instanceof NoConstraintViolation)) throw validationResult;
         // is range a class (or class disjunction)?
         if (typeof range === "string" && typeof val !== "object" &&
             (cLASS[range] || range.includes("|"))) {
           if (range.includes("|")) {
-            rangeClasses = range.split("|");
-            for (i=0; i < rangeClasses.length; i++) {
-              objRef = cLASS[rangeClasses[i]].instances[String(val)];
-              // convert IdRef to object reference
-              if (objRef) { this[p] = objRef; break;}
+            rangeTypes = range.split("|");
+            for (i=0; i < rangeTypes.length; i++) {
+              Class = cLASS[rangeTypes[i]];
+              if (Class) {  // type disjunct is a cLASS
+                if (Class.instances[String(val)])  {
+                  // convert IdRef to object reference
+                  this[p] = Class.instances[String(val)];
+                  break;
+                }
+              }
             }
+            if (!this[p]) this[p] = val;
           } else {  // range is a class
             // convert IdRef to object reference
             this[p] = cLASS[range].instances[String(val)] || val;
           }
         } else this[p] = val;
-        delete instanceSlots[p];
-      } else if (propDs[p].initialValue !== undefined) {
-        // no initialization slot, assign initial value
-        if (typeof propDs[p].initialValue === "function") {
+      } else if (propDefs[p].initialValue !== undefined) {  // assign initial value
+        if (typeof propDefs[p].initialValue === "function") {
           propsWithInitialValFunc.push(p);
-        } else this[p] = propDs[p].initialValue;
-      } else if (!propDs[p].optional) {
-        // assign default value to mandatory properties without an initialization slot
+        } else this[p] = propDefs[p].initialValue;
+      } else if (p === "id" && range === "AutoNumber") {    // assign auto-ID
+        if (typeof this.constructor.getAutoId === "function") this[p] = this.constructor.getAutoId();
+        else if (this.constructor.idCounter !== undefined) this[p] = ++this.constructor.idCounter;
+      } else if (!propDefs[p].optional) {  // assign default value to mandatory properties
         if (cLASS.isIntegerType(range) || cLASS.isDecimalType(range)) {
           this[p] = 0;
         } else if (range === "String") {
           this[p] = "";
         } else if (range === "Boolean") {
           this[p] = false;
-        } else if (typeof range === "string" && cLASS[range] ||
-            typeof range === "object" && ["Array", "ArrayList"].includes(range["dataType"])) {
-          this[p] = [];
-        } else if (typeof range === "object" && range["dataType"] === "Map") {
-          this[p] = {};
+        } else if (typeof range === "object") {
+          if (["Array", "ArrayList"].includes(range.dataType)) {
+            this[p] = [];
+          } else if (range["dataType"] === "Map") {
+            this[p] = {};
+          }
         }
       }
       // initialize historical properties
-      if (propDs[p].historySize) {
+      if (propDefs[p].historySize) {
         this.history = this.history || {};  // a map
-        this.history[p] = propDs[p].decimalPlaces ?
-            new cLASS.RingBuffer( propDs[p].range, propDs[p].historySize,
-                {decimalPlaces: propDs[p].decimalPlaces}) :
-            new cLASS.RingBuffer( propDs[p].range, propDs[p].historySize);
+        this.history[p] = propDefs[p].decimalPlaces ?
+            new cLASS.RingBuffer( propDefs[p].range, propDefs[p].historySize,
+                {decimalPlaces: propDefs[p].decimalPlaces}) :
+            new cLASS.RingBuffer( propDefs[p].range, propDefs[p].historySize);
       }
     }, this);
     // call the functions for initial value expressions
     propsWithInitialValFunc.forEach( function (p) {
-      this[p] = propDs[p].initialValue.call(this);
+      this[p] = propDefs[p].initialValue.call(this);
     }, this);
     // assign remaining fields not defined as properties by the object's class
     if (typeof( instanceSlots) === "object") {
       Object.keys( instanceSlots).forEach( function (f) {
-        this[f] = instanceSlots[f];
+        if (!propDefs[f]) this[f] = instanceSlots[f];
       }, this);
     }
-    // is the class not abstract and does the object have an ID slot?
-    if (!classSlots.isAbstract && "id" in this) {
+    // is the class neither a complex DT nor abstract and does the object have an ID slot?
+    if (!classSlots.isComplexDatatype && !classSlots.isAbstract && "id" in this) {
       // add new object to the population/extension of the class
       cLASS[classSlots.Name].instances[String(this.id)] = this;
     }
@@ -662,31 +648,34 @@ function cLASS (classSlots) {
   // assign class-level (meta-)properties
   constr.constructor = cLASS;
   constr.Name = classSlots.Name;
+  if (classSlots.isComplexDatatype) constr.isComplexDatatype = true;
   if (classSlots.isAbstract) constr.isAbstract = true;
   if (classSlots.shortLabel) constr.shortLabel = classSlots.shortLabel;
+  if (classSlots.primaryKey) constr.primaryKey = classSlots.primaryKey;
+  if (classSlots.tableName) constr.tableName = classSlots.tableName;
   if (supertypeName) {
     constr.supertypeName = supertypeName;
     superclass = cLASS[supertypeName];
-    // apply classical inheritance pattern
+    // apply classical inheritance pattern for methods
     constr.prototype = Object.create( superclass.prototype);
     constr.prototype.constructor = constr;
     // merge superclass property declarations with own property declarations
     constr.properties = Object.create( superclass.properties);
-   //  assign own property declarations, possibly overriding super-props
-    Object.keys( propDs).forEach( function (p) {
-      constr.properties[p] = propDs[p];
+   //  assign own property declarations, possibly overriding super-props																		 
+    Object.keys( propDefs).forEach( function (p) {
+      constr.properties[p] = propDefs[p];
     });
   } else {  // if class is root class
-    constr.properties = propDs;
+    constr.properties = propDefs;
     /***************************************************/
     constr.prototype.set = function ( prop, val) {
     /***************************************************/
       // this = object
-      var constrViol = cLASS.check( prop, this.constructor.properties[prop], val);
-      if (constrViol instanceof NoConstraintViolation) {
-        this[prop] = constrViol.checkedValue;
+      var validationResult = cLASS.check( prop, this.constructor.properties[prop], val);
+      if (validationResult instanceof NoConstraintViolation) {
+        this[prop] = validationResult.checkedValue;
       } else {
-        throw constrViol;
+        throw validationResult;
       }
     };
     /***************************************************/
@@ -742,7 +731,7 @@ function cLASS (classSlots) {
             if (range.constructor && range.constructor === cLASS) { // object reference(s)
               if (Array.isArray( val)) {
                 valuesToConvert = val.slice(0);  // clone;
-              } else {  // map from ID refs to obj refs
+              } else {  // val is a map from ID refs to obj refs
                 valuesToConvert = Object.values( val);
               }
             } else if (Array.isArray( val)) {
@@ -788,10 +777,12 @@ function cLASS (classSlots) {
         if (Array.isArray( val)) {
           valuesToConvert = val.slice(0);  // clone;
         } else console.log("The value of a multi-valued " +
-            "datatype property must be an array!");
+            "datatype property like "+ prop +"must be an array!");
       } else valuesToConvert = [val];
       valuesToConvert.forEach( function (v,i) {
-        if (eNUMERATION && range instanceof eNUMERATION) {
+        if (typeof propDecl.val2str === "function") {
+          valuesToConvert[i] = propDecl.val2str( v);
+        } else if (eNUMERATION && range instanceof eNUMERATION) {
           valuesToConvert[i] = range.labels[v-1];
         } else if (["number","string","boolean"].includes( typeof v) || !v) {
           valuesToConvert[i] = String( v);
@@ -800,13 +791,18 @@ function cLASS (classSlots) {
         } else if (Array.isArray( v)) {  // JSON-compatible array
           valuesToConvert[i] = v.slice(0);  // clone
         } else if (typeof range === "string" && cLASS[range]) {
-          if (typeof val === "object" && val.id !== undefined) {
-            valuesToConvert[i] = val.id;
+          if (typeof v === "object" && v.id !== undefined) {
+            valuesToConvert[i] = v.id;
           } else {
-            valuesToConvert[i] = "";
+            valuesToConvert[i] = v.toString();
+            propDecl.stringified = true;
+            console.log("Property "+ this.constructor.Name +"::"+ prop +" has a cLASS object value without an 'id' slot!");
           }
-        } else valuesToConvert[i] = JSON.stringify( v);
-      });
+        } else {
+          valuesToConvert[i] = JSON.stringify( v);
+          propDecl.stringified = true;
+        }
+      }, this);
       displayStr = valuesToConvert[0];
       if (propDecl.maxCard && propDecl.maxCard > 1) {
         displayStr = "[" + displayStr;
@@ -818,10 +814,11 @@ function cLASS (classSlots) {
       return displayStr;
     };
     /***************************************************/
-    /***************************************************/
-    // A class-level de-serialization method
+
+    /***************************************************
+     * A class-level de-serialization method
+     ***************************************************/
     constr.createObjectFromRecord = function (record) {
-    /***************************************************/
       var obj={};
       try {
         obj = new constr( record);
@@ -854,7 +851,7 @@ function cLASS (classSlots) {
   * @return {boolean}
   */
 cLASS.isIntegerType = function (T) {
-  return typeof(T)==="string" && T.includes('Integer') ||
+  return ["Integer","PositiveInteger","AutoNumber","NonNegativeInteger"].includes(T) ||
       T instanceof eNUMERATION;
 };
  /**
@@ -865,13 +862,13 @@ cLASS.isIntegerType = function (T) {
   * @return {boolean}
   */
  cLASS.isDecimalType = function (T) {
-   return typeof(T)==="string" &&
-       (T.includes("Decimal") || T.includes("UnitInterval"));
+   return ["Number","Decimal","Percent","ClosedUnitInterval","OpenUnitInterval"].includes(T);
  };
  /**
   * Constants
   */
  cLASS.patterns = {
+   ID: /^([a-zA-Z0-9][a-zA-Z0-9_\-]+[a-zA-Z0-9])$/,
    // defined in WHATWG HTML5 specification
    EMAIL: /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
    // proposed by Diego Perini (https://gist.github.com/729294)
@@ -921,12 +918,17 @@ cLASS.isIntegerType = function (T) {
      if (Array.isArray( val) ) {
        valuesToCheck = val;
      } else if (typeof range === "string" && cLASS[range]) {
-       valuesToCheck = Object.keys( val).map( function (id) {
-         return val[id];
-       });
+       if (!decl.ordered) {
+         valuesToCheck = Object.keys( val).map( function (id) {
+           return val[id];
+         });
+       } else {
+         return new RangeConstraintViolation("Values for the ordered property "+ fld +
+             " must be arrays, and not maps!");
+       }
      } else {
        return new RangeConstraintViolation("Values for "+ fld +
-           " must be arrays or maps!");
+           " must be arrays or maps of IDs to cLASS instances!");
      }
    }
    // convert integer strings to integers
@@ -958,6 +960,14 @@ cLASS.isIntegerType = function (T) {
          if (typeof v !== "string" || v.trim() === "") {
            constrVio = new RangeConstraintViolation("Values for "+ fld +
                " must be non-empty strings!");
+         }
+       });
+       break;
+     case "Identifier":  // add regexp test
+       valuesToCheck.forEach( function (v) {
+         if (typeof v !== "string" || v.trim() === "" || !cLASS.patterns.ID.test( v)) {
+           constrVio = new RangeConstraintViolation("Values for "+ fld +
+               " must be valid identifiers/names!");
          }
        });
        break;
@@ -1000,6 +1010,17 @@ cLASS.isIntegerType = function (T) {
                " must be a non-negative integer!");
          }
        });
+       break;
+     case "AutoNumber":
+       if (valuesToCheck.length === 1) {
+         if (!Number.isInteger( valuesToCheck[0]) || valuesToCheck[0] < 1) {
+           constrVio = new RangeConstraintViolation("The value of "+ fld +
+               " must be a positive integer!");
+         }
+       } else {
+         constrVio = new RangeConstraintViolation("The value of "+ fld +
+             " must not be a collection like "+ valuesToCheck);
+       }
        break;
      case "PositiveInteger":
        valuesToCheck.forEach( function (v) {
@@ -1057,8 +1078,7 @@ cLASS.isIntegerType = function (T) {
      case "Date":
        valuesToCheck.forEach( function (v,i) {
          if (typeof v === "string" &&
-             (/\d{4}-(0\d|1[0-2])-([0-2]\d|3[0-1])/.test(v) ||
-             !isNaN( Date.parse(v)))) {
+             /\d{4}-(0\d|1[0-2])-([0-2]\d|3[0-1])/.test(v) && !isNaN( Date.parse(v))) {
            valuesToCheck[i] = new Date(v);
          } else if (!(v instanceof Date)) {
            constrVio = new RangeConstraintViolation("The value of "+ fld +
@@ -1067,8 +1087,20 @@ cLASS.isIntegerType = function (T) {
          }
        });
        break;
+     case "DateTime":
+       valuesToCheck.forEach( function (v,i) {
+         if (typeof v === "string" && !isNaN( Date.parse(v))) {
+           valuesToCheck[i] = new Date(v);
+         } else if (!(v instanceof Date)) {
+           constrVio = new RangeConstraintViolation("The value of "+ fld +
+               " must be either a Date value or an ISO date-time string. "+
+               v +" is not admissible!");
+         }
+       });
+       break;
      default:
-       if (range instanceof eNUMERATION) {
+       if (range instanceof eNUMERATION || typeof range === "string" && eNUMERATION[range]) {
+         if (typeof range === "string") range = eNUMERATION[range];
          valuesToCheck.forEach( function (v) {
            if (!Number.isInteger( v) || v < 1 || v > range.MAX) {
              constrVio = new RangeConstraintViolation("The value "+ v +
@@ -1083,70 +1115,124 @@ cLASS.isIntegerType = function (T) {
                  " is not in value list "+ range.toString());
            }
          });
-       } else if (!(typeof range === "string" && (cLASS[range] || range.includes("|")))) {
-         if (typeof range === "object" && range.dataType !== undefined) {
-           // the range is a (collection) datatype declaration record
-           valuesToCheck.forEach(function (v) {
-             var i = 0;
-             if (typeof v !== "object") {
+       } else if (typeof range === "string" && cLASS[range]) {
+         valuesToCheck.forEach( function (v, i) {
+           var recFldNames=[], propDefs={};
+           if (!cLASS[range].isComplexDatatype && !(v instanceof cLASS[range])) {
+             // convert IdRef to object reference
+             if (cLASS[range].instances[String(v)]) {
+               v = valuesToCheck[i] = cLASS[range].instances[String(v)];
+             } else if (optParams && optParams.checkRefInt) {
+               constrVio = new ReferentialIntegrityConstraintViolation("The value " + v +
+                   " of property '"+ fld +"' is not an ID of any " + range + " object!");
+             }
+           } else if (cLASS[range].isComplexDatatype && typeof v === "object") {
+             // v is a record that must comply with the complex datatype
+             recFldNames = Object.keys(v);
+             propDefs = cLASS[range].properties;
+             // test if all mandatory properties occur in v and if all fields of v are properties
+             if (Object.keys( propDefs).every( function (p) {return !!propDefs[p].optional || p in v;}) &&
+                 recFldNames.every( function (fld) {return !!propDefs[fld];})) {
+               recFldNames.forEach( function (p) {
+                 var validationResult = cLASS.check( p, propDefs[p], v[p]);
+                 if (validationResult instanceof NoConstraintViolation) {
+                   v[p] = validationResult.checkedValue;
+                 } else {
+                   throw validationResult;
+                 }
+               })
+             } else {
                constrVio = new RangeConstraintViolation("The value of " + fld +
-                   " must be an object! " + JSON.stringify(v) + " is not admissible!");
+                   " must be an instance of "+ range +" or a compatible record!"+
+                   JSON.stringify(v) + " is not admissible!");
              }
-             switch (range.dataType) {
-               case "Array":
-                 if (!Array.isArray(v)) {
-                   constrVio = new RangeConstraintViolation("The value of " + fld +
-                       " must be an array! " + JSON.stringify(v) + " is not admissible!");
-                   break;
-                 }
-                 if (v.length !== range.size) {
-                   constrVio = new RangeConstraintViolation("The value of " + fld +
-                       " must be an array of length " + range.size + "! " + JSON.stringify(v) + " is not admissible!");
-                   break;
-                 }
-                 for (i = 0; i < range.size; i++) {
-                   if (!cLASS.isOfType(v[i], range.itemType)) {
-                     constrVio = new RangeConstraintViolation("The items of " + fld +
-                         " must be of type " + range.itemType + "! " + JSON.stringify(v) +
-                         " is not admissible!");
-                   }
-                 }
-                 break;
+/* DROP
+           } else {  // v may be a (numeric or string) ID ref
+             if (typeof v === "string") {
+               if (!isNaN( parseInt(v))) v = valuesToCheck[i] = parseInt(v);
+             } else if (!Number.isInteger(v)) {
+               constrVio = new RangeConstraintViolation("The value (" + JSON.stringify(v) +
+                   ") of property '" +fld + "' is neither an integer nor a string!");
              }
-           });
-         } else if (range === Object) {
-           valuesToCheck.forEach(function (v) {
-             if (!(v instanceof Object)) {
+*/
+           }
+         });
+       } else if (typeof range === "string" && range.includes("|")) {
+         valuesToCheck.forEach( function (v, i) {
+           var rangeTypes=[];
+           rangeTypes = range.split("|");
+           if (typeof v === "object") {
+             if (!rangeTypes.some( function (rc) {
+               return v instanceof cLASS[rc];
+             })) {
+               constrVio = ReferentialIntegrityConstraintViolation("The object " + JSON.stringify(v) +
+                   " is not an instance of any class from " + range + "!");
+             } else {
+               v = valuesToCheck[i] = v.id;  // convert to IdRef
+             }
+           } else if (Number.isInteger(v)) {
+             if (optParams && optParams.checkRefInt) {
+               if (!cLASS[range].instances[String(v)]) {
+                 constrVio = new ReferentialIntegrityConstraintViolation("The value " + v +
+                     " of property '"+ fld +"' is not an ID of any " + range + " object!");
+               }
+             }
+           } else if (typeof v === "string") {
+             if (!isNaN( parseInt(v))) v = valuesToCheck[i] = parseInt(v);
+           } else {
+             constrVio = new RangeConstraintViolation("The value (" + v + ") of property '" +
+                 fld + "' is neither an integer nor a string!");
+           }
+         });
+       } else if (typeof range === "object" && range.dataType !== undefined) {
+         // the range is a (collection) datatype declaration record
+         valuesToCheck.forEach( function (v) {
+           var i = 0;
+           if (typeof v !== "object") {
+             constrVio = new RangeConstraintViolation("The value of " + fld +
+                 " must be an object! " + JSON.stringify(v) + " is not admissible!");
+           }
+           switch (range.dataType) {
+           case "Array":
+             if (!Array.isArray(v)) {
                constrVio = new RangeConstraintViolation("The value of " + fld +
-                   " must be a JS object! " + JSON.stringify(v) + " is not admissible!");
+                   " must be an array! " + JSON.stringify(v) + " is not admissible!");
+               break;
              }
-           });
-         }
-       } else if (optParams && optParams.checkRefInt) {
-         // the range is a cLASS or a cLASS disjunction
-         valuesToCheck.forEach(function (v, i) {
-           var rangeClasses = [];
-           if (cLASS[range]) {
-             if (v instanceof cLASS[range]) v = valuesToCheck[i] = v.id;  // convert to IdRef
-             else if (typeof v === "string") v = valuesToCheck[i] = parseInt(v);
-             // assuming that the ID reference represents an integer (ID)
-             if (!Number.isInteger(v)) {
-               constrVio = new RangeConstraintViolation("The value (" + val + ") of property '" +
-                   fld + "' is not an integer!");
+             if (v.length !== range.size) {
+               constrVio = new RangeConstraintViolation("The value of " + fld +
+                   " must be an array of length " + range.size + "! " + JSON.stringify(v) + " is not admissible!");
+               break;
              }
-             if (!cLASS[range].instances[String(v)]) {
-               constrVio = new ReferentialIntegrityConstraintViolation("The value " + v + " of property '" +
-                   fld + "' is not an ID of any " + range + " object!");
+             for (i = 0; i < v.length; i++) {
+               if (!cLASS.isOfType(v[i], range.itemType)) {
+                 constrVio = new RangeConstraintViolation("The items of " + fld +
+                     " must be of type " + range.itemType + "! " + JSON.stringify(v) +
+                     " is not admissible!");
+               }
              }
-           } else {  // a cLASS disjunction
-             rangeClasses = range.split("|");
-             // check referential integrity: val must be in some range class
-             if (!rangeClasses.some(function (rc) {
-                   return cLASS[rc].instances[String(v)];
-                 })) {
-               constrVio = ReferentialIntegrityConstraintViolation("The value " + val + " does not reference any of " +
-                   range + "!");
+             break;
+           case "ArrayList":
+             if (!Array.isArray(v)) {
+               constrVio = new RangeConstraintViolation("The value of " + fld +
+                   " must be an array! " + JSON.stringify(v) + " is not admissible!");
+               break;
              }
+             for (i = 0; i < v.length; i++) {
+               if (!cLASS.isOfType(v[i], range.itemType)) {
+                 constrVio = new RangeConstraintViolation("The items of " + fld +
+                     " must be of type " + range.itemType + "! " + JSON.stringify(v) +
+                     " is not admissible!");
+               }
+             }
+             break;
+           }
+         });
+       } else if (range === Object) {
+         valuesToCheck.forEach(function (v) {
+           if (!(v instanceof Object)) {
+             constrVio = new RangeConstraintViolation("The value of " + fld +
+                 " must be a JS object! " + JSON.stringify(v) + " is not admissible!");
            }
          });
        }
@@ -1188,7 +1274,7 @@ cLASS.isIntegerType = function (T) {
    /********************************************************
     ***  Check cardinality constraints  *********************
     ********************************************************/
-   if (maxCard > 1) { // (a multi-valued property can be array-valued or map-valued)
+   if (maxCard > 1) { // (a multi-valued property can be array- or map-valued)
      // check minimum cardinality constraint
      if (minCard > 0 && valuesToCheck.length < minCard) {
        return new CardinalityConstraintViolation("A collection of at least "+
@@ -1200,9 +1286,9 @@ cLASS.isIntegerType = function (T) {
            fld +" must not have more than "+ maxCard +" members!");
      }
    }
-   val = maxCard === 1 ? valuesToCheck[0] : valuesToCheck;
+   //val = maxCard === 1 ? valuesToCheck[0] : valuesToCheck;
    // return deserialized value available in validationResult.checkedValue
-   return new NoConstraintViolation( val);
+   return new NoConstraintViolation( maxCard === 1 ? valuesToCheck[0] : valuesToCheck);
  };
  /**
   * Map range datatype to JS datatype.
@@ -1225,6 +1311,7 @@ cLASS.isIntegerType = function (T) {
      case "NonNegativeInteger":
      case "PositiveInteger":
      case "Number":
+     case "AutoNumber":
      case "Decimal":
      case "Percent":
      case "ClosedUnitInterval":
@@ -1373,9 +1460,9 @@ cLASS.RingBuffer.prototype.toString = function (n) {
  };
 
  /**
- * @fileOverview  A library of DOM element creation methods and
+ * @fileOverview  A library of DOM element creation methods and 
  * other DOM manipulation methods.
- *
+ * 
  * @author Gerd Wagner
  */
 
@@ -1392,7 +1479,9 @@ var dom = {
     if (slots) {
       if (slots.id) el.id = slots.id;
       if (slots.classValues) el.className = slots.classValues;
+      if (slots.title) el.title = slots.title;
       if (slots.content) el.innerHTML = slots.content;
+      if (slots.borderColor) el.style.borderColor = slots.borderColor;
     }
     return el;
   },
@@ -1410,7 +1499,7 @@ var dom = {
    },
    /**
     * Create an img element
-    *
+    * 
     * @param {string} id
     * @param {string} classValues
     * @param {object} content
@@ -1425,19 +1514,19 @@ var dom = {
     },
   /**
    * Create an option element
-   *
+   * 
    * @param {object} content
    * @return {object}
    */
   createOption: function (slots) {
     var el = document.createElement("option");
     if (slots.text) el.textContent = slots.text;
-    if (slots.value) el.value = slots.value;
+    if (slots.value !== undefined) el.value = slots.value;
     return el;
   },
   /**
    * Create a button element
-   *
+   * 
    * @param {string} id
    * @param {string} classValues
    * @param {object} content
@@ -1445,10 +1534,12 @@ var dom = {
    */
   createButton: function (slots) {
     var el = document.createElement("button");
-    el.type = "button";
+    if (!slots.type) el.type = "button";
+    else el.type = slots.type;
     if (slots.id) el.id = slots.id;
     if (slots.name) el.name = slots.name;
     if (slots.classValues) el.className = slots.classValues;
+    if (slots.title) el.title = slots.title;
     if (slots.handler) el.addEventListener( 'click', slots.handler);
     if (slots.content) el.innerHTML = slots.content;
     else el.textContent = slots.label || slots.name;
@@ -1456,7 +1547,7 @@ var dom = {
   },
   /**
    * Create a labeled output field
-   *
+   * 
    * @param {{labelText: string, name: string?, value: string?}}
    *        slots  The view definition slots.
    * @return {object}
@@ -1483,6 +1574,7 @@ var dom = {
         lblEl = document.createElement("label");
     if (slots.name) inpEl.name = slots.name;
     if (slots.type) inpEl.type = slots.type;
+    else inpEl.type = "text";
     if (slots.value !== undefined) inpEl.value = slots.value;
     if (slots.disabled) inpEl.disabled = "disabled";
     lblEl.textContent = slots.labelText;
@@ -1497,14 +1589,17 @@ var dom = {
   *        slots  The view definition slots.
   * @return {object}
   */
-  createLabeledChoiceControl: function (t,n,v,lbl) {
-    var ccEl = document.createElement("input"),
+  createLabeledChoiceControl: function (t,n,v,lblTxt) {
+    var ctrlEl = document.createElement("input"),
         lblEl = document.createElement("label");
-    ccEl.type = t;
-    ccEl.name = n;
-    ccEl.value = v;
-    lblEl.appendChild( ccEl);
-    lblEl.appendChild( document.createTextNode( lbl));
+    ctrlEl.type = t;
+    ctrlEl.name = n;
+    ctrlEl.value = v;
+    lblEl.appendChild( ctrlEl);
+    lblEl.appendChild( !lblTxt.includes("</") ?
+        document.createTextNode( lblTxt) :
+        dom.createElement("div", {content: lblTxt})
+    );
     return lblEl;
   },
   /**
@@ -1514,24 +1609,21 @@ var dom = {
   *     slots  The view definition slots.
   * @return {object}
   */
-  createLabeledSelectField: function (slots) {
+  createLabeledSelect: function (slots) {
     var selEl = document.createElement("select"),
-        lblEl = document.createElement("label"),
-        containerEl = document.createElement("div");
+        lblEl = document.createElement("label");
     if (slots.name) selEl.name = slots.name;
     if (slots.index !== undefined) selEl.index = slots.index;
     lblEl.textContent = slots.labelText;
-    if (slots.classValues) containerEl.className = slots.classValues;
     lblEl.appendChild( selEl);
-    containerEl.appendChild( lblEl);
-    return containerEl;
+    return lblEl;
   },
   /**
   * Create option elements from an array list of option text strings
   * and insert them into a selection list element
   *
   * @param {object} selEl  A select(ion list) element
-  * @param {object} options  An array list of option text items
+  * @param {object} options  An array list of records or text items
   * @param {object} optPar  A record of optional parameters
   */
   fillSelectWithOptionsFromArrayList: function (selEl, options, optPar) {
@@ -1539,12 +1631,18 @@ var dom = {
     if (!selEl.multiple) {
       selEl.add( dom.createOption({text:" --- ", value:""}), null);
     }
-    options.forEach( function (txt,i) {
-      var optEl = dom.createOption({text: txt, value: i});
+    options.forEach( function (opt,i) {
+      var optEl = null,
+          id = optPar && optPar.primaryKey ? opt[optPar.primaryKey] : opt.id;
+      if (typeof opt === "string") optEl = dom.createOption({text: opt, value: i});
+      else optEl = dom.createOption({
+        text: optPar && optPar.displayProp ? opt[optPar.displayProp] : id,
+        value: id
+      });
       if (selEl.multiple && optPar && optPar.selection &&
           optPar.selection.includes(i+1)) {
         // flag the option element with this value as selected
-        optionEl.selected = true;
+        optEl.selected = true;
       }
       selEl.add( optEl, null);
     });
@@ -1554,7 +1652,7 @@ var dom = {
     * and insert them into a selection list element
     *
     * @param {object} selEl  A select(ion list) element
-    * @param {object} entityMap  A map of option values to option text items
+    * @param {object} entityMap  A map of entity IDs to entity records
     * @param {object} optPar  A record of optional parameters
     */
    fillSelectWithOptionsFromEntityMap: function (selEl, entityMap, optPar) {
@@ -1774,13 +1872,17 @@ var oBJECTvIEW = function (slots) {
           }
           if (this.suppressNoValueFields && mo[fld] === undefined) continue;
           // else
-          this.fields[fld] = {
-            moName: mo.objectName,
-            label: properties[fld].label,
-            hint: properties[fld].hint,
-            range: properties[fld].range,
-            inputOutputMode:"I/O"
-          };
+          this.fields[fld] = util.cloneRecord( properties[fld]);
+          // in case range is a JS constructor function or object
+          if (typeof properties[fld].range !== "string") {
+            if (cLASS[properties[fld].range.Name]) {
+              this.fields[fld].range = properties[fld].range.Name;
+            } else {
+              this.fields[fld].range = properties[fld].range;
+            }
+          }
+          this.fields[fld].moName = mo.objectName;
+          this.fields[fld].inputOutputMode = "I/O";
           fldOrdEl.push( fld);
         } else if (typeof fld === "object") {  // field definition
           properties = this.modelObject.properties;
@@ -1887,7 +1989,7 @@ var oBJECTvIEW = function (slots) {
  * @return {object} dataBinding
  */
 oBJECTvIEW.maxCardButtonGroup = 7;
-oBJECTvIEW.prototype.render = function (parentEl) {
+oBJECTvIEW.prototype.render = function (objViewParentEl) {
   var fields = this.fields,  // fields map
       fieldOrder = this.fieldOrder,  // field order array
       mObject = this.modelObject,  // model object
@@ -1896,7 +1998,7 @@ oBJECTvIEW.prototype.render = function (parentEl) {
       dataBinding = {},
       userActions = this.userActions,
       validateOnInput = true,
-      fldGrpSep = this.fieldGroupSeparator,
+      uiElemType = "form", parentEl=null,
       maxELforButton = 7,
       uiContainerEl=null, footerEl=null, i=0;
   /* ==================================================================== */
@@ -2080,6 +2182,8 @@ oBJECTvIEW.prototype.render = function (parentEl) {
           range = fDef.range,
           isEnum = range instanceof eNUMERATION,
           isArr = Array.isArray( range);
+      // convert cLASS Name to cLASS object
+      if (typeof range === "string" && cLASS[range]) range = cLASS[range];
       // retrieve model object for views based on multiple model objects
       if (mObjects) mObject = mObjects[fDef.moName];
       if (isEnum || isArr) {  // (ad-hoc) enumeration
@@ -2090,6 +2194,12 @@ oBJECTvIEW.prototype.render = function (parentEl) {
         } else {
           if (!containerEl.className) containerEl.className = "select";
           containerEl.appendChild( createSelectionList( fld));
+        }
+      } else if (range && range.constructor === cLASS && range.isComplexDatatype) {
+        if (fDef.maxCard && fDef.maxCard > 1) {
+          if (!containerEl.className) containerEl.className = "RecordTableWidget";
+          containerEl.appendChild( oBJECTvIEW.createRecordTableWidget(
+              {type: range, records: mObject[fld], tableTitle: fDef.label}));
         }
       } else if (range === "Boolean") {
         if (!containerEl.className) containerEl.className = "yes-no-field";
@@ -2131,35 +2241,53 @@ oBJECTvIEW.prototype.render = function (parentEl) {
       classValues:"action-group"
     });
     Object.keys( userActions).forEach( function (usrAct) {
-      containerEl.appendChild( dom.createButton({
-        name: usrAct,
-        label: userActions[usrAct].label || util.capitalizeFirstChar( usrAct),
-        handler: userActions[usrAct]
-      }));
-      parentEl.appendChild( containerEl);
+      var renderActBtn = typeof userActions[usrAct].showCondition !== "function" ||
+          userActions[usrAct].showCondition();
+      if (renderActBtn) {
+        containerEl.appendChild( dom.createButton({
+          name: usrAct,
+          label: userActions[usrAct].label || util.capitalizeFirstChar( usrAct),
+          title: userActions[usrAct].hint,
+          handler: userActions[usrAct]
+        }));
+        parentEl.appendChild( containerEl);
+      }
     });
   }
   /* ==================================================================== */
   /* MAIN CODE of render                                                  */
   /* ==================================================================== */
+  // check if objView is descendant of a "form" element
+  parentEl = objViewParentEl;
+  while (parentEl && parentEl.tagName !== "BODY") {
+    if (parentEl.tagName === "FORM") {
+      uiElemType = "div";
+      break;
+    } else {
+      parentEl = parentEl.parentElement;
+    }
+  }
   uiContainerEl = dom.createElement(
-      !parentEl ? "form":"div", {id: this.modelObject ? this.modelObject.objectName :
-            Object.keys( this.modelObjects)[0]});
+    uiElemType,
+    {id: this.modelObject ?
+         this.modelObject.objectName : Object.keys( this.modelObjects)[0],
+     classValues:"oBJECTvIEW"}
+   );
   if (this.heading) {
     uiContainerEl.appendChild( dom.createElement("h2", {content:this.heading}));
   }
   // store the object view's DOM element
   this.domElem = uiContainerEl;
-  if (!parentEl) parentEl = document.querySelector("#uiContainerEl");
-  if (!parentEl) {
-    parentEl = document.body;
+  if (!objViewParentEl) objViewParentEl = document.querySelector("#uiContainerEl");
+  if (!objViewParentEl) {
+    objViewParentEl = document.body;
     footerEl = document.querySelector("html>body>footer");
     if (footerEl) {
       document.body.insertBefore( uiContainerEl, footerEl);
     } else {
       document.body.appendChild( uiContainerEl);
     }
-  } else parentEl.appendChild( uiContainerEl);
+  } else objViewParentEl.appendChild( uiContainerEl);
   if (uiContainerEl.tagName === "FORM") {  // reset custom validity
     for (i=0; i < uiContainerEl.elements.length; i++) {
       uiContainerEl.elements[i].setCustomValidity("");
@@ -2170,89 +2298,140 @@ oBJECTvIEW.prototype.render = function (parentEl) {
   createUiElemsForVmFields();
   // create DOM elements (like buttons) for all user actions of the UI/view model
   createUiElemsForUserActions( uiContainerEl);
-  return dataBinding;  // a map of field names to corresponding DOM elements
+  return dataBinding;  // a map of field names to corresponding DOM elements 
 };
 /**
- * Set up a tabular UI for defining the objects/population of a given cLASS
+ * Set up a tabular UI for defining/editing entity records of a given
+ * entity type or data records of a given complex datatype
  * @author Gerd Wagner
  * @method
- * @return {object} classPopulationUI
+ * @param slots.type  a cLASS
+ * @param slots.records?  a collection (array list or map) of records
+ * @return {object}  the created DOM element object
  */
-oBJECTvIEW.createClassPopulationWidget = function (Class, editableProperties) {
-  var popTableEl = dom.createElement("table", {
-    id: Class.Name + "-PopTable",
-    classValues: "PopTable"
+oBJECTvIEW.createRecordTableWidget = function (slots) {
+  var tableEl = dom.createElement("table", {classValues: "RecTbl"});
+  var headerRowEl=null, cell=null, rowIdx=0, obj=null, rowEl=null, N=0,
+      rowObjects=[], colProperties=[],  colHeadings=[], colTypes=[],
+      maxNmrOfRows = slots.maxNmrOfRows || 13,  // default is 13
+      tBody = document.createElement("tBody"),
+      Class=null, propDefs=null, tableTitle = "",
+      keys=[], records=null, nmrOfRecords=0, p="";
+  if (!slots.type) {
+    throw Error("No type provided when calling 'createRecordTableWidget'!")
+  }
+  // convert cLASS name to cLASS object reference
+  if (typeof slots.type === "string" && cLASS[slots.type]) {
+    Class = cLASS[slots.type];
+  } else if (slots.type.constructor === cLASS) {
+    Class = slots.type;
+  } else {
+    throw Error("No cLASS type provided when calling 'createRecordTableWidget'!")
+  }
+  propDefs = Class.properties;
+  tableEl.appendChild( tBody);
+  tableTitle = slots.tableTitle || Class.label || Class.Name;
+  if (!Class.isComplexDatatype) {
+    if (slots.editableProperties) colProperties = slots.editableProperties;
+    records = slots.records || Class.instances;
+    keys = Object.keys( records);
+    nmrOfRecords = keys.length;
+  } else if (Array.isArray( slots.records)) {
+    records = slots.records || [];
+    nmrOfRecords = records.length;
+  } else if (typeof slots.records === "object") { // a map
+    records = slots.records || {};
+    keys = Object.keys( records);
+    nmrOfRecords = keys.length;
+  }
+  if (propDefs.id) {
+    if (propDefs.name) colHeadings[0] = "ID/Name";
+    else colHeadings[0] = "ID";
+  } else if (propDefs.name) {
+    colHeadings[0] = "Name";
+  }
+  // loop over all property definitions (including inherited ones)
+  for (p in propDefs) {
+    if (p !== "id" && p !== "name" && propDefs[p].label) {
+      colProperties.push( p);
+      colHeadings.push( propDefs[p].label);
+      colTypes.push( propDefs[p].range);
+    }
+  }
+  // store properties displayed in table  TODO: currently not used...
+  tableEl.setAttribute("data-properties", colProperties.join(" "));
+  // create table heading
+  tableEl.appendChild( document.createElement("thead"));
+  // create row for table name
+  headerRowEl = tableEl.tHead.insertRow();
+  cell = headerRowEl.insertCell();
+  cell.textContent = tableTitle;
+  cell.colSpan = colHeadings.length;
+  // create row for column names
+  headerRowEl = tableEl.tHead.insertRow();
+  // create table column headings
+  colHeadings.forEach( function (cH) {
+    var c = headerRowEl.insertCell();
+    c.textContent = cH;
   });
-  var headerRowEl=null, cell=null,
-      tBody = document.createElement("tBody");
-  var rowObjects=[], columnProperties=[];  // for mapping table cells to object slots
-  if (editableProperties) columnProperties = editableProperties;
-  else {
-    Object.keys( Class.properties).forEach( function (p) {
-      if (p !== "id" && p !== "name") columnProperties.push( p);
+  // create table rows
+  N = Math.min( nmrOfRecords, maxNmrOfRows);
+  for (rowIdx=0; rowIdx < N; rowIdx++) {
+    obj = keys.length>0 ? records[keys[rowIdx]] : records[rowIdx];
+    rowEl = tBody.insertRow();
+    // create object row
+    rowObjects[rowIdx] = obj;
+    if (obj.id) {
+      rowEl.insertCell().textContent = obj.name ? obj.id +" / "+ obj.name : obj.id;
+    } else if (obj.name) {
+      rowEl.insertCell().textContent = obj.name;
+    }
+    // create property value cells
+    colProperties.forEach( function (p) {
+      var c=null;
+      c = rowEl.insertCell();
+      //c.textContent = cLASS.convertPropValToStr( Class, p, obj[p]);
+      c.textContent = obj.getValueAsString( p);
+      // save value for being able to restore it
+      c.setAttribute("data-oldVal", c.textContent);
+      if (!propDefs || !propDefs[p].stringified) {
+        c.setAttribute("contenteditable","true");
+        c.title = "Click to edit!";
+      }
+      c.addEventListener("blur", function (e) {
+        var tdEl = e.target,
+            val = tdEl.textContent,
+            colNo = tdEl.cellIndex - 1, // skip first column (name/ID)
+            rowNo = tdEl.parentElement.rowIndex - 2,  // rowIndex includes 2 tHead rows
+            prop = colProperties[colNo],
+            constrVio = cLASS.check( prop, propDefs[prop], val);
+        if (constrVio.message) {
+          alert( constrVio.message);
+          tdEl.textContent = tdEl.getAttribute("data-oldVal");
+        } else {
+          val = constrVio.checkedValue;
+          // update corresponding object slot
+          rowObjects[rowNo][prop] = val;
+          tdEl.setAttribute("data-oldVal", tdEl.textContent);
+        }
+      });
     });
   }
-  popTableEl.appendChild( tBody);
-  // store properties displayed in table  TODO: currently not used...
-  popTableEl.setAttribute("data-properties", columnProperties.join(" "));
-  // create table heading
-  popTableEl.appendChild( document.createElement("thead"));
-  headerRowEl = popTableEl.tHead.insertRow();
-  cell = headerRowEl.insertCell();
-  cell.textContent = Class.Name;
-  cell.colSpan = Object.keys( Class.properties).length + 1;
-  // create fixed "ID/Name" column heading
-  headerRowEl = popTableEl.tHead.insertRow();
-  headerRowEl.insertCell().textContent = "ID/Name";
-  // create column headings for other columns
-  Object.keys( Class.properties).forEach( function (p) {
-    var c=null;
-    if (columnProperties.includes( p)) {
-      c = headerRowEl.insertCell();
-      c.textContent = Class.properties[p].label || p;
-    };
-  });
-  // create rows for all objects
-  Object.keys( Class.instances).forEach( function (objIdStr,i) {
-    var obj = Class.instances[objIdStr],
-        rowEl = tBody.insertRow();
-    // create object row
-    rowObjects[i] = obj;
-    // create property value cells for own properties TODO: support inherited properties
-    rowEl.insertCell().textContent = obj.name ? obj.id +" / "+ obj.name : obj.id;
-    Object.keys( Class.properties).forEach( function (p) {
+  // create an overflow indication row
+  if (nmrOfRecords > maxNmrOfRows) {
+    rowEl = tBody.insertRow();
+    if (obj.id) rowEl.insertCell().textContent = "...";
+    Object.keys( propDefs).forEach( function (p) {
       var c=null;
-      if (columnProperties.includes( p)) {
+      if (colProperties.includes( p)) {
         c = rowEl.insertCell();
-        //c.textContent = cLASS.convertPropValToStr( Class, p, obj[p]);
-        c.textContent = obj.getValueAsString( p);
-        // save value for being able to restore it
-        c.setAttribute("data-oldVal", c.textContent);
-        c.setAttribute("contenteditable","true");
-        c.title = "Click to change!";
-        c.addEventListener("blur", function (e) {
-          var tdEl = e.target,
-              val = tdEl.textContent,
-              colNo = tdEl.cellIndex - 1, // skip first column (name/ID)
-              rowNo = tdEl.parentElement.rowIndex - 2,  // rowIndex includes 2 tHead rows
-              prop = columnProperties[colNo],
-              constrVio = cLASS.check( prop, Class.properties[prop], val);
-          if (constrVio.message) {
-            alert( constrVio.message);
-            tdEl.textContent = tdEl.getAttribute("data-oldVal");
-          } else {
-            val = constrVio.checkedValue;
-            // update corresponding object slot
-            rowObjects[rowNo][prop] = val;
-            tdEl.setAttribute("data-oldVal", tdEl.textContent);
-          }
-        });
-      };
+        c.textContent = "...";
+      }
     });
-  });
+  }
   // create an AddRow button
   //oBJECTvIEW.createUiElemsForUserActions( popTableEl, this.userActions);
-  return popTableEl;
+  return tableEl;
 };
 /**
  * Create UI elements (like buttons) for all user actions of the view
@@ -2574,115 +2753,318 @@ oBJECTvIEW.createUiFromViewModel = function (viewModel) {
 };
 
 
- /**
- * @fileOverview  A library of XHR-based HTTP messaging methods.
- *                It uses JS Promises in the underlayer.
- * @author Gerd Wagner
- * @copyright Copyright 2015 Gerd Wagner, Chair of Internet Technology,
- *   Brandenburg University of Technology, Germany.
- * @license The MIT License (MIT)
- */
-var xhr = {
-  URL_PATTERN: /\b(https?):\/\/[\-A-Za-z0-9+&@#\/%?=~_|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_|??]/,
-  /**
-   * Default response handler, used if
-   * a custom one is not provided by the caller
-   * of GET, PUT, POST, DELETE or OPTIONS.
-   */
-  defaultResponseHandler: function(rsp) {
-    if (rsp.status === 200 || rsp.status === 201 || rsp.status === 304)
-      console.log("Response: " + rsp.responseText);
-     else console.log("Error " + rsp.status +": "+ rsp.statusText);
-   },
-  /**
-   * Utility method encapsulating common code
-   * required to initiate the specific XHR request.
-   */
-  initiateRequest: function (params, type) {
-    params.method = type;
-    if (typeof params.handleResponse !== "function")
-      params.handleResponse = xhr.defaultResponseHandler;
-    xhr.makeRequest( params)
-    .then(function (p) {params.handleResponse(p)})
-    .catch(function (e) {console.log(e)});
-  },
-  /**
-   * Make an XHR GET request
-   * @param params  Contains parameter slots
-   */
-  OPTIONS: function (params) {
-    xhr.initiateRequest(params, "OPTIONS");
-  },
-  /**
-   * Make an XHR GET request
-   * @param params  Contains parameter slots
-   */
-  GET: function (params) {
-    xhr.initiateRequest(params, "GET");
-  },
-  /**
-   * Make an XHR POST request
-   * @param params  Contains parameter slots
-   */
-  POST: function (params) {
-    xhr.initiateRequest(params, "POST");
-  },
-  /**
-   * Make an XHR PUT request
-   * @param params  Contains parameter slots
-   */
-  PUT: function (params) {
-    xhr.initiateRequest(params, "PUT");
-  },
-  /**
-   * Make an XHR DELETE request
-   * @param params  Contains parameter slots
-   */
-  DELETE: function (params) {
-    xhr.initiateRequest(params, "DELETE");
-  },
-  /**
-   * Make an XHR request
-   * @param {{method: string?, url: string,
-   *          reqFormat: string?, respFormat: string?,
-   *          handleResponse: function?,
-   *          requestHeaders: Map?}
-   *        } params  The parameter slots.
-   */
-  makeRequest: function (params) {
+'use strict';
+
+(function() {
+  function toArray(arr) {
+    return Array.prototype.slice.call(arr);
+  }
+
+  function promisifyRequest(request) {
     return new Promise(function(resolve, reject) {
-      var req=null, url="", method="",
-          reqFormat="", respFormat="";
-      if (!params.url) {
-        reject(new Error("Missing value for url parameter in XHR GET request!"));
-      } else if (!xhr.URL_PATTERN.test( params.url)) {
-        reject(new Error("Invalid URL in XHR GET request!"));
-      } else {
-        url = params.url;
-        req = new XMLHttpRequest();
-        method = (params.method) ? params.method : "GET";  // default
-        reqFormat = (params.reqFormat) ? params.reqFormat :
-            "application/x-www-form-urlencoded";  // default
-        respFormat = (params.respFormat) ? params.respFormat : "application/json";  // default
-      }
-      req.open( method, url, true);
-      req.onload = function (e) {resolve(e.target);};
-      req.onerror = reject;
-      if (params.requestHeaders) {
-        Object.keys( params.requestHeaders).forEach( function (rH) {
-          req.setRequestHeader( rH, params.requestHeaders[rH]);
-        });
-      }
-      req.setRequestHeader("Accept", respFormat);
-      if (method === "GET" || method === "DELETE") {
-        req.send("");
-      } else {  // POST and PUT
-        req.setRequestHeader("Content-Type", reqFormat);
-        req.send( params.msgBody);
-      }
+      request.onsuccess = function() {
+        resolve(request.result);
+      };
+
+      request.onerror = function() {
+        reject(request.error);
+      };
     });
   }
-};
+
+  function promisifyRequestCall(obj, method, args) {
+    var request;
+    var p = new Promise(function(resolve, reject) {
+      request = obj[method].apply(obj, args);
+      promisifyRequest(request).then(resolve, reject);
+    });
+
+    p.request = request;
+    return p;
+  }
+
+  function promisifyCursorRequestCall(obj, method, args) {
+    var p = promisifyRequestCall(obj, method, args);
+    return p.then(function(value) {
+      if (!value) return;
+      return new Cursor(value, p.request);
+    });
+  }
+
+  function proxyProperties(ProxyClass, targetProp, properties) {
+    properties.forEach(function(prop) {
+      Object.defineProperty(ProxyClass.prototype, prop, {
+        get: function() {
+          return this[targetProp][prop];
+        },
+        set: function(val) {
+          this[targetProp][prop] = val;
+        }
+      });
+    });
+  }
+
+  function proxyRequestMethods(ProxyClass, targetProp, Constructor, properties) {
+    properties.forEach(function(prop) {
+      if (!(prop in Constructor.prototype)) return;
+      ProxyClass.prototype[prop] = function() {
+        return promisifyRequestCall(this[targetProp], prop, arguments);
+      };
+    });
+  }
+
+  function proxyMethods(ProxyClass, targetProp, Constructor, properties) {
+    properties.forEach(function(prop) {
+      if (!(prop in Constructor.prototype)) return;
+      ProxyClass.prototype[prop] = function() {
+        return this[targetProp][prop].apply(this[targetProp], arguments);
+      };
+    });
+  }
+
+  function proxyCursorRequestMethods(ProxyClass, targetProp, Constructor, properties) {
+    properties.forEach(function(prop) {
+      if (!(prop in Constructor.prototype)) return;
+      ProxyClass.prototype[prop] = function() {
+        return promisifyCursorRequestCall(this[targetProp], prop, arguments);
+      };
+    });
+  }
+
+  function Index(index) {
+    this._index = index;
+  }
+
+  proxyProperties(Index, '_index', [
+    'name',
+    'keyPath',
+    'multiEntry',
+    'unique'
+  ]);
+
+  proxyRequestMethods(Index, '_index', IDBIndex, [
+    'get',
+    'getKey',
+    'getAll',
+    'getAllKeys',
+    'count'
+  ]);
+
+  proxyCursorRequestMethods(Index, '_index', IDBIndex, [
+    'openCursor',
+    'openKeyCursor'
+  ]);
+
+  function Cursor(cursor, request) {
+    this._cursor = cursor;
+    this._request = request;
+  }
+
+  proxyProperties(Cursor, '_cursor', [
+    'direction',
+    'key',
+    'primaryKey',
+    'value'
+  ]);
+
+  proxyRequestMethods(Cursor, '_cursor', IDBCursor, [
+    'update',
+    'delete'
+  ]);
+
+  // proxy 'next' methods
+  ['advance', 'continue', 'continuePrimaryKey'].forEach(function(methodName) {
+    if (!(methodName in IDBCursor.prototype)) return;
+    Cursor.prototype[methodName] = function() {
+      var cursor = this;
+      var args = arguments;
+      return Promise.resolve().then(function() {
+        cursor._cursor[methodName].apply(cursor._cursor, args);
+        return promisifyRequest(cursor._request).then(function(value) {
+          if (!value) return;
+          return new Cursor(value, cursor._request);
+        });
+      });
+    };
+  });
+
+  function ObjectStore(store) {
+    this._store = store;
+  }
+
+  ObjectStore.prototype.createIndex = function() {
+    return new Index(this._store.createIndex.apply(this._store, arguments));
+  };
+
+  ObjectStore.prototype.index = function() {
+    return new Index(this._store.index.apply(this._store, arguments));
+  };
+
+  proxyProperties(ObjectStore, '_store', [
+    'name',
+    'keyPath',
+    'indexNames',
+    'autoIncrement'
+  ]);
+
+  proxyRequestMethods(ObjectStore, '_store', IDBObjectStore, [
+    'put',
+    'add',
+    'delete',
+    'clear',
+    'get',
+    'getAll',
+    'getKey',
+    'getAllKeys',
+    'count'
+  ]);
+
+  proxyCursorRequestMethods(ObjectStore, '_store', IDBObjectStore, [
+    'openCursor',
+    'openKeyCursor'
+  ]);
+
+  proxyMethods(ObjectStore, '_store', IDBObjectStore, [
+    'deleteIndex'
+  ]);
+
+  function Transaction(idbTransaction) {
+    this._tx = idbTransaction;
+    this.complete = new Promise(function(resolve, reject) {
+      idbTransaction.oncomplete = function() {
+        resolve();
+      };
+      idbTransaction.onerror = function() {
+        reject(idbTransaction.error);
+      };
+      idbTransaction.onabort = function() {
+        reject(idbTransaction.error);
+      };
+    });
+  }
+
+  Transaction.prototype.objectStore = function() {
+    return new ObjectStore(this._tx.objectStore.apply(this._tx, arguments));
+  };
+
+  proxyProperties(Transaction, '_tx', [
+    'objectStoreNames',
+    'mode'
+  ]);
+
+  proxyMethods(Transaction, '_tx', IDBTransaction, [
+    'abort'
+  ]);
+
+  function UpgradeDB(db, oldVersion, transaction) {
+    this._db = db;
+    this.oldVersion = oldVersion;
+    this.transaction = new Transaction(transaction);
+  }
+
+  UpgradeDB.prototype.createObjectStore = function() {
+    return new ObjectStore(this._db.createObjectStore.apply(this._db, arguments));
+  };
+
+  proxyProperties(UpgradeDB, '_db', [
+    'name',
+    'version',
+    'objectStoreNames'
+  ]);
+
+  proxyMethods(UpgradeDB, '_db', IDBDatabase, [
+    'deleteObjectStore',
+    'close'
+  ]);
+
+  function DB(db) {
+    this._db = db;
+  }
+
+  DB.prototype.transaction = function() {
+    return new Transaction(this._db.transaction.apply(this._db, arguments));
+  };
+
+  proxyProperties(DB, '_db', [
+    'name',
+    'version',
+    'objectStoreNames'
+  ]);
+
+  proxyMethods(DB, '_db', IDBDatabase, [
+    'close'
+  ]);
+
+  // Add cursor iterators
+  // TODO: remove this once browsers do the right thing with promises
+  ['openCursor', 'openKeyCursor'].forEach(function(funcName) {
+    [ObjectStore, Index].forEach(function(Constructor) {
+      Constructor.prototype[funcName.replace('open', 'iterate')] = function() {
+        var args = toArray(arguments);
+        var callback = args[args.length - 1];
+        var nativeObject = this._store || this._index;
+        var request = nativeObject[funcName].apply(nativeObject, args.slice(0, -1));
+        request.onsuccess = function() {
+          callback(request.result);
+        };
+      };
+    });
+  });
+
+  // polyfill getAll
+  [Index, ObjectStore].forEach(function(Constructor) {
+    if (Constructor.prototype.getAll) return;
+    Constructor.prototype.getAll = function(query, count) {
+      var instance = this;
+      var items = [];
+
+      return new Promise(function(resolve) {
+        instance.iterateCursor(query, function(cursor) {
+          if (!cursor) {
+            resolve(items);
+            return;
+          }
+          items.push(cursor.value);
+
+          if (count !== undefined && items.length == count) {
+            resolve(items);
+            return;
+          }
+          cursor.continue();
+        });
+      });
+    };
+  });
+
+  var exp = {
+    open: function(name, version, upgradeCallback) {
+      var p = promisifyRequestCall(indexedDB, 'open', [name, version]);
+      var request = p.request;
+
+      request.onupgradeneeded = function(event) {
+        if (upgradeCallback) {
+          upgradeCallback(new UpgradeDB(request.result, event.oldVersion, request.transaction));
+        }
+      };
+
+      return p.then(function(db) {
+        return new DB(db);
+      });
+    },
+    delete: function(name) {
+      return promisifyRequestCall(indexedDB, 'deleteDatabase', [name]);
+    }
+  };
+
+  if (typeof module !== 'undefined') {
+    module.exports = exp;
+    module.exports.default = module.exports;
+  }
+  else {
+    self.idb = exp;
+  }
+}());
+
 /**
  * @fileOverview  This file contains the definition of the library class
  * sTORAGEmANAGER.
@@ -2705,7 +3087,7 @@ function sTORAGEmANAGER( storageAdapter) {
       !(["LocalStorage","IndexedDB","MariaDB"].includes( storageAdapter.name))) {
     throw new ConstraintViolation("Invalid storage adapter name!");
   } else if (!storageAdapter.dbName) {
-    throw new ConstraintViolation("Storage adapter:missing DB name!");
+    throw new ConstraintViolation("Storage adapter: missing DB name!");
   } else {
     this.adapter = storageAdapter;
     // if "LocalStorage", create a main memory DB
@@ -2725,15 +3107,24 @@ function sTORAGEmANAGER( storageAdapter) {
  * Generic method for creating an empty DB
  * @method
  */
-sTORAGEmANAGER.prototype.createEmptyDb = function () {
+sTORAGEmANAGER.prototype.createEmptyDb = function (classes) {
   var adapterName = this.adapter.name,
       dbName = this.adapter.dbName;
   return new Promise( function (resolve) {
     var modelClasses=[];
-    Object.keys( cLASS).forEach( function (key) {
-      // collect all non-abstract cLASSes
-      if (cLASS[key].instances) modelClasses.push( cLASS[key]);
-    });
+    if (Array.isArray( classes) && classes.length > 0) {
+      modelClasses = classes;
+    } else {
+      Object.keys( cLASS).forEach( function (key) {
+        // test if cLASS[key] represents a cLASS
+        if (typeof cLASS[key] === "function" && cLASS[key].properties) {
+          // collect all non-abstract cLASSes that are not datatype classes
+          if (!cLASS[key].isAbstract && !cLASS[key].isComplexDatatype) {
+            modelClasses.push( cLASS[key]);
+          }
+        }
+      });
+    }
     sTORAGEmANAGER.adapters[adapterName].createEmptyDb( dbName, modelClasses)
     .then( resolve);
   });
@@ -2742,37 +3133,54 @@ sTORAGEmANAGER.prototype.createEmptyDb = function () {
  * Generic method for creating and "persisting" new model objects
  * @method
  * @param {object} mClass  The model cLASS concerned
- * @param {object} records  The object creation slots
+ * @param {object} rec  A record or record list
  */
-sTORAGEmANAGER.prototype.add = function (mClass, records) {
+sTORAGEmANAGER.prototype.add = function (mClass, rec) {
   var adapterName = this.adapter.name,
-      dbName = this.adapter.dbName;
-  return new Promise( function (resolve) {
-    var newObj=null, objID="";
-    if (Array.isArray( records)) {  // bulk insertion
-      sTORAGEmANAGER.adapters[adapterName].add( dbName, mClass, records)
-      .then( function () {
-        console.log( records.length +" "+ mClass.Name +"s added.");
-        if (typeof resolve === "function") resolve();
-
-      });
-    } else {  // single record insertion
-      try {
-        newObj = new mClass( records);  // check constraints
-        objID = newObj.id;  // save object ID
-        if (newObj) {
-          sTORAGEmANAGER.adapters[adapterName].add( dbName, mClass, newObj)
-          .then( function () {
-            console.log( mClass.Name +" "+ objID +" added.");
-            if (typeof resolve === "function") resolve();
-          });
-        }
-      } catch (e) {
-        if (e instanceof ConstraintViolation) {
-          console.log( e.constructor.name +": "+ e.message);
-        } else console.log( e);
+      dbName = this.adapter.dbName,
+      createLog = this.createLog,
+      checkConstraints = this.validateBeforeSave,
+      records=[], validRecords=[];
+  if (typeof rec === "object" && !Array.isArray(rec)) {
+    records = [rec];
+  } else if (Array.isArray(rec) && rec.every( function (r) {
+             return typeof r === "object" && !Array.isArray(r)})) {
+    records = rec;
+  } else throw Error("2nd argument of 'add' must be a record or record list!");
+  // create auto-IDs if required
+  if (mClass.properties.id && mClass.properties.id.range === "AutoNumber") {
+    records.forEach( function (r) {
+      if (!r.id) {  // do not overwrite assigned ID values
+        if (typeof mClass.getAutoId === "function") r.id = mClass.getAutoId();
+        else if (mClass.idCounter !== undefined) r.id = ++mClass.idCounter;
       }
-    }
+    })
+  }
+  // check constraints before save if required
+  if (checkConstraints) {
+    records.forEach( function (r) {
+      var newObj=null;
+      if (r instanceof mClass) {
+        validRecords.push( r);
+      } else {
+        try {newObj = new mClass( r);}  // check constraints
+        catch (e) {
+          if (e instanceof ConstraintViolation) {
+            console.log( e.constructor.name +": "+ e.message);
+          } else console.log( e);
+        }
+        if (newObj) validRecords.push( newObj);
+      }
+    });
+    records = validRecords;
+  }
+  return new Promise( function (resolve) {
+    sTORAGEmANAGER.adapters[adapterName].add( dbName, mClass, records).then( function () {
+      if (createLog) console.log( records.length +" "+ mClass.Name +"(s) added.");
+      if (typeof resolve === "function") resolve();
+    }).catch( function (error) {
+      console.log( error.name +": "+ error.message);
+    });
   });
 };
 /**
@@ -2807,7 +3215,23 @@ sTORAGEmANAGER.prototype.retrieveAll = function (mc) {
       dbName = this.adapter.dbName;
   return new Promise( function (resolve) {
     sTORAGEmANAGER.adapters[adapterName].retrieveAll( dbName, mc)
-    .then( resolve);
+    .then( function (records) {
+      var i=0, newObj=null;
+      if (this.createLog) {
+        console.log( records.length +" "+ mcName +" records retrieved.")
+      }
+      if (this.validateAfterRetrieve) {
+        for (i=0; i < records.length; i++) {
+          try {
+            newObj = new mc( records[i]);
+          } catch (e) {
+            if (e instanceof ConstraintViolation) {
+              console.log( e.constructor.name +": "+ e.message);
+            } else console.log( e.name +": "+ e.message);
+          }
+        }
+      }
+    }).then( resolve);
   });
 };
 /**
@@ -2819,7 +3243,7 @@ sTORAGEmANAGER.prototype.retrieveAll = function (mc) {
  */
 sTORAGEmANAGER.prototype.update = function (mc, id, slots) {
   var adapterName = this.adapter.name,
-      dbName = this.adapter.dbName,
+      dbName = this.adapter.dbName, 
       currentSM = this;
   return new Promise( function (resolve) {
     var objectBeforeUpdate = null, properties = mc.properties,
@@ -3066,7 +3490,7 @@ sTORAGEmANAGER.adapters["LocalStorage"] = {
   clearTable: function (dbName, mc) {
   //------------------------------------------------
     return new Promise( function (resolve) {
-      var tableName = util.class2TableName( mc.Name);
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
       mc.instances = {};
       try {
         localStorage[tableName] = JSON.stringify({});
@@ -3083,9 +3507,9 @@ sTORAGEmANAGER.adapters["LocalStorage"] = {
     return new Promise( function (resolve) {
       Object.keys( cLASS).forEach( function (key) {
         var tableName="";
-        if (cLASS[key].instances) {
+        if (!cLASS[key].isComplexDatatype && Object.keys( cLASS[key].instances).length > 0) {
           cLASS[key].instances = {};
-          tableName = util.class2TableName( cLASS[key].Name);
+          tableName = mc.tableName || util.class2TableName( cLASS[key].Name);
           try {
             localStorage[tableName] = JSON.stringify({});
           } catch (e) {
@@ -3121,10 +3545,140 @@ sTORAGEmANAGER.adapters["LocalStorage"] = {
     });
   }
 };
+/**
+ * @fileOverview  Storage management methods for the "IndexedDB" adapter
+ * @author Gerd Wagner
+ * @copyright Copyright 2017 Gerd Wagner, Chair of Internet Technology,
+ *   Brandenburg University of Technology, Germany.
+ * @license The MIT License (MIT)
+ */
+sTORAGEmANAGER.adapters["IndexedDB"] = {
+  //------------------------------------------------
+  createEmptyDb: function (dbName, modelClasses) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      idb.open( dbName, 1, function (upgradeDb) {
+        modelClasses.forEach( function (mc) {
+          var tableName = mc.tableName || util.class2TableName( mc.Name),
+              keyPath = mc.primaryKey || "id";
+          if (!upgradeDb.objectStoreNames.contains( tableName)) {
+            upgradeDb.createObjectStore( tableName, {keyPath: keyPath});
+          }
+        })
+      }).then( resolve);
+    });
+  },
+  //------------------------------------------------
+  add: function (dbName, mc, records) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( tableName, "readwrite");
+        var os = tx.objectStore( tableName);
+        // Promise.all takes a list of promises and resolves if all of them do
+        return Promise.all( records.map( function (rec) {return os.add( rec);}))
+            .then( function () {return tx.complete;});
+      }).then( resolve)
+      .catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  retrieve: function (dbName, mc, id) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( tableName, "readonly");
+        var os = tx.objectStore( tableName);
+        return os.get( id);
+      }).then( function( result) {
+        if (result === undefined) result = null;
+        resolve( result);
+      }).catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  retrieveAll: function (dbName, mc) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( tableName, "readonly");
+        var os = tx.objectStore( tableName);
+        return os.getAll();
+      }).then( function (results) {
+        if (results === undefined) results = [];
+        resolve( results);
+      }).catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  update: function (dbName, mc, id, slots) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( tableName, "readwrite");
+        var os = tx.objectStore( tableName);
+        slots["id"] = id;
+        os.put( slots);
+        return tx.complete;
+      }).then( resolve)
+      .catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  destroy: function (dbName, mc, id) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( tableName, "readwrite");
+        var os = tx.objectStore( tableName);
+        os.delete( id);
+        return tx.complete;
+      }).then( resolve)
+      .catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  clearTable: function (dbName, mc) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      var tableName = mc.tableName || util.class2TableName( mc.Name);
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( tableName, "readwrite");
+        var os = tx.objectStore( tableName);
+        os.clear();
+        return tx.complete;
+      }).then( resolve)
+      .catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  clearDB: function (dbName) {
+  //------------------------------------------------
+    return new Promise( function (resolve) {
+      idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
+        var tx = idbCx.transaction( idbCx.objectStoreNames, "readwrite");
+        // Promise.all takes a list of promises and resolves if all of them do
+        return Promise.all( Array.from( idbCx.objectStoreNames,
+            function (osName) {return tx.objectStore( osName).clear();}))
+            .then( function () {return tx.complete;});
+      }).then( resolve)
+      .catch( function (err) {console.log( err.name +": "+ err.message);});
+    });
+  },
+  //------------------------------------------------
+  saveOnUnload: function (dbName) {  // not yet implemented
+  //------------------------------------------------
+  }
+};
  /**
- * @fileOverview  A library of DOM element creation methods and
+ * @fileOverview  A library of DOM element creation methods and 
  * other DOM manipulation methods.
- *
+ * 
  * @author Gerd Wagner
  */
  /**
@@ -3152,24 +3706,26 @@ sTORAGEmANAGER.adapters["LocalStorage"] = {
   * @return {object} uiPanelEl  element object
   */
  dom.createExpandablePanel = function (slots) {
-   var uiPanelEl = dom.createElement("div", slots);
-   var mainContentEl = dom.createElement("div", {classValues:"mainContent"});
-   var expandButtonEl = dom.createElement("button", {content:"+"});
+   var uiPanelEl = dom.createElement("div", slots),
+       mainContentEl = dom.createElement("div", {classValues:"mainContent"}),
+       expandButtonEl = dom.createElement("button", {content:"►"});
    uiPanelEl.classList.add("expandablePanel");
    uiPanelEl.appendChild( dom.createElement("h2", {
-     content:"<span>"+ slots.heading +"</span>"
+     content:"<span>"+ slots.heading +"</span>",
+     title: slots.hint
    }));
    uiPanelEl.appendChild( mainContentEl);
-   uiPanelEl.firstChild.insertBefore( expandButtonEl, uiPanelEl.firstChild.firstChild);
+   uiPanelEl.firstElementChild.insertBefore(
+       expandButtonEl, uiPanelEl.firstElementChild.firstElementChild);
    expandButtonEl.addEventListener("click", function (e) {
      // toggle display of main content
      if (mainContentEl.style.display !== "none") {
        mainContentEl.style.display = "none";
-       e.target.textContent = "+";
+       e.target.textContent = "►";
      }
      else {
        mainContentEl.style.display = "block";
-       e.target.textContent = "−";
+       e.target.textContent = "▼";
      }
      e.preventDefault();
    });
@@ -3185,18 +3741,20 @@ sTORAGEmANAGER.adapters["LocalStorage"] = {
   */
  dom.createModal = function (slots) {
    var modalEl = dom.createElement("div", {classValues:"modal"}),
-       overlayEl = dom.createElement("div", {id:"overlay"}),
-       el=null, h1El=null;
+       el = document.getElementById("overlay"),
+       overlayEl = el ? el : dom.createElement("div", {id:"overlay"}),
+       h1El=null;
    if (slots.id) modalEl.id = slots.id;
-   modalEl.classList.add("modal");
    if (slots.classValues) modalEl.className += " "+ slots.classValues;
+   if (slots.width) modalEl.style.width = slots.width;
    if (!slots.title) slots.title = "No Title?";
    h1El = dom.createElement("h1", {content: "<span class='title'>"+ slots.title +"</span>"});
      //  "</span><span class='closeButton'>&times;</span>"});
-   if (!slots.classValues.includes("action-required")) {
+   if (!slots.classValues || !slots.classValues.includes("action-required")) {
      el = dom.createElement("span", {classValues:"closeButton", content:"&times;"});
      el.addEventListener("click", function () {
        overlayEl.style.display = "none";
+       modalEl.style.display = "none";
      });
      h1El.appendChild( el);
    }
@@ -3211,7 +3769,7 @@ sTORAGEmANAGER.adapters["LocalStorage"] = {
    }
    overlayEl.appendChild( modalEl);
    document.body.appendChild( overlayEl);
-   return overlayEl;
+   return modalEl;
  };
  /**
   * Create a Draggable Modal Window/Panel
@@ -3220,15 +3778,15 @@ sTORAGEmANAGER.adapters["LocalStorage"] = {
   * @return {object} uiPanelEl  element object
   */
  dom.createDraggableModal = function (slots) {
-   var overlayEl = dom.createModal( slots),
-       modalEl = overlayEl.querySelector(".modal");
+   var modalEl = dom.createModal( slots),
+       overlayEl = document.getElementById("overlay");
    // make the element draggable
    modalEl.draggable = true;
    if (!modalEl.id) modalEl.id = "dragMod";
    modalEl.addEventListener("dragstart", dom.handleDragStart);
    overlayEl.addEventListener("dragover", dom.handleDragOver);
    overlayEl.addEventListener("drop", dom.handleDrop);
-   return overlayEl;
+   return modalEl;
  };
  dom.handleDragStart = function (evt) {
    evt.dataTransfer.dropEffect = 'move';
@@ -3257,7 +3815,7 @@ var svg = {
   XLINK_NS: "http://www.w3.org/1999/xlink",
   /**
   * Create an SVG element
-  *
+  * 
   * @param {object} params  a lsit of optional parameters
   * @return {node} svgElement
   */
@@ -3284,12 +3842,12 @@ var svg = {
   },
   /**
   * Create a rect element
-  *
-  * @param {number} x
-  * @param {number} y
-  * @param {number} width
-  * @param {number} height
-  * @param {object} optParams
+  * 
+  * @param {number} x 
+  * @param {number} y 
+  * @param {number} width 
+  * @param {number} height 
+  * @param {object} optParams 
   *
   * @return (object)
   */
@@ -3304,12 +3862,12 @@ var svg = {
   },
   /**
   * Create a circle element
-  *
-  * @param {number} x
-  * @param {number} y
-  * @param {number} width
-  * @param {number} height
-  * @param {string} color
+  * 
+  * @param {number} x 
+  * @param {number} y 
+  * @param {number} width 
+  * @param {number} height 
+  * @param {string} color 
   *
   * @return (object)
   */
@@ -3322,14 +3880,14 @@ var svg = {
     return el;
   },
   /**
-   * Create a line element
-   *
-   * @param {number} x1
-   * @param {number} y1
-   * @param {number} x2
-   * @param {number} y2
+   * Create a line element 
+   * 
+   * @param {number} x1 
+   * @param {number} y1 
+   * @param {number} x2 
+   * @param {number} y2 
    * @param {string} color  the stroke color
-   * @param {number} width
+   * @param {number} width 
    * @return {object}
    */
   createLine: function (x1, y1, x2, y2, optParams) {
@@ -3343,7 +3901,7 @@ var svg = {
   },
   /**
    * Create a path element
-   *
+   * 
    * @param {number} d  the path description
    * @param {string} color  the stroke color
    * @param {number} width  the stroke width
@@ -3357,7 +3915,7 @@ var svg = {
   },
   /**
   * Create a group element
-  *
+  * 
   * @return gNode
   */
   createGroup: function (optParams) {
@@ -3372,7 +3930,7 @@ var svg = {
   * @param {string} name the content of the node
   * @param {number} fontSize of the content
   * @param {string} color of the content
-  *
+  * 
   * @return text object
   */
   createText: function ( x, y, txt, style) {
@@ -3798,7 +4356,7 @@ Random.prototype.shuffleArray = function (a) {
 /*******************************************************************************
  * Binary Heap function based on the Appendix 2 Binary Heaps Haverbeke, M.
  * Eloquent JavaScript 3rd Edition
- *
+ * 
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany.
  * @license The MIT License (MIT)
  * @author Luis Gustavo Nardin
@@ -3814,7 +4372,7 @@ BinaryHeap.prototype.push = function ( element ) {
 BinaryHeap.prototype.pop = function () {
   var result = this.content[0];
   var end = this.content.pop();
-
+  
   if ( this.content.length > 0 ) {
     this.content[0] = end;
     this.sinkDown( 0 );
@@ -3822,18 +4380,18 @@ BinaryHeap.prototype.pop = function () {
   return result;
 };
 BinaryHeap.prototype.remove = function ( element ) {
-  var length = this.content.length;
+  var len = this.content.length;
   var end;
-  for ( var i = 0; i < length; i += 1 ) {
+  for ( var i = 0; i < len; i += 1 ) {
     if ( this.content[i] !== element ) {
       continue;
     }
-
+    
     end = this.content.pop();
-    if ( i === length - 1 ) {
+    if ( i === len - 1 ) {
       break;
     }
-
+    
     this.content[i] = end;
     this.bubbleUp( i );
     this.sinkDown( i );
@@ -3859,16 +4417,17 @@ BinaryHeap.prototype.size = function () {
   return this.content.length;
 };
 BinaryHeap.prototype.bubbleUp = function ( n ) {
-  var element = this.content[n], score = this.scoreFunction( element );
+  var element = this.content[n];
+  var score = this.scoreFunction( element );
   var parentN, parent;
-
+  
   while ( n > 0 ) {
     parentN = Math.floor( (n + 1) / 2 ) - 1;
     parent = this.content[parentN];
     if ( score >= this.scoreFunction( parent ) ) {
       break;
     }
-
+    
     this.content[parentN] = element;
     this.content[n] = parent;
     n = parentN;
@@ -3877,9 +4436,10 @@ BinaryHeap.prototype.bubbleUp = function ( n ) {
 BinaryHeap.prototype.sinkDown =
     function ( n ) {
       var length = this.content.length;
-      var element = this.content[n], elemScore = this.scoreFunction( element );
+      var element = this.content[n];
+      var elemScore = this.scoreFunction( element );
       var swap, child1, child2, child1N, child2N, child1Score, child2Score;
-
+      
       while ( true ) {
         child2N = (n + 1) * 2;
         child1N = child2N - 1;
@@ -3922,7 +4482,8 @@ var sim = sim || {};
 
 oes.defaults = {
   license: "CC BY-SA",
-  imgFolder: "img/"
+  imgFolder: "img/",
+  validateOnInput: false,
 };
 oes.predfinedProperties = ["shortLabel", "history"];
 
@@ -4354,29 +4915,76 @@ oes.Departure = new cLASS({
     "workObject": {range: "wORKoBJECT"}
   }
 });
+
+/**
+ * A complex datatype for experiment parameter definitions
+ *
+ * @author Gerd Wagner
+ */
+oes.ExperimentParamDef = new cLASS({
+  Name: "eXPERIMENTpARAMdEF",
+  isComplexDatatype: true,  // do not collect instances
+  properties: {
+    "name": {range: "Identifier", label:"Name"},
+    "values": {
+      range: cLASS.ArrayList("Number"),
+      label:"Values",
+      val2str: function (v) {
+        return v.toString();  // JSON.stringify( v);
+      },
+      str2val: function (str) {
+        return JSON.parse( str);
+      },
+    }
+  }
+});
 //=================================================
 /**
  * Classes for storing experiment data
+ *
+ * An experiment is defined for a scenario, which is defined for a model.
  */
-oes.Experiment = new cLASS({
-  Name: "eXPERIMENT",
+oes.ExperimentDef = new cLASS({
+  Name: "eXPERIMENTdEF",
   properties: {
-    "id": {range: "NonEmptyString"},  // possibly the simulation ID
+    "id": {range: "AutoNumber"},
+    "model": {range: "NonEmptyString", label:"Model name"},
+    "scenarioNo": {range: "PositiveInteger", label:"Scenario number"},
+    "experimentNo": {range: "PositiveInteger", label:"Experiment number"},
+    "experimentTitle": {range: "NonEmptyString", optional:true, label:"Experiment title"},
     "replications": {range:"PositiveInteger", label:"Number of replications"},
-    "parameterNames": {range: Array, label: "Experiment parameter names"},
-    "parameterValueSetDefs": {range: Array, label: "Parameter value set definitions"},
+    "parameterDefs": {range: "eXPERIMENTpARAMdEF", minCard: 0, maxCard: Infinity,
+        ordered:true, label:"Parameter definitions"},
     "seeds": {range: Array, optional:true}  // seeds.length = #replications
   }
 });
+oes.ExperimentDef.idCounter = 0;  // retrieve actual value from IDB
+
+oes.ExperimentRun = new cLASS({
+  Name: "eXPERIMENTrUN",
+  properties: {
+    "id": {range: "AutoNumber"},  // possibly a timestamp
+    "experimentDef": {range: "eXPERIMENTdEF"},
+    "dateTime": {range: "DateTime"}
+  }
+});
+oes.ExperimentRun.getAutoId = function () {
+  return (new Date()).getTime();
+};
+
 oes.ExperimentScenarioRun = new cLASS({
   Name: "eXPERIMENTsCENARIOrUN",
   properties: {
-    "experimentRunId": {range: "NonEmptyString"},  // possibly a timestamp
+    "id": {range: "AutoNumber"},  // possibly a timestamp
+    "experimentRun": {range: "eXPERIMENTrUN"},
     "experimentScenarioNo": {range: "PositiveInteger"},
     "parameterValueCombination": {range: Array},
     "outputStatistics": {range: Object}
   }
 });
+oes.ExperimentScenarioRun.getAutoId = function () {
+  return (new Date()).getTime();
+};
 
 /**
  * Define lists of predefined cLASSes as reserved names for constraint checks
@@ -4413,10 +5021,16 @@ sim.scenario = {
 sim.experiment = {
   objectName: "experiment",
   properties: {
+    "experimentNo": {range:"AutoNumber", label:"Experiment number",
+      hint:"Automatically assigned sequence number for experiment"},
+    "experimentTitle": {range:"String", optional: true, label:"Experiment title"},
     "replications": {range:"PositiveInteger", label:"Number of replications",
         hint:"Number of replications/repetitions per scenario"},
-    "parameters": {range: Array, label:"Experiment parameters",
-        hint:"Parameter name and value set specification"},
+    "parameterDefs": {
+        range: "eXPERIMENTpARAMdEF", maxCard: Infinity,
+        label:"Experiment parameters",
+        hint:"Define experiment parameters by name and value set specification"
+    },
     "seeds": {range: Array, optional: true},
   },
   replications: 0,
@@ -4439,8 +5053,10 @@ sim.config = {
   objectName: "config",
   properties: {
     "createLog": {range:"Boolean", optional: true, label:"Log", hint:"Create simulation log (y/n)"},
-    "visualize": {range:"Boolean", optional: true, initialValue: true, label:"Visualization"},
-    "stepDuration": {range:"NonNegativeInteger", optional: true, label:"Step duration:"},
+    "visualize": {range:"Boolean", optional: true, initialValue: true, label:"Visualization",
+        hint:"Enable the visualization of a simulation run"},
+    "stepDuration": {range:"NonNegativeInteger", optional: true, label:"Step duration:",
+        hint:"How long is a simulation step to take?"},
     "userInteractive": {range:"Boolean", optional: true, label:"User-interactive"}
   }
 };
@@ -4704,6 +5320,27 @@ oes.verifySimulation = function () {
  * @method
  * @author Gerd Wagner
  */
+oes.setupStorageManagement = function (dbName) {
+  var storageAdapter = {dbName: dbName};
+  if (!('indexedDB' in self)) {
+    console.log("This browser doesn't support IndexedDB. Falling back to LocalStorage.");
+    storageAdapter.name = "LocalStorage";
+  } else {
+    storageAdapter.name = "IndexedDB";
+  }
+  sim.storeMan = new sTORAGEmANAGER( storageAdapter);
+  //sim.storeMan.createEmptyDb().then( oes.setupFrontEndSimEnv);
+  // last step in setupFrontEndSimEnv, then wait for user actions
+  sim.storeMan.createEmptyDb([oes.ExperimentRun, oes.ExperimentScenarioRun]).then( function () {
+    console.log("Empty IndexedDB created.");
+  });
+};
+/**
+ * Set up front-end simulation environment
+ *
+ * @method
+ * @author Gerd Wagner
+ */
 oes.setupFrontEndSimEnv = function () {
   var errors=[], el=null;
   sim.initializeSimulator();
@@ -4745,7 +5382,7 @@ sim.logStep = function (stepLog) {
 };
 /*******************************************************************************
  * EventList maintains an ordered list of events using Binary Heap
- *
+ * 
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany.
  * @license The MIT License (MIT)
  * @author Luis Gustavo Nardin
@@ -4772,6 +5409,9 @@ oes.EventList.prototype.getNextEvent = function () {
   } else {
     return null;
   }
+};
+oes.EventList.prototype.getAllEvents = function () {
+  return this.heap.content;
 };
 oes.EventList.prototype.isEmpty = function () {
   return this.heap.isEmpty();
@@ -4947,8 +5587,8 @@ oes.stat.prepareTimeSeriesCompression = function (maxLength) {
     + oes.stat.timeSeriesCompressionSteps + " (1 means no compression)");
 };
 /**
- * Reset the statistics variables. This means that any computed
- * value is reset to the initial value and all the connection with
+ * Reset the statistics variables. This means that any computed 
+ * value is reset to the initial value and all the connection with 
  * object(s) references are recreated.
  */
 oes.stat.reset = function () {
@@ -5077,8 +5717,8 @@ oes.stat.computePopulationAggregate = function (statVar) {
   return aggr;
 };
 /**
- * Compute the values of the statistic variables which are only required
- * to be computed at the simulation end. This method has to be called when
+ * Compute the values of the statistic variables which are only required 
+ * to be computed at the simulation end. This method has to be called when 
  * the simulation ends.
  */
 oes.stat.computeOnlyAtEndStatistics = function () {
@@ -5227,7 +5867,7 @@ sim.addObjects = function (objArr) {
  * @param o  the object to be removed
  */
 sim.removeObject = function (o) {
-  var ObjectClass = null;
+  var ObjectClass=null;
   if (!(o instanceof oes.Object)) {
     console.log( JSON.stringify(o) +" is not an OES object!");
     return;
@@ -5241,8 +5881,8 @@ sim.removeObject = function (o) {
   delete ObjectClass.instances[String(o.id)];
   delete sim.objects[String(o.id)];
 };
-sim.removeObjectById = function ( id ) {
-  var ObjectClass = null;
+sim.removeObjectById = function (id) {
+  var ObjectClass=null;
   if (typeof id === "string") id = parseInt(id);
   if (!Number.isInteger( id)) {
     console.log( JSON.stringify(id) +" is not an integer!");
@@ -5253,8 +5893,8 @@ sim.removeObjectById = function ( id ) {
     return;
   }
   ObjectClass = o.constructor;
-  delete ObjectClass.instances[String(id)];
-  delete sim.objects[String(id)];
+  delete ObjectClass.instances[id];
+  delete sim.objects[id];
 };
 /*******************************************************
  Schedule an event by adding it to the FEL
@@ -5281,7 +5921,7 @@ sim.initializeModelVariables = function (expParamSlots) {
     if (expParamSlots && expParamSlots[varName]) {
       // assign experiment parameter value
       sim.v[varName] = expParamSlots[varName];
-    } else if (sim.v[varName] === undefined) {
+    } else /* if (sim.v[varName] === undefined) */ {
       if (typeof mv === "object") {
         sim.v[varName] = mv.fieldValue !== undefined ? mv.fieldValue : mv.initialValue;
       } else {
@@ -5307,7 +5947,9 @@ sim.createInitialObjEvt = function () {
     cLASS[objTypeName].instances = {};
   });
   // allow parametrized object/event definitions
-  if (sim.scenario.setupInitialState) sim.scenario.setupInitialState();
+  if (typeof sim.scenario.setupInitialState === "function") {
+    sim.scenario.setupInitialState();
+  }
   initialObjDefs = initState.objects || null;
   initialEvtDefs = initState.events || null;
   // register initial objects
@@ -5448,7 +6090,7 @@ sim.updateInitialStateObjects = function () {
  * Initialize the simulator on start up
  * Settings that do not vary across scenarios in an experiment
  ************************************************************/
-sim.initializeSimulator = function () {
+sim.initializeSimulator = function (dbName) {
   var x=0;
   sim.FEL = new oes.EventList();  // the Future Events List (FEL)
   // complete model definition by setting objectTypes and eventTypes if not defined
@@ -5490,6 +6132,7 @@ sim.initializeSimulator = function () {
   } else {  // use the JS built-in RNG
     rand = new Random();
   }
+  if (dbName) oes.setupStorageManagement( dbName);
 };
 /*************************************************************
  * Initialize a simulation run
@@ -5549,9 +6192,13 @@ sim.runScenario = function (useWorker) {
     sim.initializeSimulationRun();
     while (sim.time < sim.scenario.simulationEndTime) {
       sim.runStep();
-      // update the progress bar
+      // update the progress bar and the simulation step/time
       if (sim.time > nextProgressIncrement) {
-        self.postMessage({progressIncrement: 10});
+        self.postMessage({
+            progressIncrement: 10,
+            simStep: sim.step,
+            simTime: sim.time
+        });
         nextProgressIncrement += simTimeTenth;
       }
       // end simulation if no time increment and no more events
@@ -5578,7 +6225,7 @@ sim.runStep = function (followupEvents) {
       nextEvtTime = sim.FEL.getNextOccurrenceTime(),  // 0 if there is no next event
       stepStartTime = (new Date()).getTime(),
       totalStepTime = 0, stepDiffTimeDelay = 0,
-      ui = sim.scenario.userInteractions,  // shortcut
+      uia = sim.scenario.userInteractions,  // shortcut
       uiViewModel=null, eventTypeName="", logInfo={};
   function advanceSimulationTime () {
     // increment the step counter
@@ -5820,13 +6467,13 @@ sim.runStep = function (followupEvents) {
           break;
         default:  //***** all types of user-defined events *****
           // check if a user interaction has been triggered
-          if (sim.config.userInteractive && ui && ui[eventTypeName]) {
+          if (sim.config.userInteractive && uia && uia[eventTypeName]) {
             // check also the triggering event condition, if defined
-            if (!ui[eventTypeName].trigEvtCondition || ui[eventTypeName].trigEvtCondition(e)) {
+            if (!uia[eventTypeName].trigEvtCondition || uia[eventTypeName].trigEvtCondition(e)) {
               // make sure that the user interaction triggering event is last in nextEvents list
               if (i === nextEvents.length - 1) {
                 sim.currentEvents[eventTypeName] = e;
-                uiViewModel = ui[eventTypeName];
+                uiViewModel = uia[eventTypeName];
                 Object.keys( uiViewModel.outputFields).forEach( function (outFldN) {
                   var fldEl = uiViewModel.dataBinding[outFldN],
                       val = uiViewModel.outputFields[outFldN].fieldValue;
@@ -5901,12 +6548,22 @@ sim.runStep = function (followupEvents) {
  ********************************************************/
 sim.runExperiment = function () {
   var exp = sim.experiment, cp=[], valueSets=[], i=0, j=0, k=0, M=0,
-      N = exp.parameters.length, increm=0, x=0, expPar={},
+      N = exp.parameterDefs.length, increm=0, x=0, expPar={},
       valueCombination=[], expParamSlots={},
       tenthRunLength=0,  // a tenth of the total run time
       nextProgressIncrementStep=0;  // thresholds for updating the progress bar
+  exp.runId = oes.ExperimentRun.getAutoId();
+  try {
+    sim.storeMan.add( oes.ExperimentRun, {
+      id: exp.runId,
+      experimentDef: exp.id,
+      dateTime: (new Date()).toISOString(),
+    });
+  } catch (e) {
+    console.log( JSON.stringify(e));
+  }
   for (i=0; i < N; i++) {
-    expPar = exp.parameters[i];
+    expPar = exp.parameterDefs[i];
     if (!expPar.values) {
       // create value set
       expPar.values = [];
@@ -5935,7 +6592,7 @@ sim.runExperiment = function () {
     });
     // create experiment parameter slots for assigning corresponding model variables
     for (j=0; j < N; j++) {
-      expParamSlots[exp.parameters[j].name] = valueCombination[j];
+      expParamSlots[exp.parameterDefs[j].name] = valueCombination[j];
     }
     // run experiment scenario replications
     for (k=0; k < exp.replications; k++) {
@@ -5963,6 +6620,14 @@ sim.runExperiment = function () {
         self.postMessage({progressIncrement: 10});
         nextProgressIncrementStep += tenthRunLength;
       }
+      if (sim.experiment.storeEachExperimentScenarioRun) {
+        sim.storeMan.add( oes.ExperimentScenarioRun, {
+          experimentRun: exp.runId,
+          experimentScenarioNo: i,
+          parameterValueCombination: exp.scenarios[i].parameterValues,
+          outputStatistics: exp.scenarios[i].stat
+        });
+      }
     }
     // compute average values
     Object.keys( sim.model.statistics).forEach( function (varName) {
@@ -5976,6 +6641,19 @@ sim.runExperiment = function () {
       expScenParamValues: exp.scenarios[i].parameterValues,
       expScenStat: exp.scenarios[i].stat
     });
+    if (!sim.experiment.storeEachExperimentScenarioRun) {
+      // store the average statistics aggregated over all exp. scenario runs
+      try {
+        sim.storeMan.add( oes.ExperimentScenarioRun, {
+          experimentRun: exp.runId,
+          experimentScenarioNo: i,
+          parameterValueCombination: exp.scenarios[i].parameterValues,
+          outputStatistics: exp.scenarios[i].stat
+        });
+      } catch (e) {
+        console.log( JSON.stringify(e));
+      }
+    }
   }
   self.postMessage({endOfExp: true});
 };
@@ -6253,26 +6931,30 @@ sim.ui = sim.ui || {};  // name space for scenario/model-specific UI settings
 oes.ui.fullUI = true;
 
 /**
- * Create the UI page title with a link to the description page.
+ * Create the UI page header and title (with a link to the description page).
  * This method is overridden when the simulation runs on the NodeJS backend.
  */
-oes.ui.createPageTitleWithDescriptionLink = function() {
-  var flyOverText="", filterDivEl=document.createElement("div"),
+oes.ui.createFrontMatter = function() {
+  var flyOverText="",
+      filterDivEl = document.createElement("div"),  // for filtering the text content
       simTitle = String( sim.scenario.title || sim.model.title),
-      frontMatterEl = document.querySelector("body > div#frontMatter"),
-      pageTitleEl = document.querySelector("body > div#frontMatter > h1");
+      frontMatterEl = document.querySelector("#frontMatter"),
+      pageTitleEl = document.querySelector("#frontMatter h1"),
+      mainEl = document.querySelector("body > main");
   // set UI page title
   if (!pageTitleEl) {
     pageTitleEl = document.createElement("h1");
     if (!frontMatterEl) {
       frontMatterEl = document.createElement("div");
       frontMatterEl.id = "frontMatter";
-      document.body.insertBefore( frontMatterEl, document.body.firstElementChild);
+      mainEl.appendChild( frontMatterEl);
     }
     frontMatterEl.insertBefore( pageTitleEl, frontMatterEl.firstElementChild);
+    pageTitleEl.innerHTML = "<span>"+ simTitle +"</span>";
+  } else {
+    pageTitleEl.innerHTML = "<span>"+ pageTitleEl.textContent +"</span>";
   }
-  pageTitleEl.innerHTML = "<span>"+ simTitle +"</span>" +
-      "<div><a href='description.html'>Read more...</a></div>";
+  pageTitleEl.innerHTML += "<div><a href='description.html'>Read more...</a></div>";
   flyOverText = sim.scenario.shortDescription || sim.model.shortDescription;
   if (flyOverText) {
     filterDivEl.innerHTML = flyOverText;
@@ -6281,11 +6963,196 @@ oes.ui.createPageTitleWithDescriptionLink = function() {
   if (simTitle.length > 38) pageTitleEl.style.fontSize = "140%";
 };
 /**
+ * Create the UI page header and title (with a link to the description page).
+ * This method is overridden when the simulation runs on the NodeJS backend.
+ */
+oes.ui.createModelMenu = function() {
+  var downloadLink=null, closeBtn=null,
+      menuEl = document.getElementById("model-menu"),
+      el=null,
+      simPageUrl = window.location.href,
+      pos=0, tail="";
+  pos = simPageUrl.indexOf("simulation.html");
+  if (pos === -1) {
+    pos = simPageUrl.indexOf("index.html");
+  }
+  if (pos > -1) {
+    sim.ui.simFolderPath = simPageUrl.substring( 0, pos);
+  } else {
+    pos = simPageUrl.lastIndexOf("/");
+    if (pos === simPageUrl.length-1) {  // last character is a slash
+      sim.ui.simFolderPath = simPageUrl;
+    }
+    else {
+      sim.ui.simFolderPath = simPageUrl.substring( 0, pos+1);
+      // accept paths that end with a simulation number
+      tail = simPageUrl.substring( pos+1);
+      if (/\d*/.test( tail)) sim.ui.simFolderPath += tail + "/";
+    }
+  }
+  sim.ui.showCodeElems = {};  // map of UI elements for showing code
+  // create showCode form element
+  el = document.createElement("form");
+  el.id = "showCodeForm";
+  el.style.display = "none";
+  el.innerHTML = "<span class='closeButton'>&times;</span>" +
+      "<p>Show code of...</p><select><option>-- choose file --</option></select>" +
+      "<p>Or <a class='download'>download all</a></p>" +
+      "</form>";
+  menuEl.appendChild( el);
+  downloadLink = document.querySelector("#showCodeForm a.download");
+  downloadLink.href = sim.ui.simFolderPath + "Download.zip"
+  downloadLink.title = "Download simulation code";
+  closeBtn = document.querySelector("#showCodeForm span.closeButton");
+  closeBtn.addEventListener("click", function () {
+    document.getElementById("showCodeBtn").style.display = "inline";
+    document.getElementById("showCodeForm").style.display = "none";
+  });
+  // create space size def. activation button
+  if (sim.model.space.type) {
+    if (!document.getElementById("spaceSizeDefBtn")) {
+      el = document.createElement("button");
+      el.id = "spaceSizeDefBtn";
+      el.textContent = "Space";
+      el.onclick = oes.ui.showSpaceSizeDefUI;
+      menuEl.appendChild( el);
+    }
+  }
+};
+oes.ui.showNarrative = function() {
+  var narrativeEl=null,
+      overlayEl = document.getElementById("overlay");
+  if (!sim.ui.narrativeEl) {
+    narrativeEl = document.createElement("div");
+    narrativeEl.innerHTML = sim.model.systemNarrative;
+    sim.ui.narrativeEl = dom.createModal({
+      fromElem: narrativeEl,
+      title: "System Narrative"
+    });
+  }
+  overlayEl.style.display = "block";
+  sim.ui.narrativeEl.style.display = "block";
+};
+oes.ui.showDescription = function() {
+  var descrEl=null,
+      overlayEl = document.getElementById("overlay");
+  if (!sim.ui.descriptionEl) {
+    descrEl = document.createElement("div");
+    descrEl.innerHTML = sim.scenario.shortDescription || sim.model.shortDescription;
+    sim.ui.descriptionEl = dom.createModal({
+      fromElem: descrEl,
+      title: "Model Description"
+    });
+  }
+  overlayEl.style.display = "block";
+  sim.ui.descriptionEl.style.display = "block";
+};
+oes.ui.showCode = function() {
+  var overlayEl = document.getElementById("overlay"),
+      showCodeBtn = document.getElementById("showCodeBtn"),
+      showCodeForm = document.getElementById("showCodeForm"),
+      codeFileSelEl = document.querySelector("#showCodeForm > select"),
+      showCodeEl=null;
+  if (!sim.ui.simFolderPath) {
+    console.log("Cannot show code since folder path is not available!");
+    return;
+  }
+  showCodeBtn.style.display = "none";
+  showCodeForm.style.display = "inline-block";
+  if (codeFileSelEl.length === 1) {  // have options not yet been created?
+    codeFileSelEl.appendChild(
+        dom.createOption({text:"simulation.js", value:"simulation"}));
+    if (sim.model.objectTypes) {
+      sim.model.objectTypes.forEach( function (objT) {
+        codeFileSelEl.appendChild( dom.createOption({text: objT + ".js", value: objT}));
+      });
+    }
+    if (sim.model.eventTypes) {
+      sim.model.eventTypes.forEach( function (evtT) {
+        codeFileSelEl.appendChild( dom.createOption({text: evtT + ".js", value: evtT}));
+      });
+    }
+    if (sim.model.activityTypes) {
+      sim.model.activityTypes.forEach( function (actT) {
+        codeFileSelEl.appendChild( dom.createOption({text: actT + ".js", value: actT}));
+      });
+    }
+    codeFileSelEl.addEventListener("change", function () {
+      var fileName = codeFileSelEl.value;
+
+      function showCode( txt) {
+        var showCodeEl=null;
+        if (!sim.ui.showCodeElems[fileName]) {
+          showCodeEl = document.createElement("div");
+          showCodeEl.innerHTML = "<pre><code class='language-javascript'>"+ txt +"</code></pre>";
+          sim.ui.showCodeElems[fileName] = dom.createModal({
+            fromElem: showCodeEl,
+            title: "JavaScript code of " + fileName +".js",
+            width: "50em"});
+        }
+        if (typeof Prism === "object") Prism.highlightAll();  // run the Prism syntax highligter
+        document.getElementById("overlay").style.display = "block";
+        sim.ui.showCodeElems[fileName].style.display = "block";
+      }
+
+      if (fileName) {  // a choice has been made
+        fetch( sim.ui.simFolderPath + fileName + ".js")
+            .then( function (response) {
+              return response.text().then( showCode);
+            })
+      }
+    });
+  }
+};
+/*******************************************************
+ UI for Space Definition
+ *******************************************************/
+oes.ui.showSpaceSizeDefUI = function () {
+  var menuEl = document.getElementById("model-menu"),
+      spaceSizeDefBtn = document.getElementById("spaceSizeDefBtn"),
+      spaceSizeDefForm = document.getElementById("spaceSizeDefForm"),
+      closeBtn=null;
+  if (!spaceSizeDefForm) {
+    // create space size def. form panel element
+    spaceSizeDefForm = document.createElement("form");
+    spaceSizeDefForm.id = "spaceSizeDefForm";
+    spaceSizeDefForm.innerHTML = "<span class='closeButton'>&times;</span>";
+    spaceSizeDefForm.style.display = "none";
+    menuEl.appendChild( spaceSizeDefForm);
+    closeBtn = document.querySelector("#spaceSizeDefForm span.closeButton");
+    closeBtn.addEventListener("click", function () {
+      spaceSizeDefBtn.style.display = "inline";
+      spaceSizeDefForm.style.display = "none";
+    });
+    sim.ui["space"] = new oBJECTvIEW({
+      modelObject: sim.model.space,
+      fields: [["xMax", "yMax", "zMax"].slice(0,
+          oes.space.dimensions[sim.model.space.type])],
+      suppressNoValueFields: false,
+      heading: "Space Size",
+      userActions: {
+        "applyChanges": function () {
+          sim.updateInitialStateObjects();
+          oes.ui.resetCanvas();
+          // visualize initial state (at start of step 0)
+          if (sim.config.visualize) oes.ui.visualizeStep();
+        }
+      }
+    });
+    sim.ui["space"].userActions["applyChanges"].label = "Apply changes";
+    // render view in modalBodyEl and store its data binding
+    sim.ui["space"].dataBinding = sim.ui["space"].render( spaceSizeDefForm);
+  }
+  spaceSizeDefBtn.style.display = "none";
+  spaceSizeDefForm.style.display = "inline-block";
+};
+/**
  * Create the UI page footer.
  */
 oes.ui.createPageFooter = function() {
   var created = new Date( sim.model.created),
       modified = new Date( sim.model.modified),
+      mainEl = document.querySelector("body > main"),
       license = sim.model.license || oes.defaults.license,
       licenseLinks=[], el=null,
       contributions = sim.model.contributors ?
@@ -6304,8 +7171,8 @@ oes.ui.createPageFooter = function() {
         "), created on "+ created.toLocaleDateString() +", last modified on "+
         modified.toLocaleDateString() + contributions +
         artworkCredits + " | <a href='https://sim4edu.com/credits.html'>OESjs credits</a>";
-    // insert footer as the last child element of body
-    document.body.appendChild( el);
+    // insert footer after body > main
+    dom.insertAfter( el, mainEl);
   }
 };
 
@@ -6317,6 +7184,7 @@ oes.ui.createPageFooter = function() {
  */
 oes.ui.setupUI = function () {
   var el=null, el2=null,
+      mainEl = document.querySelector("body > main"),
       statistics = sim.model.statistics,
       createTimeSeriesChart = false;
   oes.ui.timeUnitLabels = {"ms":"milliseconds", "s":"seconds", "m":"minutes", "h":"hours",
@@ -6326,83 +7194,16 @@ oes.ui.setupUI = function () {
    **********************************************************************/
   // Set HTML title
   if (!document.title){
-    document.title = "OES " + (sim.scenario.name || sim.model.name);
+    document.title = "OES - " + (sim.scenario.name || sim.model.name);
   }
-  oes.ui.createPageTitleWithDescriptionLink();
-  if (sim.experiment.replications) {  // an experiment-based simulation
-    /*********************************************************************
-     Set up UI for experiment information
-     *********************************************************************/
-    try {
-      sim.ui["experiment"] = new oBJECTvIEW({
-        modelObject: sim.experiment,
-        heading: "Experiment",
-        fields: [[
-          { name: "replications",
-            label: sim.experiment.properties["replications"].label,
-            hint: sim.experiment.properties["replications"].hint,
-            range: sim.experiment.properties["replications"].range,
-            inputOutputMode: "O"},
-          { name: "parameters",
-            label: sim.experiment.properties["parameters"].label,
-            hint: sim.experiment.properties["parameters"].hint,
-            range: sim.experiment.properties["parameters"].range,
-            inputOutputMode: "O"}
-        ]],
-        suppressNoValueFields: false,
-        userActions: {
-          "run": function () {
-            var rowEl = null, tbodyEl=null, worker=null;
-            var progressContainer = dom.createProgressBar("Executing simulation experiment...");
-            function logExpScenarioRun( data) {
-              rowEl = tbodyEl.insertRow();  // create new table row
-              rowEl.insertCell().textContent = data.expScenNo;
-              rowEl.insertCell().textContent = data.expScenParamValues.toString();
-              rowEl.insertCell().textContent = JSON.stringify( data.expScenStat);
-            }
-            document.body.appendChild( progressContainer);
-            // configure experiment log
-            oes.ui.setupSimLog( true);
-            tbodyEl = sim.ui.logEl;
-            // drop scenario form
-            document.forms["scenario"].remove();
-            // hide simulation parameters and show simulator controls
-            document.forms["experiment"].style.display = "none";
-            document.forms["sim"].style.display = "block";
-            // log simulation start time (in the main thread)
-            sim.startTime = (new Date()).getTime();
-            // start the simulation worker
-            if (window.Worker) {
-              worker = new Worker("simulation-worker.js");
-              // send "experiment mode" message to worker
-              worker.postMessage({runExperiment: true});
-              // on incoming messages from worker
-              worker.onmessage = function (e) {
-                if (e.data.expScenNo !== undefined) logExpScenarioRun( e.data);
-                if (e.data.progressIncrement !== undefined) {
-                  document.querySelector("#progress-container > progress").value +=
-                      e.data.progressIncrement;
-                }
-                if (e.data.endOfExp) oes.ui.updateUiOnSimulationEnd( true);
-              };
-            } else {
-              alert("Experiment cannot be executed since browser does not support web workers!");
-            }
-          }
-        }
-      });
-      // render view and store its data binding
-      sim.ui["experiment"].dataBinding = sim.ui["experiment"].render();
-    } catch (e) {
-      console.log( e.constructor.name +": "+ e.message);
-    }
-  }
+  oes.ui.createFrontMatter();
+  oes.ui.createModelMenu();  // rendered underneath the model title
   /*********************************************************************
    Set up UI for simulation scenario information
    *********************************************************************/
   try {
     sim.ui["scenario"] = new oBJECTvIEW({
-      heading: sim.experiment.replications ? "Single Scenario Simulation" : "",
+      heading: sim.scenario.title ? sim.scenario.title : "Default scenario",
       modelObjects: {"scenario":sim.scenario, "model":sim.model, "config":sim.config},
       fields: [["scenario.simulationEndTime", "config.stepDuration", "config.createLog", "config.visualize"]],
       //fields: [["simulationEndTime", "stepDuration", "visualize", "createLog"]],
@@ -6442,8 +7243,8 @@ oes.ui.setupUI = function () {
             msg = {runExperiment: false, endTime: sim.scenario.simulationEndTime,
               createLog: sim.config.createLog};
             Object.keys( sim.model.v).forEach( function (varName) {
-              if (sim.model.v[varName].fieldValue !== undefined) {
-                changedModelVarValues[varName] = sim.model.v[varName].fieldValue;
+              if (sim.model.v[varName].value !== undefined) {
+                changedModelVarValues[varName] = sim.model.v[varName].value;
               }
             });
             if (Object.keys( changedModelVarValues).length > 0) {
@@ -6456,11 +7257,13 @@ oes.ui.setupUI = function () {
               if (e.data.progressIncrement !== undefined) {
                 document.querySelector("#progress-container > progress").value +=
                     e.data.progressIncrement;
-              }
-              // receive step log message
-              if (e.data.simTime !== undefined) sim.logStep( e.data);
-              // receive ex post statistics at simulation end
-              if (e.data.simStat !== undefined) {
+                sim.ui["sim"].dataBinding["step"].value = e.data.simStep;
+                sim.ui["sim"].dataBinding["time"].value = e.data.simTime;
+              } else if (e.data.simTime !== undefined) {
+                // receive step log message
+                sim.logStep( e.data);
+              } else if (e.data.simStat !== undefined) {
+                // receive ex post statistics at simulation end
                 sim.stat = e.data.simStat;
                 oes.ui.updateUiOnSimulationEnd();
               }
@@ -6468,14 +7271,53 @@ oes.ui.setupUI = function () {
           } else {  // start main thread simulator
             sim.runScenario();
           }
+        },
+        "defineExperiment": function () {
+          var experimentsUiPanelEl = document.getElementById("experimentsUI"),
+              mainContentEl = experimentsUiPanelEl.lastElementChild;
+          experimentsUiPanelEl.style.display = "block";
+          // display the panel's main content element
+          mainContentEl.style.display = "block";
+          // hide +Experiment button
+          document.forms["scenario"].defineExperiment.style.display = "none";
+          try {
+            sim.experiment.experimentNo = 1;
+            sim.ui["experiments"] = new oBJECTvIEW({
+              modelObject: sim.experiment,
+              //fields: [["experimentNo", "title", "replications", "parameters"]],
+              fields: [[
+                  {name: "experimentNo",
+                   label: sim.experiment.properties["experimentNo"].label,
+                   range: sim.experiment.properties["experimentNo"].range,
+                   inputOutputMode: "O"},
+                  "experimentTitle", "replications", "parameterDefs"]],
+              suppressNoValueFields: false,
+              userActions: {
+                "save": function () {
+                  alert("Sorry! Defining new experiments is not yet implemented!");
+                }
+              }
+            });
+            /* sim.ui["experiments"].userActions["save"].label = "Save"; */
+            // render view and store its data binding
+            sim.ui["experiments"].dataBinding = sim.ui["experiments"].render( mainContentEl);
+          } catch (e) {
+            console.log( e.constructor.name +": "+ e.message);
+          }
         }
       }
     });
   } catch (e) {
     console.log( e.constructor.name +": "+ e.message);
   }
+  sim.ui["scenario"].userActions["run"].label = "Run Scenario";
+  sim.ui["scenario"].userActions["defineExperiment"].label = "+Experiment";
+  sim.ui["scenario"].userActions["defineExperiment"].hint = "Define an experiment";
+  sim.ui["scenario"].userActions["defineExperiment"].showCondition = function () {
+    return !sim.experiment.replications;
+  };
   // render the view and store its databinding
-  sim.ui["scenario"].dataBinding = sim.ui["scenario"].render();
+  sim.ui["scenario"].dataBinding = sim.ui["scenario"].render( mainEl);
   // show simulation time unit
   el = document.querySelector("form#scenario input[name*='simulationEndTime']");
   if (sim.model.timeUnit) {
@@ -6488,41 +7330,36 @@ oes.ui.setupUI = function () {
   el = document.querySelector("form#scenario input[name*='stepDuration']");
   if (el) dom.insertAfter( document.createTextNode(" ms"), el);
 
-  // Example for setting a non-default label: sim.ui["scenario"].userActions["run"].label = "Run";
-
-  /*********************************************************************
-   UIs for Visualization, Event Appearances and User Interaction
-   **********************************************************************/
-  if (sim.config.visualize) {
-    oes.ui.setupVisualization();
-    if (sim.config.observationUI.eventAppearances &&
-        Object.keys( sim.config.observationUI.eventAppearances).length > 0) {
-      oes.ui.setupEventAppearances();
-    }
-    if (sim.scenario.userInteractions &&
-        Object.keys( sim.scenario.userInteractions).length > 0 &&
-        sim.config.userInteractive) {
-      oes.ui.setupUserInteraction();
-    }
-  } else sim.config.userInteractive = false;  // no visual. implies no usr interaction
   /*********************************************************************
    Set up UI for showing/modifying model variables within scenario UI
    **********************************************************************/
   if (Object.keys( sim.model.v).length > 0) {
     oes.ui.setupModelVariablesUI( document.forms["scenario"]);
   }
-  /*********************************************************************
-   Set up UI for modifying the initial state objects within scenario UI
-   **********************************************************************/
-  if (sim.scenario.initialState.objects && !sim.config.suppressInitialStateUI) {
-    oes.ui.setupInitialStateObjectsUI( document.forms["scenario"]);
+  // possibly re-create initial objects/events
+  if (!(sim.scenario.initialState.objects && sim.scenario.initialState.events) &&
+      typeof sim.scenario.setupInitialState === "function") {
+    sim.scenario.setupInitialState();
   }
   /*********************************************************************
-   Set up UI for defining the space and space view within scenario UI
+   Set up UI for modifying the initial objects within scenario UI
    **********************************************************************/
-  if (sim.model.space.type) {
-    oes.ui.setupSpaceDefUI( document.forms["scenario"]);
+  if (Object.keys( sim.objects).length > 0 && !sim.config.suppressInitialStateUI) {
+    oes.ui.setupInitialObjectsUI( document.forms["scenario"]);
   }
+  /*********************************************************************
+   Set up UI for modifying the initial events within scenario UI
+  **********************************************************************/
+  if (!sim.FEL.isEmpty() && !sim.config.suppressInitialStateUI) {
+    oes.ui.setupInitialEventsUI( document.forms["scenario"]);
+  }
+  /*********************************************************************
+   Set up UI for defining/modifying experiments within scenario UI
+  **********************************************************************/
+  if (Object.keys( sim.model.v).length > 0 && !sim.config.suppressExperimentsUI) {
+    oes.ui.setupExperimentsUI( document.forms["scenario"]);
+  }
+
   /*********************************************************************
    Simulator Control UI
    *********************************************************************/
@@ -6554,7 +7391,7 @@ oes.ui.setupUI = function () {
       }
     });
     // render view and store its data binding
-    sim.ui["sim"].dataBinding = sim.ui["sim"].render();
+    sim.ui["sim"].dataBinding = sim.ui["sim"].render( mainEl);
     el = document.querySelector("form#sim output[name*='time']");
     if (sim.model.timeUnit) {
       dom.insertAfter( document.createTextNode(" "+ sim.model.timeUnit), el);
@@ -6563,6 +7400,21 @@ oes.ui.setupUI = function () {
   } catch (e) {
     console.log( e.constructor.name +": "+ e.message);
   }
+  /*********************************************************************
+   Set up UIs for Visualization, Event Appearances and User Interaction
+   **********************************************************************/
+  if (sim.config.visualize) {
+    oes.ui.setupVisualization();
+    if (sim.config.observationUI.eventAppearances &&
+        Object.keys( sim.config.observationUI.eventAppearances).length > 0) {
+      oes.ui.setupEventAppearances();
+    }
+    if (sim.scenario.userInteractions &&
+        Object.keys( sim.scenario.userInteractions).length > 0 &&
+        sim.config.userInteractive) {
+      oes.ui.setupUserInteraction();
+    }
+  } else sim.config.userInteractive = false;  // no visual. implies no usr interaction
   //TODO: set up UI for ex-post statistics using oBJECTvIEW
   /*
    try {
@@ -6614,35 +7466,37 @@ oes.ui.setupUI = function () {
   oes.ui.createPageFooter();
 };
 /*********************************************************************
- Set up the simulation log (create initially empty log table)
+ Set up the simulation/experiment log (create initially empty log table)
  **********************************************************************/
 oes.ui.setupSimLog = function (isExperiment) {
   var el = document.getElementById("simLogTbl"),
-      tblH="", col1H="", col2H="", col3H="";
+      mainEl = document.querySelector("body > main"),
+      N=0, statVarHeadings="";
   if (!el) {
     el = document.createElement("table");
     el.id = "simLogTbl";
-    document.body.appendChild( el);
+    mainEl.appendChild( el);
   }
   if (isExperiment) {
-    tblH = "Experiment Log";
-    col1H = "Scenario";
-    col2H = "Parameter values";
-    col3H = "Statistics";
+    Object.keys( sim.model.statistics).forEach( function (v) {
+      if (sim.model.statistics[v].label) {
+        N = N+1;
+        statVarHeadings += "<th>"+ sim.model.statistics[v].label +"</th>";
+      }
+    })
+    el.innerHTML = "<thead><tr><th colspan='"+ (2+N) +"'>Experiment Log</th></tr>" +
+        "<tr><th rowspan='2'>Scenario</th><th rowspan='2'>Parameter values</th>" +
+            "<th colspan='"+ N +"'>Statistics</th></tr>" +
+        "<tr>"+ statVarHeadings +"</tr></thead>";
   } else {
-    tblH = "Simulation Log";
-    col1H = "Time";
-    col2H = "System State";
-    col3H = "Future Events";
+    el.innerHTML = "<thead><tr><th colspan='3'>Simulation Log</th></tr>" +
+        "<tr><th>Time</th><th>System State</th><th>Future Events</th></tr></thead>";
   }
-  el.innerHTML = "<thead><tr><th colspan='3'>"+ tblH +"</th></tr>" +
-      "<tr><th>"+ col1H +"</th><th>"+ col2H +"</th>" +
-      "<th>"+ col3H +"</th></tr></thead>";
   sim.ui.logEl = dom.createElement("tbody",{id:"simLog"});
   el.appendChild( sim.ui.logEl);
-  //el.style.display = "none";
   el.style.overflowX = "auto";  // horizontal scrolling
 }
+
 /*******************************************************
  Reset front-end simulation environment
  *******************************************************
@@ -6810,33 +7664,39 @@ oes.ui.showExPostStatistics = function () {
 
 /*******************************************************
  UI for defining the initial state
- *******************************************************/
-/**
+ *******************************************************
  * Set up UI for model varables
- *
  *
  * @method
  * @author Gerd Wagner
  */
 oes.ui.setupModelVariablesUI = function (parentEl) {
   var uiPanelEl = dom.createExpandablePanel({id: "ModelVariablesUI",
-    heading: "Model Variables"});
+      heading:"Model Variables", borderColor:"aqua",
+      hint:"Define/set variables that can be used, for instance, in the initial state " +
+      "or as parameters in functions or in an experiment." });
   var mainContentEl = uiPanelEl.lastElementChild;
   var labeledVarDefs={}, vm={};
   sim.config.modelVariablesUI = sim.config.modelVariablesUI || {};
   Object.keys( sim.model.v).forEach( function (varName) {
     if (sim.model.v[varName].label) labeledVarDefs[varName] = sim.model.v[varName];
-  })
+  });
   if (Object.keys( labeledVarDefs).length === 0) return;  // nothing to show
   vm = {inputFields: labeledVarDefs};
   // create form element
-
   mainContentEl.appendChild( oBJECTvIEW.createUiFromViewModel( vm));
   sim.config.modelVariablesUI.userActions = {
     "applyChanges": function () {
       Object.keys( vm.fieldValues).forEach( function (fld) {
-        sim.model.v[fld].fieldValue = vm.fieldValues[fld];
+        sim.model.v[fld].value = vm.fieldValues[fld];  //TODO: check if needed
+        sim.v[fld] = vm.fieldValues[fld];
       });
+      sim.createInitialObjEvt();
+      // redraw visualization of initial state (step 0)
+      if (sim.config.visualize) {
+        oes.ui.resetCanvas();
+        oes.ui.visualizeStep();
+      }
     }
   };
   sim.config.modelVariablesUI.userActions["applyChanges"].label = "Apply changes";
@@ -6847,40 +7707,40 @@ oes.ui.setupModelVariablesUI = function (parentEl) {
   parentEl.appendChild( uiPanelEl);
 }
 /*******************************************************
- UI for defining the initial state
- *******************************************************/
-/**
- * Set up UI for defining the objects of the initial state
- *
+ UI for defining the initial state objects
+ *******************************************************
  *
  * @method
  * @author Gerd Wagner
  */
-oes.ui.setupInitialStateObjectsUI = function (parentEl) {
+oes.ui.setupInitialObjectsUI = function (parentEl) {
   var objTypes = sim.model.objectTypes.concat( oes.predefinedObjectTypes);  // an array
   var uiPanelEl = dom.createExpandablePanel({id:"InitialStateObjectsUI",
-          heading:"Initial State"});
+      heading:"Initial Objects", borderColor:"aqua",
+    // "Delete, create or edit initial objects."
+      hint:"Change initial attribute values of objects - as a part of the initial state"
+  });
   var mainContentEl = uiPanelEl.lastElementChild;
   sim.scenario.initialStateUI = sim.scenario.initialStateUI || {};
   // create a ClassPopulationWidget for each object type
   objTypes.forEach( function (className) {
     var editProps=[], classPopWidget=null,
+        slots = {type: className},
         Class = cLASS[className];
     if (!Class.instances || Object.keys( Class.instances).length === 0) return;
     if (sim.scenario.initialStateUI &&
         sim.scenario.initialStateUI.editableProperties &&
         sim.scenario.initialStateUI.editableProperties[className]) {
       editProps = sim.scenario.initialStateUI.editableProperties[className];
-      classPopWidget = oBJECTvIEW.createClassPopulationWidget( Class, editProps);
-    } else {
-      classPopWidget = oBJECTvIEW.createClassPopulationWidget( Class);
+      slots.editProps = editProps;
     }
+    classPopWidget = oBJECTvIEW.createRecordTableWidget( slots);
     mainContentEl.appendChild( classPopWidget);
   });
   sim.scenario.initialStateUI.userActions = {
     "applyChanges": function () {
+      alert("Changing the initial state is not yet implemented!"); return;
       sim.updateInitialStateObjects();
-      sim.initializeModelVariables();
       sim.createInitialObjEvt();
       if (sim.config.visualize) {
         oes.ui.resetCanvas();
@@ -6896,15 +7756,143 @@ oes.ui.setupInitialStateObjectsUI = function (parentEl) {
   parentEl.appendChild( uiPanelEl);
 };
 /*******************************************************
- UI for Space Definition
- *******************************************************/
-/**
- * Set up space definition UI
+ UI for defining the initial state events
+ *******************************************************
  *
  * @method
  * @author Gerd Wagner
  */
-oes.ui.setupSpaceDefUI = function (parentEl) {
+oes.ui.setupInitialEventsUI = function (parentEl) {
+  var evtTypes = sim.model.eventTypes.concat( oes.predefinedEventTypes);  // an array
+  var uiPanelEl = dom.createExpandablePanel({id:"InitialStateEventsUI",
+      heading:"Initial Events", borderColor:"aqua",
+      // "Delete, create or edit initial events."
+      hint:"Change attribute values of initial events  - as a part of the initial state"
+  });
+  var mainContentEl = uiPanelEl.lastElementChild;
+  var initEvts = sim.FEL.getAllEvents();
+  sim.scenario.initialEventsUI = sim.scenario.initialEventsUI || {};
+  // create a ClassPopulationWidget for each event type
+  evtTypes.forEach( function (className) {
+    var editProps=[], classPopWidget=null,
+        Class = cLASS[className],
+        slots = {type: className};
+    Class.instances = initEvts.filter(
+        function (evt) {return evt.constructor.Name === className;});
+    if (Object.keys( Class.instances).length === 0) return;
+    if (sim.scenario.initialEventsUI.editableProperties &&
+        sim.scenario.initialEventsUI.editableProperties[className]) {
+      editProps = sim.scenario.initialEventsUI.editableProperties[className];
+      slots.editProps = editProps;
+    }
+    // add inherited property
+    Class.properties["occTime"] = {range:"NonNegativeNumber", label:"Occ. time"};
+    classPopWidget = oBJECTvIEW.createRecordTableWidget( slots);
+    mainContentEl.appendChild( classPopWidget);
+  });
+  sim.scenario.initialEventsUI.userActions = {
+    "applyChanges": function () {
+      sim.updateInitialStateObjects();
+      sim.createInitialObjEvt();
+      if (sim.config.visualize) {
+        oes.ui.resetCanvas();
+        oes.ui.visualizeStep();  // visualize initial state
+      }
+    }
+  };
+  sim.scenario.initialEventsUI.userActions["applyChanges"].label = "Apply changes";
+  // create buttons for userActions
+  mainContentEl.appendChild( oBJECTvIEW.createUiElemsForUserActions(
+      sim.scenario.initialEventsUI.userActions
+  ));
+  parentEl.appendChild( uiPanelEl);
+};
+/*******************************************************
+ TODO: UI for Experiments
+ *******************************************************
+ *
+ * @method
+ * @author Gerd Wagner
+ */
+oes.ui.setupExperimentsUI = function (parentEl) {
+  var uiPanelEl = dom.createExpandablePanel({id:"experimentsUI",
+      heading:"Experiments", borderColor:"chartreuse",
+      hint:"An experiment is defined on top of a scenario by defining (1) the number of replications, " +
+      "(2) zero or more experiment parameters (bound to model variables), and " +
+      "(3) possibly a list of seed values, one for each replication."
+  });
+  var mainContentEl = uiPanelEl.lastElementChild;
+  parentEl.appendChild( uiPanelEl);
+  if (sim.experiment.replications) {  // an experiment has been defined
+    try {
+      sim.ui["experiments"] = new oBJECTvIEW({
+        modelObject: sim.experiment,
+        heading: "Experiment " + sim.experiment.experimentNo +
+            (sim.experiment.title ? ": "+ sim.experiment.title : ""),
+        fields: [["replications", "parameterDefs"]],
+        suppressNoValueFields: false,
+        userActions: {
+          "run": function () {
+            var rowEl = null, tbodyEl=null, worker=null;
+            var progressContainer = dom.createProgressBar("Executing simulation experiment...");
+            function logExpScenarioRun( data) {
+              rowEl = tbodyEl.insertRow();  // create new table row
+              rowEl.insertCell().textContent = data.expScenNo;
+              rowEl.insertCell().textContent = data.expScenParamValues.toString();
+              Object.keys( data.expScenStat).forEach( function (v) {
+                rowEl.insertCell().textContent = data.expScenStat[v];
+              });
+            }
+            document.body.appendChild( progressContainer);
+            // configure experiment log
+            oes.ui.setupSimLog( true);
+            tbodyEl = sim.ui.logEl;
+            // drop scenario form
+            document.forms["scenario"].remove();
+            // show simulator controls
+            document.forms["sim"].style.display = "block";
+            // log simulation start time (in the main thread)
+            sim.startTime = (new Date()).getTime();
+            // start the simulation worker
+            if (window.Worker) {
+              worker = new Worker("simulation-worker.js");
+              // send "experiment mode" message to worker
+              worker.postMessage({runExperiment: true, dbName: sim.model.name});
+              // on incoming messages from worker
+              worker.onmessage = function (e) {
+                if (e.data.expScenNo !== undefined) logExpScenarioRun( e.data);
+                if (e.data.progressIncrement !== undefined) {
+                  document.querySelector("#progress-container > progress").value +=
+                      e.data.progressIncrement;
+                }
+                if (e.data.endOfExp) oes.ui.updateUiOnSimulationEnd( true);
+              };
+            } else {
+              alert("Experiment cannot be executed since browser does not support web workers!");
+            }
+          }
+        }
+      });
+      sim.ui["experiments"].userActions["run"].label = "Run Experiment";
+      // render view and store its data binding
+      sim.ui["experiments"].dataBinding = sim.ui["experiments"].render( mainContentEl);
+    } catch (e) {
+      console.log( e.constructor.name +": "+ e.message);
+    }
+  } else {
+    //mainContentEl.innerHTML = "<p>No experiment defined.</p>";
+    uiPanelEl.style.display = "none";
+  }
+};
+
+/*******************************************************
+ TODO: UI for Expost Statistics
+ *******************************************************
+ *
+ * @method
+ * @author Gerd Wagner
+ */
+oes.ui.setupExpostStatisticsDefUI = function (parentEl) {
   var uiPanelEl = dom.createExpandablePanel({id:"spaceUI", heading:"Space"});
   var mainContentEl = uiPanelEl.lastElementChild;
   parentEl.appendChild( uiPanelEl);
@@ -6930,8 +7918,10 @@ oes.ui.setupSpaceDefUI = function (parentEl) {
  Set up the Visualization
  *******************************************************/
 oes.ui.setupVisualization = function () {
-  if (sim.model.space.type) oes.ui.setupSpaceView();
-  else if (sim.config.observationUI.type) {  // visualizing a non-spatial  model
+  var mainEl = document.querySelector("body > main");
+  if (sim.model.space.type) {
+    oes.ui.setupSpaceView();
+  } else if (sim.config.observationUI.type) {  // visualizing a non-spatial  model
     switch (sim.config.observationUI.type) {
       case "SVG":
         oes.ui.setupCanvas = oes.ui.vis.SVG.setup;
@@ -6942,9 +7932,8 @@ oes.ui.setupVisualization = function () {
         console.log("Invalid visualization type: "+ sim.config.observationUI.visualType);
         sim.config.visualize = false;
     }
-  }
-  else sim.config.visualize = false;
-  if (sim.config.visualize) oes.ui.setupCanvas();
+  } else sim.config.visualize = false;
+  if (sim.config.visualize) oes.ui.setupCanvas( mainEl);
 
 }
 /*******************************************************
@@ -7041,13 +8030,14 @@ oes.ui.vis.SVG.setup = function (containerEl) {
       canvasHeight = obsUI.canvas.height || 400,
       canvasSvgEl = svg.createSVG({id:"canvasSVG",
           width: canvasWidth, height: canvasHeight});
-  var defsEl = svg.createDefs();
+  var defsEl = svg.createDefs(),
+      mainEl = document.querySelector("body > main");
   // define SVG canvas
   sim.visualEl = dom.createElement("div",{id:"visCanvas", classValues:"uiBlock"});
   if (obsUI.canvas.style) sim.visualEl.style = obsUI.canvasStyle;
   sim.visualEl.appendChild( canvasSvgEl);
   canvasSvgEl.appendChild( defsEl);
-  document.body.appendChild( sim.visualEl);
+  mainEl.appendChild( sim.visualEl);
   if (fixedElems) {  // render fixed elements
     Object.keys( fixedElems).forEach( function (id) {
       var el=null;
@@ -7266,6 +8256,7 @@ oes.ui.setupUserInteraction = function () {
 };
 /*******************************************************
  Set up the Event Appearances (Sound + Animations)
+ TODO: support audio/sound
  *******************************************************/
 oes.ui.setupEventAppearances = function () {
   var eventAppearances = sim.config.observationUI.eventAppearances;

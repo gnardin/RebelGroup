@@ -12,12 +12,8 @@ var Fight = new cLASS( {
   Name: "Fight",
   supertypeName: "eVENT",
   properties: {
-    "defiant": {
-      range: "RebelGroup"
-    },
-    "opponent": {
-      range: "RebelGroup"
-    }
+    "defiant": {range: "RebelGroup", label: "Attacker"},
+    "opponent": {range: "RebelGroup", label: "Opponent"}
   },
   methods: {
     "onEvent": function () {

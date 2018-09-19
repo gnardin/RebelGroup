@@ -12,9 +12,7 @@ var Demand = new cLASS( {
   Name: "Demand",
   supertypeName: "eVENT",
   properties: {
-    "rebelGroup": {
-      range: "RebelGroup"
-    }
+    "rebelGroup": {range: "RebelGroup", label: "Rebel group"}
   },
   methods: {
     "onEvent": function () {
