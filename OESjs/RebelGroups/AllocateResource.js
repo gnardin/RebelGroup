@@ -21,40 +21,41 @@ var AllocateResource = new cLASS( {
       var followupEvents = [];
       var deltaRebels = 0, recruit = 0, expel = 0;
       var strengthRatio = sim.model.f.globalRelativeStrength( this.rebelGroup );
-
-      var totalSalary = this.rebelGroup.nmrOfRebels *
-        this.rebelGroup.rebelCost;
+      var totalSalary = this.rebelGroup.nmrOfRebels * this.rebelGroup.rebelCost;
 
       /* CHECK Excessive recruitment */
       if ( this.rebelGroup.wealth > totalSalary ) {
         this.rebelGroup.wealth -= totalSalary;
       } else {
         // Rebels not paid leave the Rebel Group
-        expel = Math.round( ( totalSalary - this.rebelGroup.wealth ) /
+        expel = Math.ceil( ( totalSalary - this.rebelGroup.wealth ) /
           this.rebelGroup.rebelCost );
         this.rebelGroup.wealth = 0;
       }
 
-      if ( ( this.rebelGroup.wealth > this.rebelGroup.lastWealth ) &&
-        ( strengthRatio < this.rebelGroup.freezeExpandThreshold ) ) {
-        deltaRebels = ( ( this.rebelGroup.wealth -
-          this.rebelGroup.lastWealth ) / this.rebelGroup.rebelCost );
+      if ( ( this.rebelGroup.lastAmountExtorted > totalSalary ) &&
+        ( strengthRatio < this.rebelGroup.recruitThreshold ) ) {
+        // Recruit
+        deltaRebels =
+          Math.floor( ( this.rebelGroup.lastAmountExtorted - totalSalary ) /
+            this.rebelGroup.rebelCost );
 
-        recruit = Math.round( Math.min( deltaRebels,
-          ( this.rebelGroup.nmrOfRebels * this.rebelGroup.expandRate ) ) );
+        recruit = Math.floor( Math.min( deltaRebels * ( 1 - strengthRatio ),
+          ( this.rebelGroup.nmrOfRebels * this.rebelGroup.recruitRate ) ) );
+      } else {
+        // Expel
+        deltaRebels =
+          Math.ceil( ( totalSalary - this.rebelGroup.lastAmountExtorted ) /
+            this.rebelGroup.rebelCost );
 
-      } else if ( this.rebelGroup.wealth < this.rebelGroup.lastWealth ) {
-        deltaRebels = ( this.rebelGroup.lastWealth - this.rebelGroup.wealth ) /
-          this.rebelGroup.rebelCost;
-
-        expel = Math.round( Math.min( this.rebelGroup.nmrOfRebels,
-          expel + deltaRebels ) );
+        expel = Math.min( this.rebelGroup.nmrOfRebels,
+          Math.max( expel, deltaRebels ) );
       }
 
       this.rebelGroup.nmrOfRebels = Math.max( 0,
         this.rebelGroup.nmrOfRebels + recruit - expel );
 
-      this.rebelGroup.lastWealth = this.rebelGroup.wealth;
+      this.rebelGroup.lastAmountExtorted = 0;
 
       sim.stat.nmrOfRecruits += recruit;
       sim.stat.nmrOfExpels += expel;

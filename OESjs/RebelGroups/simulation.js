@@ -116,7 +116,7 @@ sim.model.f.normalizeValue = function ( value ) {
  */
 sim.model.f.sigmoid = function ( a, b, c, d, e ) {
   return a / ( b + ( c * Math.pow( Math.E, ( -1 * d * e ) ) ) );
-}
+};
 /*******************************************************************************
  * Define Initial State
  ******************************************************************************/
@@ -129,8 +129,7 @@ sim.scenario.initialState.events = [];
 /* Initial Functions */
 sim.scenario.setupInitialState = function () {
   var rebelGroupsObj, rebelGroupsKey, rebelGroup;
-  var enterprisesObj, enterprise;
-  var aux, objId;
+  var enterprisesObj, enterprise, objId;
   var i = sim.v.nmrOfRebelGroups + 1;
 
   /* Create Rebel Groups */
@@ -138,19 +137,19 @@ sim.scenario.setupInitialState = function () {
     id: 1,
     name: "RebelGroup1",
     shortLabel: "rg1",
-    wealth: 10000,
-    nmrOfRebels: 50,
-    rebelCost: 100,
-    freezeExpandThreshold: 0.8,
-    expandRate: 0.1,
+    wealth: 300000,
+    nmrOfRebels: 1000,
+    rebelCost: 291,
+    recruitThreshold: 0.8,
+    recruitRate: 0.5,
     extortedEnterprises: [],
     extortionRate: 0.1,
     reports: {},
-    freqDemand: Math.round( rand.normal( 20, 2 ) ),
-    freqExpand: Math.round( rand.normal( 100, 2 ) ),
+    freqDemand: Math.round( rand.normal( 30, 2 ) ),
+    freqExpand: Math.round( rand.normal( 5, 2 ) ),
     freqAllocate: 30,
     lastExpand: 0,
-    lastWealth: 0
+    lastAmountExtorted: 0
   } ) );
 
   sim.scheduleEvent( new Demand( {
@@ -162,7 +161,7 @@ sim.scenario.setupInitialState = function () {
     rebelGroup: 1
   } ) );
   sim.scheduleEvent( new AllocateResource( {
-    occTime: 1,
+    occTime: 30,
     rebelGroup: 1
   } ) );
 
@@ -170,19 +169,19 @@ sim.scenario.setupInitialState = function () {
     id: 2,
     name: "RebelGroup2",
     shortLabel: "rg2",
-    wealth: 10000,
-    nmrOfRebels: 49,
-    rebelCost: 100,
-    freezeExpandThreshold: 0.8,
-    expandRate: 0.1,
+    wealth: 240000,
+    nmrOfRebels: 800,
+    rebelCost: 291,
+    recruitThreshold: 0.8,
+    recruitRate: 0.5,
     extortedEnterprises: [],
     extortionRate: 0.1,
     reports: {},
-    freqDemand: Math.round( rand.normal( 20, 2 ) ),
-    freqExpand: Math.round( rand.normal( 100, 2 ) ),
+    freqDemand: Math.round( rand.normal( 30, 2 ) ),
+    freqExpand: Math.round( rand.normal( 5, 2 ) ),
     freqAllocate: 30,
     lastExpand: 0,
-    lastWealth: 0
+    lastAmountExtorted: 0
   } ) );
 
   sim.scheduleEvent( new Demand( {
@@ -194,72 +193,17 @@ sim.scenario.setupInitialState = function () {
     rebelGroup: 2
   } ) );
   sim.scheduleEvent( new AllocateResource( {
-    occTime: 1,
+    occTime: 30,
     rebelGroup: 2
   } ) );
 
-  // sim.addObject( new RebelGroup( {
-  //   id: 3,
-  //   name: "RebelGroup3",
-  //   shortLabel: "rg3",
-  //   wealth: 250,
-  //   nmrOfRebels: 100,
-  //   rebelCost: 2,
-  //   freezeExpandThreshold: 0.8,
-  //   expandRate: 0.1,
-  //   extortedEnterprises: [],
-  //   extortionRate: 0.2,
-  //   reports: {},
-  //   freqDemand: Math.round( rand.normal( 30, 5 ) ),
-  //   freqExpand: Math.round( rand.normal( 100, 2 ) ),
-  //   freqAllocate: 30,
-  //   lastExpand: 0,
-  //   lastWealth: 0
-  // } ) );
-
-  // sim.scheduleEvent( new Demand( {
-  //   occTime: 1,
-  //   rebelGroup: 3
-  // } ) );
-  // sim.scheduleEvent( new Expand( {
-  //   occTime: 1,
-  //   rebelGroup: 3
-  // } ) );
-  // sim.scheduleEvent( new AllocateResource( {
-  //   occTime: 1,
-  //   rebelGroup: 3
-  // } ) );
-
   /* Create Enterprises */
-  aux = Math.round( sim.v.nmrOfEnterprises * 0.2 );
-  for ( ; i <= ( sim.v.nmrOfRebelGroups + aux ); i += 1 ) {
-    objId = i;
-    sim.addObject( new Enterprise( {
-      id: objId,
-      name: "enterprise" + objId,
-      income: rand.normal( 100, 10 ),
-      freqIncome: 1,
-      rebelGroup: null,
-      wealth: 0,
-      accIncome: 0,
-      fleeProb: 0.5,
-      fleeThreshold: 3,
-      nmrOfExtortions: 0,
-      nmrOfLoot: 0
-    } ) );
-
-    sim.scheduleEvent( new Income( {
-      occTime: 1,
-      enterprise: objId
-    } ) );
-  }
-
   for ( ; i <= ( sim.v.nmrOfRebelGroups + sim.v.nmrOfEnterprises ); i += 1 ) {
     objId = i;
     sim.addObject( new Enterprise( {
       id: objId,
       name: "enterprise" + objId,
-      income: rand.normal( 5, 1 ),
+      income: rand.normal( 200, 50 ),
       freqIncome: 1,
       rebelGroup: null,
       wealth: 0,
@@ -301,9 +245,9 @@ sim.model.statistics = {
     // showTimeSeries: true,
     // computeOnlyAtEnd: false
   },
-  "nmrOfLoot": {
+  "nmrOfLoots": {
     range: "NonNegativeInteger",
-    label: "Number Loot",
+    label: "Number Loots",
     initialValue: 0,
     // showTimeSeries: true,
     // computeOnlyAtEnd: false
@@ -326,7 +270,9 @@ sim.model.statistics = {
   "nmrOfFlees": {
     range: "NonNegativeInteger",
     label: "Number Flees",
-    initialValue: 0
+    initialValue: 0,
+    showTimeSeries: true,
+    computeOnlyAtEnd: false
   },
   "nmrOfRecruits": {
     range: "NonNegativeInteger",
@@ -343,9 +289,9 @@ sim.model.statistics = {
     label: "Amount Extorted",
     initialValue: 0
   },
-  "amountLoot": {
+  "amountLooted": {
     range: "Decimal",
-    label: "Amount Loot",
+    label: "Amount Looted",
     initialValue: 0
   },
   // "nmrOfRebels": {

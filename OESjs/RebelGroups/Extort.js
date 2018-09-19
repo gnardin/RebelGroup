@@ -36,7 +36,11 @@ var Extort = new cLASS( {
         extortion = this.enterprise.wealth;
       }
 
+      // Update Rebel Group
       this.rebelGroup.wealth += extortion;
+      this.rebelGroup.lastAmountExtorted += extortion;
+
+      // Update Enterprise
       this.enterprise.wealth -= extortion;
       this.enterprise.accIncome = 0;
       this.enterprise.nmrOfExtortions += 1;

@@ -24,13 +24,13 @@ var RebelGroup = new cLASS( {
       range: "Decimal",
       label: "Rebel's cost"
     },
-    "freezeExpandThreshold": {
+    "recruitThreshold": {
       range: "Decimal",
-      label: "Freeze Expansion Threshold"
+      label: "Recruitment Strength Threshold"
     },
-    "expandRate": {
+    "recruitRate": {
       range: "Decimal",
-      label: "Maximum Expansion Rate"
+      label: "Maximum Recruitment Rate"
     },
     "extortedEnterprises": {
       range: "Enterprise",
@@ -61,9 +61,9 @@ var RebelGroup = new cLASS( {
       range: "NonNegativeInteger",
       label: "Time Last Expansion"
     },
-    "lastWealth": {
+    "lastAmountExtorted": {
       range: "Decimal",
-      label: "Wealth Last Adaptation"
+      label: "Amount Extorted Last Period"
     }
   },
   methods: {

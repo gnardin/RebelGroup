@@ -28,7 +28,11 @@ var Loot = new cLASS( {
       /* TODO Replace it by a function */
       var fleeProb = this.enterprise.fleeProb;
 
+      // Update Rebel Group
       this.rebelGroup.wealth += amount;
+      this.rebelGroup.lastAmountExtorted += amount;
+
+      // Update Enterprise
       this.enterprise.wealth = 0;
       this.enterprise.accIncome = 0;
       this.enterprise.nmrOfLoot += 1;
@@ -42,8 +46,7 @@ var Loot = new cLASS( {
           } ) );
         }
       } else {
-        // Enterprise decides to Flee or Report if looted by a different
-        // Rebel Group
+        // Flee or Report if looted by a different Rebel Group
         if ( rand.uniform() < fleeProb ) {
           followupEvents.push( new Flee( {
             occTime: this.occTime + 1,
@@ -59,8 +62,8 @@ var Loot = new cLASS( {
         }
       }
 
-      sim.stat.nmrOfLoot += 1;
-      sim.stat.amountLoot += amount;
+      sim.stat.nmrOfLoots += 1;
+      sim.stat.amountLooted += amount;
 
       return followupEvents;
     }
