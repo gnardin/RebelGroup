@@ -42,7 +42,7 @@ var AllocateResource = new cLASS( {
 
         recruit = Math.floor( Math.min( deltaRebels * ( 1 - strengthRatio ),
           ( this.rebelGroup.nmrOfRebels * this.rebelGroup.recruitRate ) ) );
-      } else {
+      } else if ( totalSalary > this.rebelGroup.lastAmountExtorted ) {
         // Expel
         deltaRebels =
           Math.ceil( ( totalSalary - this.rebelGroup.lastAmountExtorted ) /

@@ -56,9 +56,11 @@ var Expand = new cLASS( {
             ( 1 / enterprisesObj[ enterprisesKey[ i ] ].wealth );
         }
         threshold = rand.uniform( 0, 1 );
-        for ( i = 0, v = 0; v < threshold; i += 1 ) {
+        i = -1;
+        do {
+          i += 1;
           v = wEnterprises[ i ] / wEnterprises[ wEnterprises.length - 1 ];
-        }
+        } while ( v < threshold );
         enterprise = enterprisesObj[ enterprisesKey[ i ] ];
         if ( ( enterprise.rebelGroup !== null ) &&
           ( this.rebelGroup.id === enterprise.rebelGroup.id ) ) {

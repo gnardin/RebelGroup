@@ -21,6 +21,7 @@ var Flee = new cLASS( {
       var followupEvents = [];
       var rebelGroup, index;
       var rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
+      var enterprisesKey = Object.keys( cLASS[ "Enterprise" ].instances );
 
       Object.keys( rebelGroupsObj ).forEach( ( objId ) => {
         rebelGroup = rebelGroupsObj[ objId ];
@@ -31,9 +32,10 @@ var Flee = new cLASS( {
         }
       } );
 
-      sim.removeObject( this.enterprise );
-
-      sim.stat.nmrOfFlees += 1;
+      if ( enterprisesKey.indexOf( String( this.enterprise.id ) ) !== -1 ) {
+        sim.removeObject( this.enterprise );
+        sim.stat.nmrOfFlees += 1;
+      }
 
       return followupEvents;
     }
