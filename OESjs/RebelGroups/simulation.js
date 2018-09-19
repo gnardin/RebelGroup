@@ -247,7 +247,7 @@ sim.model.statistics = {
   },
   "nmrOfLoots": {
     range: "NonNegativeInteger",
-    label: "Number Loots",
+    label: "Number Lootings",
     initialValue: 0,
     // showTimeSeries: true,
     // computeOnlyAtEnd: false
@@ -269,14 +269,14 @@ sim.model.statistics = {
   },
   "nmrOfFlees": {
     range: "NonNegativeInteger",
-    label: "Number Flees",
+    label: "Number Fled Ent.",
     initialValue: 0,
     showTimeSeries: true,
     computeOnlyAtEnd: false
   },
   "nmrOfRecruits": {
     range: "NonNegativeInteger",
-    label: "Number Recruitment",
+    label: "Number Recruitments",
     initialValue: 0
   },
   "nmrOfExpels": {
@@ -311,7 +311,7 @@ sim.model.statistics = {
   // },
   "nmrOfRebels1": {
     range: "NonNegativeInteger",
-    label: "Number of Rebels (1)",
+    label: "Size of Rebel Group 1",
     initialValue: 0,
     showTimeSeries: true,
     computeOnlyAtEnd: false,
@@ -323,7 +323,7 @@ sim.model.statistics = {
   },
   "nmrOfRebels2": {
     range: "NonNegativeInteger",
-    label: "Number of Rebels (2)",
+    label: "Size of Rebel Group 2",
     initialValue: 0,
     showTimeSeries: true,
     computeOnlyAtEnd: false,
@@ -362,7 +362,7 @@ sim.model.statistics = {
   // },
   "nmrOfExtorted1": {
     range: "NonNegativeInteger",
-    label: "Number of Extorted Enterprises (1)",
+    label: "Enterprises Extorted by Group 1",
     initialValue: 0,
     showTimeSeries: true,
     computeOnlyAtEnd: false,
@@ -374,7 +374,7 @@ sim.model.statistics = {
   },
   "nmrOfExtorted2": {
     range: "NonNegativeInteger",
-    label: "Number of Extorted Enterprises (2)",
+    label: "Enterprises Extorted by Group 2",
     initialValue: 0,
     showTimeSeries: true,
     computeOnlyAtEnd: false,
