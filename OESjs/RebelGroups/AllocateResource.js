@@ -12,9 +12,7 @@ var AllocateResource = new cLASS( {
   Name: "AllocateResource",
   supertypeName: "eVENT",
   properties: {
-    "rebelGroup": {
-      range: "RebelGroup"
-    }
+    "rebelGroup": { range: "RebelGroup" }
   },
   methods: {
     "onEvent": function () {
@@ -23,7 +21,6 @@ var AllocateResource = new cLASS( {
       var strengthRatio = sim.model.f.globalRelativeStrength( this.rebelGroup );
       var totalSalary = this.rebelGroup.nmrOfRebels * this.rebelGroup.rebelCost;
 
-      /* CHECK Excessive recruitment */
       if ( this.rebelGroup.wealth > totalSalary ) {
         this.rebelGroup.wealth -= totalSalary;
       } else {

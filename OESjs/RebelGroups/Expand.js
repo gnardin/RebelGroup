@@ -12,7 +12,7 @@ var Expand = new cLASS( {
   Name: "Expand",
   supertypeName: "eVENT",
   properties: {
-    "rebelGroup": {range: "RebelGroup", label: "Rebel group"}
+    "rebelGroup": { range: "RebelGroup", label: "Rebel group" }
   },
   methods: {
     "onEvent": function () {
@@ -29,7 +29,7 @@ var Expand = new cLASS( {
       var enterprisesObj = cLASS[ "Enterprise" ].instances;
       var enterprisesKey = Object.keys( enterprisesObj );
 
-      /* CHECK Expand Probability */
+      /* Expand Probability */
       globalStrengthRatio =
         sim.model.f.globalRelativeStrength( this.rebelGroup );
 
@@ -37,10 +37,7 @@ var Expand = new cLASS( {
         sim.model.f.normalizeValue( globalStrengthRatio ),
         ( this.occTime - this.rebelGroup.lastExpand ) );
 
-      /*
-       * Decide to expand if there are Enterprises to expand and the Rebel
-       * Group has rebels
-       */
+      // Expand if there are available Enterprises and rebels
       if ( ( rand.uniform() < expandProb ) &&
         ( this.rebelGroup.nmrOfRebels > 0 ) &&
         ( enterprisesKey.length >
@@ -69,16 +66,14 @@ var Expand = new cLASS( {
             ( this.rebelGroup.id === enterprise.rebelGroup.id ) );
         }
 
-        /* Calculate the probability to fight if the Enterprise already has
-         * an main extorter Rebel Group
-         */
+        // Probability to fight if the Enterprise already has main extorter
         fightProb = 0;
         if ( enterprise.rebelGroup !== null ) {
           strengthRatio = sim.model.f.normalizeValue(
             sim.model.f.relativeStrength( this.rebelGroup,
               enterprise.rebelGroup ) );
 
-          /* CHECK Fight Probability */
+          /* Fight Probability */
           fightProb = sim.model.f.sigmoid( 1, 1, 1,
             -1.5, ( strengthRatio * 4 ) );
         } else {
@@ -88,14 +83,12 @@ var Expand = new cLASS( {
         if ( rand.uniform() < fightProb ) {
           followupEvents.push( new Fight( {
             occTime: this.occTime + 1,
-            defiant: this.rebelGroup,
+            attacker: this.rebelGroup,
             opponent: enterprise.rebelGroup
           } ) );
         } else {
-          /*
-           * Weaker Rebel Groups have a greater chance to loot, while
-           * stronger Rebel Groups tend to extort
-           */
+          // Weaker Rebel Groups have a greater chance to loot
+          // Stronger Rebel Groups tend to extort
           if ( rand.uniform() < globalStrengthRatio ) {
             followupEvents.push( new Extort( {
               occTime: this.occTime + 1,

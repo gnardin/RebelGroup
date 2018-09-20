@@ -12,7 +12,7 @@ var Income = new cLASS( {
   Name: "Income",
   supertypeName: "eVENT",
   properties: {
-    "enterprise": {range: "Enterprise", label: "Enterprise"}
+    "enterprise": { range: "Enterprise", label: "Enterprise" }
   },
   methods: {
     "onEvent": function () {
