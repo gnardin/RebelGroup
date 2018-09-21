@@ -3734,6 +3734,7 @@ oes.setupFrontEndSimEnv = function () {
   if (sim.model.space.type) oes.space.initialize();
   // set up initial state
   sim.initializeModelVariables();
+  console.log("sim.v.nmrOfEnterprises: "+ sim.v.nmrOfEnterprises);
   sim.createInitialObjEvt();
   // initialize statistics
   if (sim.model.statistics) oes.stat.initialize();
@@ -4300,7 +4301,7 @@ sim.initializeModelVariables = function (expParamSlots) {
       sim.v[varName] = expParamSlots[varName];
     } else /* if (sim.v[varName] === undefined) */ {
       if (typeof mv === "object") {
-        sim.v[varName] = mv.fieldValue !== undefined ? mv.fieldValue : mv.initialValue;
+        sim.v[varName] = mv.value !== undefined ? mv.value : mv.initialValue;
       } else {
         sim.v[varName] = mv;
       }
@@ -5043,7 +5044,7 @@ sim.runExperimentScenarioStep = function () {
       ActivityEndET=null, AT=null, a=null,
       WorkObject=null, o=null, slots={}, nextNode=null, occT=0,
       nextEvtTime = sim.FEL.getNextOccurrenceTime(),  // 0 if there is no next event
-      eventTypeName="";
+      eventTypeName="", followupEvents=[];
   function advanceSimulationTime () {
     // increment the step counter
     sim.step += 1;
@@ -5067,7 +5068,6 @@ sim.runExperimentScenarioStep = function () {
     }
   }
   //-----------------------------------------------------
-  followupEvents = [];
   advanceSimulationTime();
   // extract and process next events
   if (sim.time === nextEvtTime) {
