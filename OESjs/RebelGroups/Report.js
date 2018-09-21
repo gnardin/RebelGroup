@@ -12,10 +12,9 @@ var Report = new cLASS( {
   Name: "Report",
   supertypeName: "eVENT",
   properties: {
-    "rebelGroup": {range: "RebelGroup", label: "Rebel group"},
-    "enterprise": {range: "Enterprise", label: "Enterprise"},
-    "extorter": {range: "RebelGroup", label: "Extorter"
-    }
+    "rebelGroup": { range: "RebelGroup", label: "Rebel group" },
+    "enterprise": { range: "Enterprise", label: "Enterprise" },
+    "extorter": { range: "RebelGroup", label: "Extorter" }
   },
   methods: {
     "onEvent": function () {
@@ -29,7 +28,7 @@ var Report = new cLASS( {
         nmrOfReports = this.rebelGroup.reports[ extorterId ] + 1;
       }
 
-      /* CHECK Fight Probability */
+      /* Fight Probability */
       strengthRatio =
         sim.model.f.relativeStrength( this.rebelGroup, this.extorter );
 
@@ -40,7 +39,7 @@ var Report = new cLASS( {
       if ( ( rand.uniform < fightProb ) &&
         ( this.rebelGroup.nmrOfRebels > 0 ) ) {
         followupEvents.push( new Fight( {
-          defiant: this.rebelGroup,
+          attacker: this.rebelGroup,
           opponent: this.extorter
         } ) );
         this.rebelGroup.reports[ extorterId ] = 0;

@@ -12,7 +12,7 @@ var Flee = new cLASS( {
   Name: "Flee",
   supertypeName: "eVENT",
   properties: {
-    "enterprise": {range: "Enterprise", label: "Enterprise"}
+    "enterprise": { range: "Enterprise", label: "Enterprise" }
   },
   methods: {
     "onEvent": function () {

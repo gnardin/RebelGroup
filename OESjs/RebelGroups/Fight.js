@@ -12,8 +12,8 @@ var Fight = new cLASS( {
   Name: "Fight",
   supertypeName: "eVENT",
   properties: {
-    "defiant": {range: "RebelGroup", label: "Attacker"},
-    "opponent": {range: "RebelGroup", label: "Opponent"}
+    "attacker": { range: "RebelGroup", label: "Attacker" },
+    "opponent": { range: "RebelGroup", label: "Opponent" }
   },
   methods: {
     "onEvent": function () {
@@ -21,20 +21,20 @@ var Fight = new cLASS( {
       var strongRG, weakRG, strongRGProb, weakRGProb, enterprise, index, len, i;
 
       // Define the strong and weak Rebel Groups
-      if ( this.defiant.nmrOfRebels > this.opponent.nmrOfRebels ) {
-        strongRG = this.defiant;
+      if ( this.attacker.nmrOfRebels > this.opponent.nmrOfRebels ) {
+        strongRG = this.attacker;
         weakRG = this.opponent;
       } else {
         strongRG = this.opponent;
-        weakRG = this.defiant;
+        weakRG = this.attacker;
       }
 
-      /* Rebel Groups fight only if they have rebels */
+      // Rebel Groups fight only if they have rebels
       if ( ( strongRG.nmrOfRebels > 0 ) || ( weakRG.nmrOfRebels > 0 ) ) {
         strongRGProb = sim.model.f.relativeStrength( strongRG, weakRG );
         weakRGProb = sim.model.f.relativeStrength( weakRG, strongRG );
 
-        /* Probability the strong Rebel Group wins the fight */
+        // Probability the strong Rebel Group wins the fight
         if ( rand.uniform() < strongRGProb ) {
           // Define number of Enterprises to transfer
           len = weakRG.extortedEnterprises.length;
@@ -52,7 +52,7 @@ var Fight = new cLASS( {
             enterprise.nmrOfLoot = 0;
           }
         } else {
-          /* Probability the weak Rebel Group wins the fight */
+          // Probability the weak Rebel Group wins the fight
           if ( rand.uniform() < weakRGProb ) {
             // Define number of Enterprises to transfer
             len = strongRG.extortedEnterprises.length;
@@ -73,10 +73,7 @@ var Fight = new cLASS( {
           }
         }
 
-        /*
-         * Fight causes the decrease of Rebel Group members proportional to the
-         * opposite Rebel Group's strength
-        */
+        // Fight decreases RG size proportional to opposite RG's strength
         strongRG.nmrOfRebels -= Math.round( strongRG.nmrOfRebels * weakRGProb );
         weakRG.nmrOfRebels -= Math.round( weakRG.nmrOfRebels * strongRGProb );
 

@@ -12,8 +12,8 @@ var Extort = new cLASS( {
   Name: "Extort",
   supertypeName: "eVENT",
   properties: {
-    "rebelGroup": {range: "RebelGroup", label: "Rebel group"},
-    "enterprise": {range: "Enterprise", label: "Enterprise"}
+    "rebelGroup": { range: "RebelGroup", label: "Rebel group" },
+    "enterprise": { range: "Enterprise", label: "Enterprise" }
   },
   methods: {
     "onEvent": function () {
