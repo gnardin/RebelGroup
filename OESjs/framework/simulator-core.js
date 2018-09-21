@@ -5923,7 +5923,7 @@ sim.initializeModelVariables = function (expParamSlots) {
       sim.v[varName] = expParamSlots[varName];
     } else /* if (sim.v[varName] === undefined) */ {
       if (typeof mv === "object") {
-        sim.v[varName] = mv.fieldValue !== undefined ? mv.fieldValue : mv.initialValue;
+        sim.v[varName] = mv.value !== undefined ? mv.value : mv.initialValue;
       } else {
         sim.v[varName] = mv;
       }

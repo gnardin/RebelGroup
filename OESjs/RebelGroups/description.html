@@ -32,11 +32,6 @@
       />
     </figure>
     <section id="shortDescription">
-      <figure class="right">
-        <img src="media/img/InteractionsOverview.png" alt="InteractionsOverview"
-          width="571" height="361"
-        />
-      </figure>
     </section>
   </div>
 
@@ -54,255 +49,13 @@
 
       <p>The potentially relevant object types are:</p>
       <ol>
-        <li>RebelGroup</li>
-        <li>Enterprise</li>
-        <li>Household</li>
+        <li>enterprises</li>
+        <li>rebel groups</li>
+        <li>clans</li>
+        <li>households</li>
       </ol>
 
-      <p>These objects coexist in one shared environment. Each object might
-        change its own properties and influence the change in the properties of
-        others as well. They can share the information about their properties
-        together, also about other objects. Objects actions and communication
-        are represented as Events.</p>
-
-      <p>Relevant types of events identified for the Mafia model are
-        described in the tables below. The tables present the events between two
-        objects or just within one object. For example, the events, in table
-        Entrepreneur – Customers, triggered by the Entrepreneur will affect the
-        Customer or just take some information from him. The Event name column
-        describes the name of the event, the Event description column describes
-        briefly the logic performed by the event, and the Trigger object column
-        defines the object that generates the event.</p>
-
-      <table>
-        <caption>Entrepreneur</caption>
-        <thead>
-          <tr>
-            <td>Event name</td>
-            <td>Event description</td>
-            <td>Trigger Object</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>products production</td>
-            <td>Production of new products.</td>
-            <td>Entrepreneur</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <table>
-        <caption>Entrepreneur - Customer.</caption>
-        <thead>
-          <tr>
-            <td>Event name</td>
-            <td>Event description</td>
-            <td>Trigger Object</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>purchase request</td>
-            <td>The Customer takes a decision about the number of products
-              and the Entrepreneur from whom to purchase.</td>
-            <td>Customer</td>
-          </tr>
-          <tr>
-            <td>purchase acceptance</td>
-            <td>The Entrepreneur accepts or declines the purchase
-              transaction.</td>
-            <td>Entrepreneur</td>
-          </tr>
-          <tr>
-            <td>bill payment</td>
-            <td>The Customer pays the bill for the accepted purchase
-              transaction.</td>
-            <td>Customer</td>
-          </tr>
-          <tr>
-            <td>goods transfer</td>
-            <td>The Entrepreneur delivers the purchased products to the
-              Customer.</td>
-            <td>Entrepreneur</td>
-          </tr>
-          <tr>
-            <td>transaction appraise</td>
-            <td>The Customer appraises the purchase transaction as
-              satisfactory or not.</td>
-            <td>Customer</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <table>
-        <caption>Entrepreneur - Mafia.</caption>
-        <thead>
-          <tr>
-            <td>Event name</td>
-            <td>Event description</td>
-            <td>Trigger Object</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>pizzo demand</td>
-            <td>The Mafia demands pizzo from an Entrepreneur.</td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>paying pizzo consideration</td>
-            <td>The Entrepreneur decides whether to pay the pizzo demand.</td>
-            <td>Entrepreneur</td>
-          </tr>
-          <tr>
-            <td>pizzo payment</td>
-            <td>The Entrepreneur pays the pizzo demand.</td>
-            <td>Entrepreneur</td>
-          </tr>
-          <tr>
-            <td>payment check</td>
-            <td>The Mafia checks whether the Entrepreneur paid the pizzo
-              demand.</td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>benefit</td>
-            <td>The Mafia decides how to benefit the Entrepreneur who paid
-              pizzo.</td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>production acceleration</td>
-            <td>The Entrepreneur will increase production for a pre-defined
-              period of time.</td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>pizzo payback</td>
-            <td>The Entrepreneur receives part of the paid pizzo back.</td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>punishment</td>
-            <td>The Mafia decides how to punish the Entrepreneur who did
-              not pay pizzo.</td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>production punishment</td>
-            <td>The Mafia prevents the Entrepreneur to produce products for
-              a pre-defined period of time.
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>warehouse punishment</td>
-            <td>The Mafia destroys a part of the products in the
-              Entrepreneur's warehouse.</td>
-            <td>Mafia</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <table>
-        <caption>State</caption>
-        <thead>
-          <tr>
-            <td>Event name</td>
-            <td>Event description</td>
-            <td>Trigger Object</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>state payment</td>
-            <td>The State increases the amount of resources in the Fondo di
-              Solidarietà.</td>
-            <td>State</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <table>
-        <caption>Entrepreneur - State</caption>
-        <thead>
-          <tr>
-            <td>Event name</td>
-            <td>Event description</td>
-            <td>Trigger Object</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>pizzo report</td>
-            <td>The Entrepreneur reports to the State about the Mafia's
-              pizzo demand. Entrepreneur punishment report The Entrepreneur
-              reports to</td>
-            <td>Entrepreneur</td>
-          </tr>
-          <tr>
-            <td>punishment report</td>
-            <td>The Entrepreneur reports to the State about the Mafia's
-              punishment and the cost inflicted on the business.</td>
-            <td>Entrepreneur</td>
-          </tr>
-
-          <tr>
-            <td>entrepreneur assistance</td>
-            <td>The State decides whether to assist the Entrepreneur for
-              the losses inflicted by the Mafia.</td>
-            <td>State</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <table>
-        <caption>State - Mafia</caption>
-        <thead>
-          <tr>
-            <td>Event name</td>
-            <td>Event description</td>
-            <td>Trigger Object</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>results of general investigation</td>
-            <td>The State regularly assigns an available Police Officer to
-              monitor an Entrepreneur for any Mafia activity.</td>
-            <td>State</td>
-          </tr>
-          <tr>
-            <td>bureaucratic activity</td>
-            <td>The Police Officer conducts several bureaucratic activities
-              to conduct a Mafioso in custody to trial.</td>
-            <td>State</td>
-          </tr>
-          <tr>
-            <td>specific investigation</td>
-            <td>The State initiate a specific investigation if it receives
-              a report of pizzo demand from an Entrepreneur.</td>
-            <td>State</td>
-          </tr>
-          <tr>
-            <td>trial</td>
-            <td>The State decides to imprison or release a Mafioso in
-              custody.</td>
-            <td>State</td>
-          </tr>
-          <tr>
-            <td>prison release</td>
-            <td>The State releases a Mafioso at the end of his prison term.</td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>free time</td>
-            <td>The Police Officer is set available to initiate a new
-              investigation.</td>
-            <td>State</td>
-          </tr>
-        </tbody>
-      </table>
+      <p></p>
     </section>
 
     <section>
@@ -312,255 +65,33 @@
       <div id="expl-CPM" class="expl"></div>
 
       <table>
-        <caption>Entrepreneur</caption>
+        <caption>Event rules</caption>
         <thead>
           <tr>
-            <td>Event name</td>
-            <td>Event description</td>
-            <td>Trigger Object</td>
+            <td>Events</td>
+            <td>Participating objects</td>
+            <td>Caused state changes and follow-up events</td>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>products production</td>
-            <td>If the Entrepreneur's supply chain is not blocked by Mafia
-              and the Entrepreneur's production infrastructure is not damaged
-              and there is enough money, the Entrepreneur can produce products,
-              otherwise he cannot. If the Entrepreneur has paid pizzo and it has
-              been benefited by the Mafia, the production speed increases.</td>
-            <td>Entrepreneur</td>
+            <td>Fights</td>
+            <td>Two rebel groups: an attacker and an opponent.</td>
+            <td>...</td>
+          </tr>
+          <tr>
+            <td>Expansions</td>
+            <td>A rebel group.</td>
+            <td>...</td>
+          </tr>
+          <tr>
+            <td>...</td>
+            <td>...</td>
+            <td>...</td>
           </tr>
         </tbody>
       </table>
 
-      <table>
-        <caption>Entrepreneur - Customer.</caption>
-        <thead>
-          <tr>
-            <td>Event name</td>
-            <td>Event description</td>
-            <td>Trigger Object</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>purchase request</td>
-            <td>The Customer takes a decision about the amount of products
-              and the Entrepreneur from whom to purchase. In addition, the
-              Customer sends a purchase request to the chosen Entrepreneur.</td>
-            <td>Customer</td>
-          </tr>
-          <tr>
-            <td>purchase acceptance</td>
-            <td>The Entrepreneur, after receiving a purchase request,
-              confirms the transaction if there is enough products in the
-              warehouse to fulfill the Customer purchase request. If there is
-              not enough products in the warehouse, the Entrepreneur declines
-              the transaction.</td>
-            <td>Entrepreneur</td>
-          </tr>
-          <tr>
-            <td>bill payment</td>
-            <td>The Customer pays the bill for the last transaction. The
-              Entrepreneur's wealth increases.</td>
-            <td>Customer</td>
-          </tr>
-          <tr>
-            <td>goods transfer</td>
-            <td>The Entrepreneur delivers the purchased products to the
-              Customer. The amount of products in the Entrepreneur's warehouse
-              is decreased.</td>
-            <td>Entrepreneur</td>
-          </tr>
-          <tr>
-            <td>transaction appraise</td>
-            <td>The Customer appraises the transaction as satisfactory or
-              not. If the Customer was satisfied with the transaction, there is
-              a increase on the changes to choose this same Entrepreneur again,
-              otherwise the Customer loses trust on the Entrepreneur and reduces
-              the chances of buying from him again.</td>
-            <td>Customer</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <table>
-        <caption>Entrepreneur - Mafia.</caption>
-        <thead>
-          <tr>
-            <td>Event name</td>
-            <td>Event description</td>
-            <td>Trigger Object</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>pizzo demand</td>
-            <td>The Mafia demands pizzo from an Entrepreneur and waits for
-              payment. The amount of pizzo is calculated based on the
-              Entrepreneur's current wage. If the Entrepreneur is monitored by
-              the State, there is chance that the Mafiosi is seen and captured.
-              If captured, the Mafiosi is sent to custody and the number of
-              available Mafiosi is decreased.</td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>paying pizzo consideration</td>
-            <td>The Entrepreneur takes one of two possible decisions, the
-              Entrepreneur pays or does not pay the pizzo. If the pizzo is not
-              paid, the Entrepreneur takes the decision to report or not the
-              request to the State.</td>
-            <td>Entrepreneur</td>
-          </tr>
-          <tr>
-            <td>pizzo payment</td>
-            <td>The Entrepreneur pays the pizzo.</td>
-            <td>Entrepreneur</td>
-          </tr>
-          <tr>
-            <td>payment check</td>
-            <td>The Mafia checks to see if the Entrepreneur paid the last
-              pizzo request. If so, the Mafia may benefit the Entrepreneur,
-              otherwise the Mafia may punish the Entrepreneur.</td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>benefit</td>
-            <td>The Mafia decides how to benefits the Entrepreneur who paid
-              pizzo. The Mafia benefits the Entrepreneur by increasing the
-              production speed or returning part of the pizzo payment back.</td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>punishment</td>
-            <td>The Mafia decides how to punishe the Entrepreneur who did
-              not pay pizzo. The Mafia punishes the Entrepreneur by decreasing
-              production speed or destroying part of the products in the
-              warehouse.</td>
-            <td>Mafia</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <table>
-        <caption>State</caption>
-        <thead>
-          <tr>
-            <td>Event name</td>
-            <td>Event description</td>
-            <td>Trigger Object</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>state payment</td>
-            <td>The State increases the amount of resources in the Fondo di
-              Solidarietà.</td>
-            <td>State</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <table>
-        <caption>Entrepreneur - State</caption>
-        <thead>
-          <tr>
-            <td>Event name</td>
-            <td>Event description</td>
-            <td>Trigger Object</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>pizzo report</td>
-            <td>The Entrepreneur reports the State about the Mafia's pizzo
-              request. The State decides to monitor the Entrepreneur (i.e.,
-              begin a specific investigation) if there is any Police Officer
-              available. If the specific investigation is initiated, the number
-              of available Police Officer is decreased.</td>
-            <td>Entrepreneur</td>
-          </tr>
-          <tr>
-            <td>punishment report</td>
-            <td>The Entrepreneur reports the State about the Mafia's
-              punishment and cost inflicted on the business. The cost is
-              calculated differently depending if the production speed is
-              reduced or the products in the warehouse was destroyed.</td>
-            <td>Entrepreneur</td>
-          </tr>
-          <tr>
-            <td>entrepreneur assistance</td>
-            <td>The State decides whether or not to compensate the
-              Entrepreneur for the losses inflicted by the Mafia. The State's
-              decision to compensate the Entrepreneur depends on the amount of
-              resources available in the Fondo di Solidarietà. Thus, the
-              Entrepreneur is compensated only if there is enough resources in
-              the Fondo di Solidarietà.</td>
-            <td>State</td>
-          </tr>
-          <tr>
-            <td>general investigation</td>
-            <td>The State regularly assigns an available Police Officer to
-              monitor an Entrepreneur for any Mafia activity.</td>
-            <td>State</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <table>
-        <caption>State - Mafia</caption>
-        <thead>
-          <tr>
-            <td>Event name</td>
-            <td>Event description</td>
-            <td>Trigger Object</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>investigation result</td>
-            <td>The State checks if a Mafiosi was captured by a Police
-              Officer during a general or specific investigation. If so, the
-              Police Officer involved in the investigation starts a bureaucratic
-              activity. Otherwise, the Police Officer has some free time before
-              starting another investigation.</td>
-            <td>State</td>
-          </tr>
-          <tr>
-            <td>bureaucratic activity</td>
-            <td>The Police Officer conducts several bureaucratic activities
-              that ends at the beginning of the Mafiosi trial.</td>
-            <td>State</td>
-          </tr>
-          <tr>
-            <td>end of specific investigation</td>
-            <td>Specific investigation stops. If a Mafiosi was captured the
-              number of free Mafiosi decreases and the State starts new
-              bureaucratic activity. If nobody was captured an Officers takes
-              free.</td>
-            <td>State</td>
-          </tr>
-          <tr>
-            <td>trial</td>
-            <td>The State takes the decision to imprison or release a
-              Mafiosi in custody. If the State decides to release, the number of
-              available Mafiosi is increased.</td>
-            <td>State</td>
-          </tr>
-          <tr>
-            <td>prison release</td>
-            <td>The State releases a Mafiosi at the end of his prison term.
-              The number of available Mafiosi increases.</td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>end of free time</td>
-            <td>The Police Officer is set available to initiate a new
-              investigation.</td>
-            <td>State</td>
-          </tr>
-        </tbody>
-      </table>
     </section>
   </section>
 
