@@ -197,7 +197,6 @@ sim.scenario.setupInitialState = function () {
     rebelGroup: 2
   } ) );
 
-  console.log("sim.v.nmrOfEnterprises: "+ sim.v.nmrOfEnterprises);
   /* Create Enterprises */
   for ( ; i <= ( sim.v.nmrOfRebelGroups + sim.v.nmrOfEnterprises ); i += 1 ) {
     objId = i;
