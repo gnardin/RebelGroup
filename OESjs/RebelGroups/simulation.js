@@ -40,8 +40,8 @@ sim.model.activityTypes = [];
 sim.model.v.nmrOfRebelGroups = {
   range: "NonNegativeInteger",
   initialValue: 2,
-  label: "Number Rebel Groups",
-  hint: "The number of rebel groups"
+  //label: "Number Rebel Groups",
+  //hint: "The number of rebel groups"
 };
 sim.model.v.nmrOfEnterprises = {
   range: "NonNegativeInteger",
@@ -49,7 +49,31 @@ sim.model.v.nmrOfEnterprises = {
   label: "Number Enterprises",
   hint: "The number of enterprises"
 };
-sim.model.v.basket = {
+sim.model.v.nmrOfRebels1 = {
+  range: "NonNegativeInteger",
+  initialValue: 1000,
+  label: "Rebel Group 1 Size",
+  hint: "The number of rebels members of rebel group 1"
+};
+sim.model.v.extortionRate1 = {
+  range: "Decimal",
+  initialValue: 0.1,
+  label: "Rebel Group 1 Extortion",
+  hint: "The extortion rate of rebel group 1",
+};
+sim.model.v.nmrOfRebels2 = {
+  range: "NonNegativeInteger",
+  initialValue: 800,
+  label: "Rebel Group 2 Size",
+  hint: "The number of rebels members of rebel group 2"
+};
+sim.model.v.extortionRate2 = {
+  range: "Decimal",
+  initialValue: 0.1,
+  label: "Rebel Group 2 Extortion",
+  hint: "The extortion rate of rebel group 2"
+};
+sim.model.v.fightExpansion = {
   range: "NonNegativeInteger",
   initialValue: 1,
   label: "Fight Expansion",
@@ -137,13 +161,13 @@ sim.scenario.setupInitialState = function () {
     id: 1,
     name: "RebelGroup1",
     shortLabel: "rg1",
-    wealth: 300000,
-    nmrOfRebels: 1000,
+    wealth: sim.v.nmrOfRebels1 * 291,
+    nmrOfRebels: sim.v.nmrOfRebels1,
     rebelCost: 291,
     recruitThreshold: 0.8,
     recruitRate: 0.5,
     extortedEnterprises: [],
-    extortionRate: 0.1,
+    extortionRate: sim.v.extortionRate2,
     reports: {},
     freqDemand: Math.round( rand.normal( 30, 2 ) ),
     freqExpand: Math.round( rand.normal( 5, 2 ) ),
@@ -169,13 +193,13 @@ sim.scenario.setupInitialState = function () {
     id: 2,
     name: "RebelGroup2",
     shortLabel: "rg2",
-    wealth: 240000,
-    nmrOfRebels: 800,
+    wealth: sim.v.nmrOfRebels2 * 291,
+    nmrOfRebels: sim.v.nmrOfRebels2,
     rebelCost: 291,
     recruitThreshold: 0.8,
     recruitRate: 0.5,
     extortedEnterprises: [],
-    extortionRate: 0.1,
+    extortionRate: sim.v.extortionRate2,
     reports: {},
     freqDemand: Math.round( rand.normal( 30, 2 ) ),
     freqExpand: Math.round( rand.normal( 5, 2 ) ),
@@ -211,7 +235,7 @@ sim.scenario.setupInitialState = function () {
       fleeProb: 0.5,
       fleeThreshold: 3,
       nmrOfExtortions: 0,
-      nmrOfLoot: 0
+      nmrOfLootings: 0
     } ) );
 
     sim.scheduleEvent( new Income( {

@@ -11,181 +11,138 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 
-<head>
-<meta charset="utf-8" />
-<title>Rebel Groups Protection Racket</title>
-<meta name="viewport" content="width=device-width, initial-scale = 1.0" />
-<link rel="stylesheet" href="../framework/description.css" />
-<script src="metadata.js"></script>
-<script src="../framework/description.js"></script>
-</head>
-<body onload="oes.ui.setupDescription()">
-  <div id="frontMatter">
-    <h1>Rebel Groups Protection Racket</h1>
-    <p>
-      <strong>Classification tags</strong>: Rebel Group, Civil War,
-      Discrete-Event Simulation
-    </p>
-    <figure class="right">
-      <img src="media/img/theme-image.png" alt="theme-image" width="295"
-        height="246"
-      />
-    </figure>
-    <section id="shortDescription">
-    </section>
-  </div>
+  <head>
+    <meta charset="utf-8" />
+    <title>Rebel Groups Protection Racket</title>
+    <meta name="viewport" content="width=device-width, initial-scale = 1.0" />
+    <link rel="stylesheet" href="../framework/description.css" />
+    <script src="metadata.js"></script>
+    <script src="../framework/description.js"></script>
+  </head>
 
-  <section class="mbd collapsed">
-    <h1>
-      <span>►</span>Conceptual Model <sup class="expl-req">?</sup>
-    </h1>
-    <div id="expl-CM" class="expl"></div>
-
-    <section>
-      <h1>
-        Conceptual Information Model <sup class="expl-req">?</sup>
-      </h1>
-      <div id="expl-CIM" class="expl"></div>
-
-      <p>The potentially relevant object types are:</p>
-      <ol>
-        <li>enterprises</li>
-        <li>rebel groups</li>
-        <li>clans</li>
-        <li>households</li>
-      </ol>
-
-      <p></p>
-    </section>
-
-    <section>
-      <h1>
-        Conceptual Process Model <sup class="expl-req">?</sup>
-      </h1>
-      <div id="expl-CPM" class="expl"></div>
-
-      <table>
-        <caption>Event rules</caption>
-        <thead>
-          <tr>
-            <td>Events</td>
-            <td>Participating objects</td>
-            <td>Caused state changes and follow-up events</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Fights</td>
-            <td>Two rebel groups: an attacker and an opponent.</td>
-            <td>...</td>
-          </tr>
-          <tr>
-            <td>Expansions</td>
-            <td>A rebel group.</td>
-            <td>...</td>
-          </tr>
-          <tr>
-            <td>...</td>
-            <td>...</td>
-            <td>...</td>
-          </tr>
-        </tbody>
-      </table>
-
-    </section>
-  </section>
-
-  <section class="mbd collapsed">
-    <h1>
-      <span>►</span>Simulation Design Model <sup class="expl-req">?</sup>
-    </h1>
-    <div id="expl-DM" class="expl"></div>
-
-    <section>
-      <h1>
-        Information Design Model <sup class="expl-req">?</sup>
-      </h1>
-      <div id="expl-IDM" class="expl"></div>
-
-      <p>For all activity types the simulator computes the utilization of
-        their resources.</p>
-
-      <figure>
-        <img src="media/img/IDM.svg" width="1000" />
-        <figcaption>An information design model describing object
-          types and event types.</figcaption>
+  <body onload="oes.ui.setupDescription()">
+    <div id="frontMatter">
+      <h1>Rebel Groups Protection Racket</h1>
+      <p>
+        <strong>Classification tags</strong>: Rebel Group, Civil War,
+        Discrete-Event Simulation
+      </p>
+      <figure class="right">
+        <img src="media/img/theme-image.png" alt="" width="295" height="246" />
       </figure>
+      <section id="shortDescription">
+      </section>
+    </div>
 
-      <figure>
-        <img src="media/img/OES.svg" width="1000" />
-        <figcaption>An OES class model showing the pre-defined
-          types Object and Event.</figcaption>
-      </figure>
-    </section>
-
-    <section>
+    <section class="mbd collapsed">
       <h1>
-        Process Design Model <sup class="expl-req">?</sup>
+        <span>►</span>Conceptual Model <sup class="expl-req">?</sup>
       </h1>
-      <div id="expl-PDM" class="expl"></div>
+      <div id="expl-CM" class="expl"></div>
 
-      <table>
-        <caption>PDM Entrepreneur - Mafia</caption>
-        <thead>
-          <tr>
-            <td>ON (event type)</td>
-            <td>DO (event routine)</td>
-            <td>Trigger Object</td>
+      <section>
+        <h1>
+          Conceptual Information Model <sup class="expl-req">?</sup>
+        </h1>
+        <div id="expl-CIM" class="expl"></div>
 
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>DemandPizzo</td>
-            <td>SET e TO entrepreneur <br> SET m TO mafia <br>
-              SET s TO state<br> IF (s.entUnderObserv.includes(e.id
-              )&amp;&amp;<br> (rand.uniform() s.seeAndCaptureProb))<br>
-              THEN<br> INCREASE m.numCaptMaf BY 1<br> ELSE<br>
-              INCREASE m.numFreeMaf BY 1<br> SET pizzoToPay TO
-              parseFloat((m.pizzoPayPerc *<br> e.wealth).toFixed(2))<br>
-              IF (pizzoToPay > 1)<br> THEN<br> INCREMENT
-              extortionCounter<br> SCHEDULE EventStart<br>
-              (“ConsiderPayPizzo”,this.mafia, this.entrepreneur, this.state,<br>
-              this.pizzoToPay)@(t+timeForPayPizzoConsideration)<br>
-              SCHEDULE EventStart (“CheckPayment”,this.mafia,<br>
-              this.entrepreneur, this.state,<br>
-              this.pizzoToPay)@(t+timeForPayPizzoConsideration)<br> ELSE<br>
-              INCREMENT lostExtortionCounter BY 1<br>
-            </td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>CheckPayment</td>
-            <td>SET m to mafia<br> SET e TO entrepreneur<br> IF
-              (m.extortionCheck[e.id) == true)<br> IF ((rand.uniform() &lt;
-              m.benefitProb))<br> SCHEDULE EventStart
-              (“Benefit”,this.mafia, this.entrepreneur,<br>
-              this.pizzoToPay)@(t+timeForBenPun)<br> ELSE<br> INCREASE
-              e.numNoPayments BY 1<br> IF (rand.uniform() &lt;
-              m.punishProb)<br> SCHEDULE EventStart<br>
-              (“Punish”,this.mafia,this.entrepreneur,this.state)@(t+timeForBenPun)
-            </td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>Benefit</td>
-            <td>SET e TO entrepreneur<br> SET m TO mafia<br> SET
-              randomBenefit TO rand.uniform() >= 0.5<br> IF (randomBenefit
-              == true)<br> SET benefitValue TO parseFloat( (m.pizzoBenPerc
-              *<br> pizzoToPay).toFixed( 2 ) )<br>
-              this.pizzoToPay).toFixed( 2 ) )<br> INCREASE e.wealth BY
-              benefitValue<br> ELSE<br> SET e.fasterProduction TO true
-            </td>
-            <td>Mafia</td>
-          </tr>
-        </tbody>
-      </table>
+        <p>The potentially relevant object types are:</p>
+        <ol>
+          <li>enterprises</li>
+          <li>rebel groups</li>
+          <li>clans</li>
+          <li>households</li>
+        </ol>
+
+        <p></p>
+      </section>
+
+      <section>
+        <h1>
+          Conceptual Process Model <sup class="expl-req">?</sup>
+        </h1>
+        <div id="expl-CPM" class="expl"></div>
+
+        <table>
+          <caption>Event rules</caption>
+          <thead>
+            <tr>
+              <td>Events</td>
+              <td>Participating objects</td>
+              <td>Caused state changes and follow-up events</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Fights</td>
+              <td>Two rebel groups: an attacker and an opponent.</td>
+              <td>...</td>
+            </tr>
+            <tr>
+              <td>Expansions</td>
+              <td>A rebel group.</td>
+              <td>...</td>
+            </tr>
+            <tr>
+              <td>...</td>
+              <td>...</td>
+              <td>...</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </section>
     </section>
-  </section>
-</body>
+
+    <section class="mbd collapsed">
+      <h1>
+        <span>►</span>Simulation Design Model <sup class="expl-req">?</sup>
+      </h1>
+      <div id="expl-DM" class="expl"></div>
+
+      <section>
+        <h1>
+          Information Design Model <sup class="expl-req">?</sup>
+        </h1>
+        <div id="expl-IDM" class="expl"></div>
+
+        <p>For all activity types the simulator computes the utilization of
+          their resources.</p>
+
+        <figure>
+          <img src="media/img/IDM.png" width="1000" />
+          <figcaption>An information design model describing object
+            types and event types.</figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h1>
+          Process Design Model <sup class="expl-req">?</sup>
+        </h1>
+        <div id="expl-PDM" class="expl"></div>
+
+        <table>
+          <caption>Rebel Group</caption>
+          <thead>
+            <tr>
+              <td>ON (event type)</td>
+              <td>DO (event routine)</td>
+              <td>Trigger Object</td>
+
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Demand</td>
+              <td><pre><code>SET rg TO rebelGroup<br>IF (rg.nmrOfRebels > 0)<br>THEN<br>  strengthRatio = globalStrengthRatio(rg)<br>  FOR EACH e IN Enterprises<br>  DO<br>    IF (rand.uniform() &#60; (1 - strengthRatio))<br>    THEN<br>      Loot(e)<br>    ELSE<br>      Extort(e)<br>    ENDIF<br>  DONE<br>ENDIF</code></pre>
+              </td>
+              <td>Rebel Group</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </section>
+  </body>
+
 </html>

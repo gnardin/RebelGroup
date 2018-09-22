@@ -31,11 +31,11 @@ var Loot = new cLASS( {
       // Update Enterprise
       this.enterprise.wealth = 0;
       this.enterprise.accIncome = 0;
-      this.enterprise.nmrOfLoot += 1;
+      this.enterprise.nmrOfLootings += 1;
 
       if ( this.enterprise.rebelGroup.id === this.rebelGroup.id ) {
         if ( ( rand.uniform() < fleeProb ) ||
-          ( this.enterprise.nmrOfLoot > this.enterprise.fleeThreshold ) ) {
+          ( this.enterprise.nmrOfLootings > this.enterprise.fleeThreshold ) ) {
           followupEvents.push( new Flee( {
             occTime: this.occTime + 1,
             enterprise: this.enterprise
