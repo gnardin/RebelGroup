@@ -74,8 +74,8 @@ var Fight = new cLASS( {
         }
 
         // Fight decreases RG size proportional to opposite RG's strength
-        strongRG.nmrOfRebels -= Math.round( strongRG.nmrOfRebels * weakRGProb );
-        weakRG.nmrOfRebels -= Math.round( weakRG.nmrOfRebels * strongRGProb );
+        strongRG.nmrOfRebels -= Math.ceil( strongRG.nmrOfRebels * weakRGProb );
+        weakRG.nmrOfRebels -= Math.ceil( weakRG.nmrOfRebels * strongRGProb );
 
         sim.stat.nmrOfFights += 1;
       }

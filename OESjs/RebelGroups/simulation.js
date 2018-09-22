@@ -56,10 +56,16 @@ sim.model.v.nmrOfRebels1 = {
   hint: "The number of rebels members of rebel group 1"
 };
 sim.model.v.extortionRate1 = {
-  range: "Decimal",
+  range: "PositiveDecimal",
   initialValue: 0.1,
   label: "Rebel Group 1 Extortion",
   hint: "The extortion rate of rebel group 1",
+};
+sim.model.v.rebelCost1 = {
+  range: "PositiveDecimal",
+  initialValue: 291.00,
+  label: "Rebel Group 1 Cost",
+  hint: "The monthly cost per rebel for rebel group 1"
 };
 sim.model.v.nmrOfRebels2 = {
   range: "NonNegativeInteger",
@@ -67,8 +73,14 @@ sim.model.v.nmrOfRebels2 = {
   label: "Rebel Group 2 Size",
   hint: "The number of rebels members of rebel group 2"
 };
+sim.model.v.rebelCost2 = {
+  range: "PositiveDecimal",
+  initialValue: 291.00,
+  label: "Rebel Group 2 Cost",
+  hint: "The monthly cost per rebel for rebel group 2"
+};
 sim.model.v.extortionRate2 = {
-  range: "Decimal",
+  range: "PositiveDecimal",
   initialValue: 0.1,
   label: "Rebel Group 2 Extortion",
   hint: "The extortion rate of rebel group 2"
@@ -161,9 +173,9 @@ sim.scenario.setupInitialState = function () {
     id: 1,
     name: "RebelGroup1",
     shortLabel: "rg1",
-    wealth: sim.v.nmrOfRebels1 * 291,
+    wealth: sim.v.nmrOfRebels1 * sim.v.rebelCost1,
     nmrOfRebels: sim.v.nmrOfRebels1,
-    rebelCost: 291,
+    rebelCost: sim.v.rebelCost1,
     recruitThreshold: 0.8,
     recruitRate: 0.5,
     extortedEnterprises: [],
@@ -193,9 +205,9 @@ sim.scenario.setupInitialState = function () {
     id: 2,
     name: "RebelGroup2",
     shortLabel: "rg2",
-    wealth: sim.v.nmrOfRebels2 * 291,
+    wealth: sim.v.nmrOfRebels2 * sim.v.rebelCost2,
     nmrOfRebels: sim.v.nmrOfRebels2,
-    rebelCost: 291,
+    rebelCost: sim.v.rebelCost2,
     recruitThreshold: 0.8,
     recruitRate: 0.5,
     extortedEnterprises: [],
@@ -308,16 +320,16 @@ sim.model.statistics = {
     label: "Number Expels",
     initialValue: 0
   },
-  "amountExtorted": {
-    range: "Decimal",
-    label: "Amount Extorted",
-    initialValue: 0
-  },
-  "amountLooted": {
-    range: "Decimal",
-    label: "Amount Looted",
-    initialValue: 0
-  },
+  // "amountExtorted": {
+  //   range: "Decimal",
+  //   label: "Amount Extorted",
+  //   initialValue: 0
+  // },
+  // "amountLooted": {
+  //   range: "Decimal",
+  //   label: "Amount Looted",
+  //   initialValue: 0
+  // },
   // "nmrOfRebels": {
   //   range: "NonNegativeInteger",
   //   label: "Number of Rebels",
