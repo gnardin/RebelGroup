@@ -107,20 +107,17 @@
       </h1>
       <div id="expl-IDM" class="expl"></div>
 
-      <p>For all activity types the simulator computes the utilization of
-        their resources.</p>
-
+    <p>The following object types are included in the model:</p>
+      <ol>
+        <li>Enterprise</li>
+        <li>RebelGroup</li>
+      </ol>
       <figure>
         <img src="media/img/IDM.svg" width="1000" />
         <figcaption>An information design model describing object
           types and event types.</figcaption>
       </figure>
 
-      <figure>
-        <img src="media/img/OES.svg" width="1000" />
-        <figcaption>An OES class model showing the pre-defined
-          types Object and Event.</figcaption>
-      </figure>
     </section>
 
     <section>
@@ -130,58 +127,22 @@
       <div id="expl-PDM" class="expl"></div>
 
       <table>
-        <caption>PDM Entrepreneur - Mafia</caption>
+        <caption>Event Rule Design</caption>
         <thead>
           <tr>
             <td>ON (event type)</td>
             <td>DO (event routine)</td>
-            <td>Trigger Object</td>
 
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>DemandPizzo</td>
-            <td>SET e TO entrepreneur <br> SET m TO mafia <br>
-              SET s TO state<br> IF (s.entUnderObserv.includes(e.id
-              )&amp;&amp;<br> (rand.uniform() s.seeAndCaptureProb))<br>
-              THEN<br> INCREASE m.numCaptMaf BY 1<br> ELSE<br>
-              INCREASE m.numFreeMaf BY 1<br> SET pizzoToPay TO
-              parseFloat((m.pizzoPayPerc *<br> e.wealth).toFixed(2))<br>
-              IF (pizzoToPay > 1)<br> THEN<br> INCREMENT
-              extortionCounter<br> SCHEDULE EventStart<br>
-              (“ConsiderPayPizzo”,this.mafia, this.entrepreneur, this.state,<br>
-              this.pizzoToPay)@(t+timeForPayPizzoConsideration)<br>
-              SCHEDULE EventStart (“CheckPayment”,this.mafia,<br>
-              this.entrepreneur, this.state,<br>
-              this.pizzoToPay)@(t+timeForPayPizzoConsideration)<br> ELSE<br>
-              INCREMENT lostExtortionCounter BY 1<br>
-            </td>
-            <td>Mafia</td>
+            <td>Fight</td>
+            <td>...</td>
           </tr>
           <tr>
-            <td>CheckPayment</td>
-            <td>SET m to mafia<br> SET e TO entrepreneur<br> IF
-              (m.extortionCheck[e.id) == true)<br> IF ((rand.uniform() &lt;
-              m.benefitProb))<br> SCHEDULE EventStart
-              (“Benefit”,this.mafia, this.entrepreneur,<br>
-              this.pizzoToPay)@(t+timeForBenPun)<br> ELSE<br> INCREASE
-              e.numNoPayments BY 1<br> IF (rand.uniform() &lt;
-              m.punishProb)<br> SCHEDULE EventStart<br>
-              (“Punish”,this.mafia,this.entrepreneur,this.state)@(t+timeForBenPun)
-            </td>
-            <td>Mafia</td>
-          </tr>
-          <tr>
-            <td>Benefit</td>
-            <td>SET e TO entrepreneur<br> SET m TO mafia<br> SET
-              randomBenefit TO rand.uniform() >= 0.5<br> IF (randomBenefit
-              == true)<br> SET benefitValue TO parseFloat( (m.pizzoBenPerc
-              *<br> pizzoToPay).toFixed( 2 ) )<br>
-              this.pizzoToPay).toFixed( 2 ) )<br> INCREASE e.wealth BY
-              benefitValue<br> ELSE<br> SET e.fasterProduction TO true
-            </td>
-            <td>Mafia</td>
+            <td>Loot</td>
+            <td>...</td>
           </tr>
         </tbody>
       </table>
