@@ -44,7 +44,7 @@ var Enterprise = new cLASS( {
       range: "NonNegativeInteger",
       label: "Number of Extortions"
     },
-    "nmrOfLoot": {
+    "nmrOfLootings": {
       range: "NonNegativeInteger",
       label: "Number of Loot"
     }

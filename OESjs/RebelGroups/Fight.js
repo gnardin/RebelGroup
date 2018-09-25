@@ -38,8 +38,8 @@ var Fight = new cLASS( {
         if ( rand.uniform() < strongRGProb ) {
           // Define number of Enterprises to transfer
           len = weakRG.extortedEnterprises.length;
-          if ( len >= sim.v.basket ) {
-            len = sim.v.basket;
+          if ( len >= sim.v.fightExpansion ) {
+            len = sim.v.fightExpansion;
           }
           // Transfer random Enterprise from weak to strong Rebel Group
           for ( i = 0; i < len; i += 1 ) {
@@ -49,15 +49,15 @@ var Fight = new cLASS( {
             enterprise.rebelGroup = strongRG;
             strongRG.extortedEnterprises =
               strongRG.extortedEnterprises.concat( enterprise );
-            enterprise.nmrOfLoot = 0;
+            enterprise.nmrOfLootings = 0;
           }
         } else {
           // Probability the weak Rebel Group wins the fight
           if ( rand.uniform() < weakRGProb ) {
             // Define number of Enterprises to transfer
             len = strongRG.extortedEnterprises.length;
-            if ( len >= sim.v.basket ) {
-              len = sim.v.basket;
+            if ( len >= sim.v.fightExpansion ) {
+              len = sim.v.fightExpansion;
             }
             // Transfer random Enterprise from strong to weak Rebel Group
             for ( i = 0; i < len; i += 1 ) {
@@ -68,14 +68,14 @@ var Fight = new cLASS( {
               enterprise.rebelGroup = weakRG;
               weakRG.extortedEnterprises =
                 weakRG.extortedEnterprises.concat( enterprise );
-              enterprise.nmrOfLoot = 0;
+              enterprise.nmrOfLootings = 0;
             }
           }
         }
 
         // Fight decreases RG size proportional to opposite RG's strength
-        strongRG.nmrOfRebels -= Math.round( strongRG.nmrOfRebels * weakRGProb );
-        weakRG.nmrOfRebels -= Math.round( weakRG.nmrOfRebels * strongRGProb );
+        strongRG.nmrOfRebels -= Math.ceil( strongRG.nmrOfRebels * weakRGProb );
+        weakRG.nmrOfRebels -= Math.ceil( weakRG.nmrOfRebels * strongRGProb );
 
         sim.stat.nmrOfFights += 1;
       }
