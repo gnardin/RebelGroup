@@ -1,5 +1,5 @@
 /*******************************************************************************
- * AllocateResource event class
+ * AllocateWealth event class
  *
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
@@ -8,8 +8,8 @@
  * @author Luis Gustavo Nardin
  * @author Gerd Wagner
  ******************************************************************************/
-var AllocateResource = new cLASS( {
-  Name: "AllocateResource",
+var AllocateWealth = new cLASS( {
+  Name: "AllocateWealth",
   supertypeName: "eVENT",
   properties: {
     "rebelGroup": { range: "RebelGroup" }
@@ -61,12 +61,12 @@ var AllocateResource = new cLASS( {
     }
   }
 } );
-AllocateResource.recurrence = function ( e ) {
+AllocateWealth.recurrence = function ( e ) {
   return e.rebelGroup.freqAllocate;
 };
-AllocateResource.createNextEvent = function ( e ) {
-  return new AllocateResource( {
-    occTime: e.occTime + AllocateResource.recurrence( e ),
+AllocateWealth.createNextEvent = function ( e ) {
+  return new AllocateWealth( {
+    occTime: e.occTime + AllocateWealth.recurrence( e ),
     rebelGroup: e.rebelGroup
   } );
 };

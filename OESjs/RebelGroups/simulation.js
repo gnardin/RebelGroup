@@ -31,7 +31,7 @@ sim.model.timeIncrement = 1; // optional
 /* Object, Event, and Activity types */
 sim.model.objectTypes = [ "RebelGroup", "Enterprise" ];
 sim.model.eventTypes = [
-  "Income", "Demand", "Extort", "Loot", "Expand", "Fight", "AllocateResource",
+  "Income", "Demand", "Extort", "Loot", "Expand", "Fight", "AllocateWealth",
   "Report", "Flee"
 ];
 sim.model.activityTypes = [];
@@ -196,7 +196,7 @@ sim.scenario.setupInitialState = function () {
     occTime: 1,
     rebelGroup: 1
   } ) );
-  sim.scheduleEvent( new AllocateResource( {
+  sim.scheduleEvent( new AllocateWealth( {
     occTime: 30,
     rebelGroup: 1
   } ) );
@@ -228,7 +228,7 @@ sim.scenario.setupInitialState = function () {
     occTime: 1,
     rebelGroup: 2
   } ) );
-  sim.scheduleEvent( new AllocateResource( {
+  sim.scheduleEvent( new AllocateWealth( {
     occTime: 30,
     rebelGroup: 2
   } ) );
