@@ -1918,15 +1918,17 @@ sTORAGEmANAGER.prototype.retrieve = function (mc, id) {
  */
 sTORAGEmANAGER.prototype.retrieveAll = function (mc) {
   var adapterName = this.adapter.name,
-      dbName = this.adapter.dbName;
+      dbName = this.adapter.dbName,
+      createLog = this.createLog,
+      validateAfterRetrieve = this.validateAfterRetrieve;
   return new Promise( function (resolve) {
     sTORAGEmANAGER.adapters[adapterName].retrieveAll( dbName, mc)
     .then( function (records) {
       var i=0, newObj=null;
-      if (this.createLog) {
-        console.log( records.length +" "+ mcName +" records retrieved.")
+      if (createLog) {
+        console.log( records.length +" "+ mc.Name +" records retrieved.")
       }
-      if (this.validateAfterRetrieve) {
+      if (validateAfterRetrieve) {
         for (i=0; i < records.length; i++) {
           try {
             newObj = new mc( records[i]);
@@ -1937,7 +1939,8 @@ sTORAGEmANAGER.prototype.retrieveAll = function (mc) {
           }
         }
       }
-    }).then( resolve);
+      resolve( records);
+    })
   });
 };
 /**
@@ -3336,7 +3339,8 @@ oes.ExperimentDef = new cLASS({
     "id": {range: "AutoNumber"},
     "model": {range: "NonEmptyString", label:"Model name"},
     "scenarioNo": {range: "PositiveInteger", label:"Scenario number"},
-    "experimentNo": {range: "PositiveInteger", label:"Experiment number"},
+    "experimentNo": {range: "PositiveInteger", label:"Experiment number",
+        hint:"The sequence number relative to the underlying simulation scenario"},
     "experimentTitle": {range: "NonEmptyString", optional:true, label:"Experiment title"},
     "replications": {range:"PositiveInteger", label:"Number of replications"},
     "parameterDefs": {range: "eXPERIMENTpARAMdEF", minCard: 0, maxCard: Infinity,
@@ -3349,9 +3353,9 @@ oes.ExperimentDef.idCounter = 0;  // retrieve actual value from IDB
 oes.ExperimentRun = new cLASS({
   Name: "eXPERIMENTrUN",
   properties: {
-    "id": {range: "AutoNumber"},  // possibly a timestamp
-    "experimentDef": {range: "eXPERIMENTdEF"},
-    "dateTime": {range: "DateTime"}
+    "id": {range: "AutoNumber", label:"ID"},  // possibly a timestamp
+    "experimentDef": {range: "eXPERIMENTdEF", label:"Experiment def."},
+    "dateTime": {range: "DateTime", label:"Date/time"}
   }
 });
 oes.ExperimentRun.getAutoId = function () {
@@ -3365,7 +3369,15 @@ oes.ExperimentScenarioRun = new cLASS({
     "experimentRun": {range: "eXPERIMENTrUN"},
     "experimentScenarioNo": {range: "PositiveInteger"},
     "parameterValueCombination": {range: Array},
-    "outputStatistics": {range: Object}
+    "outputStatistics": {range: Object,
+      label:"Output statistics",
+      val2str: function (v) {
+        return JSON.stringify( v);
+      },
+      str2val: function (str) {
+        return JSON.parse( str);
+      },
+    }
   }
 });
 oes.ExperimentScenarioRun.getAutoId = function () {
@@ -3734,7 +3746,6 @@ oes.setupFrontEndSimEnv = function () {
   if (sim.model.space.type) oes.space.initialize();
   // set up initial state
   sim.initializeModelVariables();
-  console.log("sim.v.nmrOfEnterprises: "+ sim.v.nmrOfEnterprises);
   sim.createInitialObjEvt();
   // initialize statistics
   if (sim.model.statistics) oes.stat.initialize();
@@ -4164,13 +4175,12 @@ oes.stat.avg = function (oldValue, newValue) {
 /*
 Improvements/extensions
 v1
-
- - Add observation UIs for visualizing variables in "monitors"
+ - add column headings for exp. parameters in exp. log table
  - improve the initial state definition UI:
-   + Support setting model variables (provided they have a label)
-   + add events
+   + support value changes via IndexedDB
    + allowing adding/dropping objects in the ClassPopulationWidget
    + supporting enumeration attributes in the ClassPopulationWidget
+ - Add observation UIs for visualizing variables in "monitors"
 
  - make a sims/basic-tests.html that invokes one or more seeded scenario simulations and checks statistics results
  - Define set/get for scenario.visualize and use the setter for dropping/setting-up the visualization (canvas)
@@ -4301,7 +4311,7 @@ sim.initializeModelVariables = function (expParamSlots) {
       sim.v[varName] = expParamSlots[varName];
     } else /* if (sim.v[varName] === undefined) */ {
       if (typeof mv === "object") {
-        sim.v[varName] = mv.value !== undefined ? mv.value : mv.initialValue;
+        sim.v[varName] = (mv.value !== undefined) ? mv.value : mv.initialValue;
       } else {
         sim.v[varName] = mv;
       }
@@ -4313,8 +4323,7 @@ sim.initializeModelVariables = function (expParamSlots) {
  ********************************************************/
 sim.createInitialObjEvt = function () {
   var initState = sim.scenario.initialState,
-      initialObjDefs = initState ? initState.objects : null,
-      initialEvtDefs = initState ? initState.events : null;
+      initialEvtDefs=null, initialObjDefs=null;
   // clear initial state data structures
   sim.objects = {};  // a map of all objects (accessible by ID)
   sim.namedObjects = {};  // a map of objects accessible by a unique name
@@ -4328,9 +4337,8 @@ sim.createInitialObjEvt = function () {
   if (typeof sim.scenario.setupInitialState === "function") {
     sim.scenario.setupInitialState();
   }
-  initialObjDefs = initState.objects || null;
-  initialEvtDefs = initState.events || null;
   // register initial objects
+  initialObjDefs = initState.objects;
   if (initialObjDefs) {  // a map of object definitions
     Object.keys( initialObjDefs).forEach( function (idStr) {
       var objSlots = util.cloneObject( initialObjDefs[idStr]),
@@ -4379,6 +4387,7 @@ sim.createInitialObjEvt = function () {
     });
   });
   // schedule initial events
+  initialEvtDefs = initState.events;
   if (initialEvtDefs) {  // an array of JS object definitions
     initialEvtDefs.forEach( function (evt) {
       var e = util.cloneObject( evt),  // clone event object definition
@@ -4927,13 +4936,13 @@ sim.runStep = function (followupEvents) {
 sim.runExperiment = function () {
   var exp = sim.experiment, cp=[], valueSets=[], i=0, j=0, k=0, M=0,
       N = exp.parameterDefs.length, increm=0, x=0, expPar={},
+      expRunId = (new Date()).getTime(),
       valueCombination=[], expParamSlots={},
       tenthRunLength=0,  // a tenth of the total run time
       nextProgressIncrementStep=0;  // thresholds for updating the progress bar
-  exp.runId = oes.ExperimentRun.getAutoId();
   try {
     sim.storeMan.add( oes.ExperimentRun, {
-      id: exp.runId,
+      id: expRunId,
       experimentDef: exp.id,
       dateTime: (new Date()).toISOString(),
     });
@@ -4993,18 +5002,19 @@ sim.runExperiment = function () {
           exp.scenarios[i].stat[varName] += sim.stat[varName];
         }
       });
+      if (sim.experiment.storeEachExperimentScenarioRun) {
+        sim.storeMan.add( oes.ExperimentScenarioRun, {
+          id: expRunId + i * exp.replications + k,
+          experimentRun: expRunId,
+          experimentScenarioNo: i,
+          parameterValueCombination: exp.scenarios[i].parameterValues,
+          outputStatistics: sim.stat
+        });
+      }
       // update the progress bar
       if (i*k > nextProgressIncrementStep) {
         self.postMessage({progressIncrement: 10});
         nextProgressIncrementStep += tenthRunLength;
-      }
-      if (sim.experiment.storeEachExperimentScenarioRun) {
-        sim.storeMan.add( oes.ExperimentScenarioRun, {
-          experimentRun: exp.runId,
-          experimentScenarioNo: i,
-          parameterValueCombination: exp.scenarios[i].parameterValues,
-          outputStatistics: exp.scenarios[i].stat
-        });
       }
     }
     // compute average values
@@ -5023,7 +5033,7 @@ sim.runExperiment = function () {
       // store the average statistics aggregated over all exp. scenario runs
       try {
         sim.storeMan.add( oes.ExperimentScenarioRun, {
-          experimentRun: exp.runId,
+          experimentRun: expRunId,
           experimentScenarioNo: i,
           parameterValueCombination: exp.scenarios[i].parameterValues,
           outputStatistics: exp.scenarios[i].stat

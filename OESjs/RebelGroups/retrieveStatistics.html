@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <title>Retrieve Experiment Statistics From IndexedDB To Text File</title>
+    <script src="../framework/simulator-core.js"></script>
+    <script src="metadata.js"></script>
+    <script src="simulation.js"></script>
+    <script src="retrieveStatistics.js"></script>
+    <script>
+      document.addEventListener( "DOMContentLoaded", function () {
+        retrieveStatistics();
+      }, false );
+    </script>
+  </head>
+
+  <body>
+    <h1>Retrieve Experiment Statistics From IndexedDB</h1>
+
+    <fieldset>
+      <legend><b>Configuration</b></legend>
+      <b>Header</b>
+      <input type="checkbox" id="header" value="" checked="checked" />
+      <br />
+      <b>Separator</b>
+      <input type="text" size="1" id="sep" value=";" /><br />
+      <b>Filename</b>
+      <input type="text" id="fname" value="output.txt" />
+    </fieldset>
+    <br />
+    <fieldset>
+      <legend><b>Experiment Runs</b></legend>
+      <form id="expRun">
+      </form>
+    </fieldset>
+    <br />
+    <input id="export" type="submit" value="Export" />
+  </body>
+
+</html>

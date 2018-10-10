@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Retrieve Experiment Statistics From IndexedDB</title>
+  <script>
+  </script>
+  <script src="../framework/simulator-core.js"></script>
+</head>
+<body>
+<h1>Retrieve Experiment Statistics From IndexedDB</h1>
+<script>
+  let storageAdapter = {name:"IndexedDB", dbName: "ServiceDesk-2"};
+  let storeMan = new sTORAGEmANAGER( storageAdapter);
+  storeMan.createLog = true;
+
+  storeMan.retrieveAll( oes.ExperimentRun).then( function (records) {
+    var tableEl = document.createElement("table");
+    var tableHeadEl = document.createElement("tHead");
+    var tableBodyEl = document.createElement("tBody");
+    var row=null;
+    tableEl.appendChild( tableHeadEl);
+    tableEl.appendChild( tableBodyEl);
+    document.body.appendChild( tableEl);
+
+    row = tableHeadEl.insertRow(-1);
+    Object.keys( oes.ExperimentRun.properties).forEach( function (prop) {
+      row.insertCell(-1).textContent = oes.ExperimentRun.properties[prop].label || prop;
+    });
+    for (let i=0; i < records.length; i++) {
+      row = tableBodyEl.insertRow(-1);
+      Object.keys( oes.ExperimentRun.properties).forEach( function (prop) {
+        var expRun = new oes.ExperimentRun( records[i]);
+        //row.insertCell(-1).textContent = records[i][prop];
+        row.insertCell(-1).textContent = expRun.getValueAsString( prop);
+      });
+    }
+  }).catch( function (err) {console.log( err.name +": "+ err.message);});
+
+  storeMan.retrieveAll( oes.ExperimentScenarioRun).then( function (records) {
+    var tableEl = document.createElement("table");
+    var tableHeadEl = document.createElement("tHead");
+    var tableBodyEl = document.createElement("tBody");
+    var row=null;
+    tableEl.appendChild( tableHeadEl);
+    tableEl.appendChild( tableBodyEl);
+    document.body.appendChild( tableEl);
+
+    row = tableHeadEl.insertRow(-1);
+    Object.keys( oes.ExperimentScenarioRun.properties).forEach( function (prop) {
+      row.insertCell(-1).textContent = oes.ExperimentScenarioRun.properties[prop].label || prop;
+    });
+    for (let i=0; i < records.length; i++) {
+      row = tableBodyEl.insertRow(-1);
+      Object.keys( oes.ExperimentScenarioRun.properties).forEach( function (prop) {
+        var expScenRun = new oes.ExperimentScenarioRun( records[i]);
+        row.insertCell(-1).textContent = expScenRun.getValueAsString( prop);
+      });
+    }
+  }).catch( function (err) {console.log( err.name +": "+ err.message);});
+
+</script>
+</body>
+</html>

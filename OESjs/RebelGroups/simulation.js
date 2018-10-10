@@ -154,6 +154,23 @@ sim.model.f.sigmoid = function ( a, b, c, d, e ) {
   return a / ( b + ( c * Math.pow( Math.E, ( -1 * d * e ) ) ) );
 };
 /*******************************************************************************
+ * Define Experiments
+ ******************************************************************************/
+sim.experiment.id = 1;
+sim.experiment.experimentNo = 1;
+sim.experiment.title = "Test";
+sim.experiment.parameterDefs = [
+  new oes.ExperimentParamDef(
+    { name: "extortionRate1", values: [ 0.05, 0.1, 0.2 ] } ),
+  new oes.ExperimentParamDef(
+    { name: "extortionRate2", values: [ 0.05, 0.1  ] } ),
+  new oes.ExperimentParamDef(
+    { name: "fightExpansion", values: [ 1 ] } )
+];
+sim.experiment.replications = 10;
+sim.experiment.seeds = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ];
+sim.experiment.storeEachExperimentScenarioRun = true;
+/*******************************************************************************
  * Define Initial State
  ******************************************************************************/
 /* Initial Objects */
@@ -260,8 +277,8 @@ sim.scenario.setupInitialState = function () {
   rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
   rebelGroupsKey = Object.keys( rebelGroupsObj );
   enterprisesObj = cLASS[ "Enterprise" ].instances;
-  Object.keys( enterprisesObj ).forEach( function ( objId ) {
-    enterprise = enterprisesObj[ objId ];
+  Object.keys( enterprisesObj ).forEach( function ( id ) {
+    enterprise = enterprisesObj[ id ];
     rebelGroup = rebelGroupsObj[ rebelGroupsKey[ rand.uniformInt( 0,
       rebelGroupsKey.length - 1 ) ] ];
 

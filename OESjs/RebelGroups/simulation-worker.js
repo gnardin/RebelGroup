@@ -1,23 +1,26 @@
-self.importScripts( "../framework/simulation-worker-core.js" );
 
-self.importScripts( "simulation.js" );
+self.importScripts("../framework/simulation-worker-core.js");
 
-if ( sim.model.objectTypes ) {
-  sim.model.objectTypes.forEach( function ( objT ) {
-    self.importScripts( objT + ".js" );
-  } );
+self.importScripts("simulation.js");
+
+if (sim.model.objectTypes) {
+  sim.model.objectTypes.forEach( function (objT) {
+    self.importScripts( objT + ".js");
+  });
 }
-if ( sim.model.eventTypes ) {
-  sim.model.eventTypes.forEach( function ( evtT ) {
-    self.importScripts( evtT + ".js" );
-  } );
+if (sim.model.eventTypes) {
+  sim.model.eventTypes.forEach( function (evtT) {
+    self.importScripts( evtT + ".js");
+  });
 }
-if ( sim.model.activityTypes ) {
-  sim.model.activityTypes.forEach( function ( actT ) {
-    self.importScripts( actT + ".js" );
-  } );
+if (sim.model.activityTypes) {
+  sim.model.activityTypes.forEach( function (actT) {
+    self.importScripts( actT + ".js");
+  });
 }
+
 //=================================================================
+
 onmessage = function (e) {
   if (e.data.runExperiment) {
     sim.initializeSimulator( e.data.dbName);

@@ -30,4 +30,4 @@ sim.model.source = "";
 sim.model.license = "CC BY-NC";
 sim.model.creator = "Frances Duffy, Kamil Klosek, Luis Gustavo Nardin, Gerd Wagner";
 sim.model.created = "2018-07-26";
-sim.model.modified = "2018-10-02";
+sim.model.modified = "2018-10-10";

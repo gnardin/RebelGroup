@@ -59,7 +59,7 @@ var Loot = new cLASS( {
       }
 
       sim.stat.nmrOfLoots += 1;
-      sim.stat.amountLooted += amount;
+      // sim.stat.amountLooted += amount;
 
       return followupEvents;
     }
