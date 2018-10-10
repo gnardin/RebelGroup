@@ -90,46 +90,44 @@ let exportData = function ( expRuns, filename = "output.txt", sep = ";",
   } );
 };
 
-let retrieveStatistics = function () {
-  // Add Experiment Run in the Select
-  storeMan.retrieveAll( oes.ExperimentRun ).then( function ( records ) {
-    let label, option;
-    let selectOption = document.getElementById( "expRun" );
+// Add Experiment Run in the Select
+storeMan.retrieveAll( oes.ExperimentRun ).then( function ( records ) {
+  let label, option;
+  let selectOption = document.getElementById( "expRun" );
 
-    for ( let i = 0; i < records.length; i += 1 ) {
-      option = document.createElement( "input" );
-      option.type = "checkbox";
-      option.id = records[ i ].id;
-      option.value = records[ i ].id;
-      option.checked = "checked";
-      selectOption.appendChild( option );
+  for ( let i = 0; i < records.length; i += 1 ) {
+    option = document.createElement( "input" );
+    option.type = "checkbox";
+    option.id = records[ i ].id;
+    option.value = records[ i ].id;
+    option.checked = "checked";
+    selectOption.appendChild( option );
 
-      label = document.createElement( "label" );
-      label.appendChild( document.createTextNode( records[ i ].dateTime ) );
-      selectOption.appendChild( label );
+    label = document.createElement( "label" );
+    label.appendChild( document.createTextNode( records[ i ].dateTime ) );
+    selectOption.appendChild( label );
 
-      selectOption.appendChild( document.createElement( "br" ) );
-    }
+    selectOption.appendChild( document.createElement( "br" ) );
+  }
+} );
+
+// Define the Export button action onClick
+let button = document.getElementById( "export" );
+button.addEventListener( "click", function () {
+  let experiments = [], filename, sep, header;
+  let selectedOptions = document.querySelectorAll( "input[type=checkbox]" );
+
+  let elements = [].filter.call( selectedOptions, function ( el ) {
+    return el.checked;
   } );
 
-  // Define the Export button action onClick
-  let button = document.getElementById( "export" );
-  button.addEventListener( "click", function () {
-    let experiments = [], filename, sep, header;
-    let selectedOptions = document.querySelectorAll( "input[type=checkbox]" );
+  for ( let i = 0; i < elements.length; i += 1 ) {
+    experiments.push( elements[ i ].id );
+  }
 
-    let elements = [].filter.call( selectedOptions, function ( el ) {
-      return el.checked;
-    } );
+  header = document.querySelector( "#header" ).checked;
+  sep = document.querySelector( "#sep" ).value;
+  filename = document.querySelector( "#fname" ).value;
 
-    for ( let i = 0; i < elements.length; i += 1 ) {
-      experiments.push( elements[ i ].id );
-    }
-
-    header = document.querySelector( "#header" ).checked;
-    sep = document.querySelector( "#sep" ).value;
-    filename = document.querySelector( "#fname" ).value;
-
-    exportData( experiments, filename, sep, header );
-  } );
-};
+  exportData( experiments, filename, sep, header );
+} );
