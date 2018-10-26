@@ -5040,10 +5040,10 @@ sim.experiment = {
   objectName: "experiment",
   properties: {
     "experimentNo": {range:"AutoNumber", label:"Experiment number",
-      hint:"Automatically assigned sequence number for experiment"},
+        hint:"Automatically assigned sequence number for experiment"},
     "experimentTitle": {range:"String", optional: true, label:"Experiment title"},
     "replications": {range:"PositiveInteger", label:"Number of replications",
-        hint:"Number of replications/repetitions per scenario"},
+        hint:"Number of replications/repetitions per experiment scenario"},
     "parameterDefs": {
         range: "eXPERIMENTpARAMdEF", maxCard: Infinity,
         label:"Experiment parameters",
@@ -5055,14 +5055,13 @@ sim.experiment = {
   parameters: [],
   scenarios:[],  // are created by the simulator
   validate: function () {
-    var exp = sim.experiment;
+    var errMsgs=[], exp = sim.experiment;
     if (exp.replications > 0) {
-      var errMsgs=[];
       if (exp.seeds && (!Array.isArray( exp.seeds) || exp.seeds.length !== exp.replications)) {
         errMsgs = ["Not enough seeds for number of replications!"];
       }
-      return errMsgs;
     }
+    return errMsgs;
   }
 };
 
@@ -6505,6 +6504,7 @@ sim.runStep = function (followupEvents) {
           }
           followupEvents = e.onEvent();
         }  //***end of switch***
+        
         // render event appearances if defined
         if (sim.config.visualize && sim.ui.animations && sim.ui.animations[eventTypeName]) {
           sim.ui.animations[eventTypeName].play();
