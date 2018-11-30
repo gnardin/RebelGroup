@@ -9,42 +9,56 @@ let storeMan = new sTORAGEmANAGER( storageAdapter );
 storeMan.createLog = true;
 
 /*******************************************************************************
+ * Generate the file from text
+ *
+ * @param {string} filename - Name of the file
+ * @param {string} text - Content of the file
+ ******************************************************************************/
+let generateTextFile = function ( filename, text ) {
+  let defData, defFile, defURL;
+
+  defData = new Blob( [ text ], { type: "text/plain" } );
+
+  defURL = window.URL.createObjectURL( defData );
+
+  defFile = document.createElement( "a" );
+  defFile.setAttribute( "style", "display: none" );
+  defFile.setAttribute( "href", defURL );
+  defFile.setAttribute( "download", filename );
+  document.body.appendChild( defFile );
+  defFile.click();
+  window.URL.revokeObjectURL( defURL );
+  defFile.remove();
+};
+
+/*******************************************************************************
  * Export data from experiments to text file
  *
  * @param {Array} expRuns - IDs of the experiment runs to export
- * @param {string} filename - Export filename
  * @param {string} sep - Field separator character
  * @param {boolean} header - Enable/Disable header
+ * @param {string} defFn - Experiment definitions filename
+ * @param {string} sumFn - Summary output filename
+ * @param {string} tsFn - Time series output filename
  ******************************************************************************/
-let exportData = function ( expRuns, filename = "output.txt", sep = ";",
-  header = true ) {
+let exportData = function ( expRuns, sep = ";", header = true,
+  timeSeries = true, defFn = "definitions.csv", sumFn = "summary.csv",
+  tsFn = "timeseries.csv" ) {
 
   storeMan.retrieveAll( oes.ExperimentScenarioRun ).then( function ( records ) {
-    let hline, line, text, param, output, expScenRun, data, url, file;
+    let param, output, expScenRun;
+    let defHeader, defText, defLine;  // Definitions
+    let sumHeader, sumText, sumLine;  // Summary
+    let tsHeader, tsText, tsLine, ts; // Time Series
 
-    // Create Header
-    hline = [];
-    hline.push( "id" );
-    hline.push( "experimentRun" );
-    hline.push( "experimentScenarioNo" );
-
-    for ( let i = 0; i < sim.experiment.parameterDefs.length; i += 1 ) {
-      hline.push( sim.experiment.parameterDefs[ i ].name );
-    }
-
-    for ( let statVarName of Object.keys( sim.model.statistics ) ) {
-      hline.push( statVarName );
-    }
-
-    if ( header ) {
-      text = hline.join( sep ) + "\n";
-    } else {
-      text = "";
-    }
+    defText = "";
+    sumText = "";
+    tsText = "";
 
     // Create output records
     for ( let i = 0; i < records.length; i += 1 ) {
-      line = [];
+      defLine = [];
+      sumLine = [];
       expScenRun = new oes.ExperimentScenarioRun( records[ i ] );
       param = expScenRun.parameterValueCombination;
       output = expScenRun.outputStatistics;
@@ -52,39 +66,111 @@ let exportData = function ( expRuns, filename = "output.txt", sep = ";",
       if ( expRuns.includes(
         expScenRun.getValueAsString( "experimentRun" ) ) ) {
 
-        line.push( expScenRun[ hline[ 0 ] ] );
-        line.push( expScenRun[ hline[ 1 ] ] );
-        line.push( expScenRun[ hline[ 2 ] ] );
-
-        // Input parameter values
-        param.forEach( function ( prop ) {
-          line.push( prop );
-        } );
-
-        // Output statistics value
-        Object.keys( output ).forEach( function ( prop ) {
-          if ( ( typeof output[ prop ] ) !== "object" ) {
-            line.push( output[ prop ] );
+        // Definition Header
+        if ( typeof defHeader === "undefined" ) {
+          defHeader = [];
+          if ( header ) {
+            for ( let j = 0; j < sim.experiment.parameterDefs.length; j += 1 ) {
+              defHeader.push( sim.experiment.parameterDefs[ j ].name );
+            }
+            defText = [ "id", "experimentRun", "experimentScenarioNo" ].concat(
+              defHeader ).join( sep ) + "\n";
           }
+        }
+        // Definition Line
+        defLine.push( expScenRun[ "id" ] );
+        defLine.push( expScenRun[ "experimentRun" ] );
+        defLine.push( expScenRun[ "experimentScenarioNo" ] );
+        param.forEach( function ( prop ) {
+          defLine.push( prop );
         } );
 
-        text += line.join( sep ) + "\n";
+        // Summary Header
+        if ( typeof sumHeader === "undefined" ) {
+          sumHeader = [];
+          for ( let statVarName of Object.keys( output ) ) {
+            if ( typeof output[ statVarName ] !== "object" ) {
+              sumHeader.push( statVarName );
+            }
+          }
+          if ( header ) {
+            sumText = [ "id" ].concat( sumHeader ).join( sep ) + "\n";
+          }
+        }
+        // Summary Line
+        sumLine.push( expScenRun[ "id" ] );
+        sumHeader.forEach( function ( prop ) {
+          sumLine.push( output[ prop ] );
+        } );
+
+        // Time Series
+        if ( timeSeries ) {
+          // Time Series Header
+          if ( typeof tsHeader === "undefined" ) {
+            tsHeader = [];
+            for ( let tsVarName of Object.keys( output.timeSeries ) ) {
+              tsHeader.push( tsVarName );
+            }
+            if ( header ) {
+              if ( typeof sim.model.timeIncrement !== "undefined" ) {
+                tsText = [ "id", "time" ].concat( tsHeader ).join( sep ) + "\n";
+              } else {
+                tsText = [ "id", "time", "variable", "value" ].join( sep ) +
+                  "\n";
+              }
+            }
+          }
+
+          // Time Series Line
+          if ( tsHeader.length > 0 ) {
+
+            ts = [];
+            if ( typeof sim.model.timeIncrement !== "undefined" ) {
+              for ( let v = 0; v < tsHeader.length; v += 1 ) {
+                if ( output.timeSeries[ tsHeader[ v ] ] ) {
+                  ts[ v ] = output.timeSeries[ tsHeader[ v ] ];
+                }
+              }
+
+              for ( let r = 0, t = 0; r < ts[ 0 ].length; r += 1,
+                t += sim.model.timeIncrement ) {
+                tsLine = [];
+                tsLine.push( expScenRun[ "id" ] );
+                tsLine.push( t );
+                for ( let v = 0; v < tsHeader.length; v += 1 ) {
+                  tsLine.push( ts[ v ][ r ] );
+                }
+
+                tsText += tsLine.join( sep ) + "\n";
+              }
+            } else {
+              for ( let v = 0; v < tsHeader.length; v += 1 ) {
+                ts = output.timeSeries[ tsHeader[ v ] ];
+
+                for ( let r = 0; r < ts[ 0 ].length; r += 1 ) {
+                  tsLine = [];
+                  tsLine.push( expScenRun[ "id" ] );
+                  tsLine.push( ts[ 0 ][ r ] );
+                  tsLine.push( tsHeader[ v ] );
+                  tsLine.push( ts[ 1 ][ r ] );
+                  tsText += tsLine.join( sep ) + "\n";
+                }
+              }
+            }
+          }
+        }
+
+        defText += defLine.join( sep ) + "\n";
+        sumText += sumLine.join( sep ) + "\n";
       }
     }
 
-    // Generate and export the file
-    data = new Blob( [ text ], { type: "text/plain" } );
-
-    url = window.URL.createObjectURL( data );
-
-    file = document.createElement( "a" );
-    file.setAttribute( "style", "display: none" );
-    file.setAttribute( "href", url );
-    file.setAttribute( "download", filename );
-    document.body.appendChild( file );
-    file.click();
-    window.URL.revokeObjectURL( url );
-    file.remove();
+    // Export data
+    generateTextFile( defFn, defText );
+    generateTextFile( sumFn, sumText );
+    if ( timeSeries ) {
+      generateTextFile( tsFn, tsText );
+    }
   } ).catch( function ( err ) {
     console.log( err.name + ": " + err.message );
   } );
@@ -114,7 +200,7 @@ storeMan.retrieveAll( oes.ExperimentRun ).then( function ( records ) {
 // Define the Export button action onClick
 let button = document.getElementById( "export" );
 button.addEventListener( "click", function () {
-  let experiments = [], filename, sep, header;
+  let experiments = [], sep, header, timeSeries, defFn, sumFn, tsFn;
   let selectedOptions = document.querySelectorAll( "input[type=checkbox]" );
 
   let elements = [].filter.call( selectedOptions, function ( el ) {
@@ -127,7 +213,11 @@ button.addEventListener( "click", function () {
 
   header = document.querySelector( "#header" ).checked;
   sep = document.querySelector( "#sep" ).value;
-  filename = document.querySelector( "#fname" ).value;
+  timeSeries = document.querySelector( "#timeSeries" ).checked;
 
-  exportData( experiments, filename, sep, header );
+  defFn = document.querySelector( "#defFilename" ).value;
+  sumFn = document.querySelector( "#sumFilename" ).value;
+  tsFn = document.querySelector( "#tsFilename" ).value;
+
+  exportData( experiments, sep, header, timeSeries, defFn, sumFn, tsFn );
 } );
