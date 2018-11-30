@@ -18,7 +18,9 @@ var Fight = new cLASS( {
   methods: {
     "onEvent": function () {
       var followupEvents = [];
-      var strongRG, weakRG, strongRGProb, weakRGProb, enterprise, index, len, i;
+      var enterprise, index, len, i;
+      var strongRG, strongRGProb;
+      var weakRG, weakRGProb;
 
       // Define the strong and weak Rebel Groups
       if ( this.attacker.nmrOfRebels > this.opponent.nmrOfRebels ) {

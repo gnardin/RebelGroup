@@ -11,7 +11,7 @@
 /******************************************************************************
  * Simulation Parameters
  ******************************************************************************/
-sim.scenario.simulationEndTime = 365;
+sim.scenario.simulationEndTime = 100;
 sim.scenario.idCounter = 1; // optional
 //sim.scenario.randomSeed = 1234; // optional
 /*******************************************************************************
@@ -126,7 +126,6 @@ sim.model.v.fightExpansion = {
   label: "Fight Expansion",
   hint: "The number of enterprises conquered due to win a fight"
 };
-
 /* Global Functions */
 /**
  * Calculates the global relative strength of a Rebel Group. The Rebel Group's
@@ -148,29 +147,6 @@ sim.model.f.globalRelativeStrength = function ( rebelGroup ) {
   }
 
   return globalRelativeStrength;
-};
-/**
- * Calculates the global relative strengths of all Rebel Groups. The Rebel
- * Groups' strength with respect to all other Rebel Groups.
- *
- * @return Object with all Rebel Groups global relative strength ratio
- */
-sim.model.f.globalRelativeStrengths = function () {
-  var sumOfRebels = 0, globalRelativeStrengths = {};
-  var rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
-
-  Object.keys( rebelGroupsObj ).forEach( function ( objId ) {
-    sumOfRebels += rebelGroupsObj[ objId ].nmrOfRebels;
-  } );
-
-  if ( sumOfRebels > 0 ) {
-    Object.keys( rebelGroupsObj ).forEach( function ( objId ) {
-      globalRelativeStrengths[ objId ] = rebelGroupsObj[ objId ].nmrOfRebels /
-        sumOfRebels;
-    } );
-  }
-
-  return globalRelativeStrengths;
 };
 /**
  * Calculates the relative strength of a Rebel Group with respect to an
@@ -225,8 +201,8 @@ sim.experiment.parameterDefs = [
         "[0.05,0.05,0.1]", "[0.05,0.1,0.05]", "[0.1,0.05,0.05]" ]
     } )
 ];
-sim.experiment.replications = 2;
-sim.experiment.seeds = [ 1, 2 ];
+sim.experiment.replications = 10;
+sim.experiment.seeds = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ];
 sim.experiment.storeEachExperimentScenarioRun = true;
 /*******************************************************************************
  * Define Initial State
@@ -335,7 +311,53 @@ sim.scenario.setupInitialState = function () {
       rebelGroup.extortedEnterprises.concat( enterprise );
   } );
 
-  /* Create statistics */
+  /*****************************************************************************
+   * Define Output Statistics Variables
+   ****************************************************************************/
+  sim.model.statistics = {
+    "nmrOfExtortions": {
+      range: "NonNegativeInteger",
+      label: "Number Extortions",
+      initialValue: 0
+    },
+    "nmrOfLoots": {
+      range: "NonNegativeInteger",
+      label: "Number Lootings",
+      initialValue: 0
+    },
+    "nmrOfExpands": {
+      range: "NonNegativeInteger",
+      label: "Number Expansions",
+      initialValue: 0
+    },
+    "nmrOfFights": {
+      range: "NonNegativeInteger",
+      label: "Number Fights",
+      initialValue: 0
+    },
+    "nmrOfReports": {
+      range: "NonNegativeInteger",
+      label: "Number Reports",
+      initialValue: 0
+    },
+    "nmrOfFlees": {
+      range: "NonNegativeInteger",
+      label: "Number Fled Ent.",
+      initialValue: 0,
+      showTimeSeries: true,
+      computeOnlyAtEnd: false
+    },
+    "nmrOfRecruits": {
+      range: "NonNegativeInteger",
+      label: "Number Recruitments",
+      initialValue: 0
+    },
+    "nmrOfExpels": {
+      range: "NonNegativeInteger",
+      label: "Number Expels",
+      initialValue: 0
+    }
+  };
   rebelGroupsKeys.forEach( function ( id ) {
     // Rebel Group's Size
     sim.model.statistics[ "nmrOfRebels" + id ] = {
@@ -375,50 +397,4 @@ sim.scenario.setupInitialState = function () {
     };
   } );
 };
-/*******************************************************************************
- * Define Output Statistics Variables
- ******************************************************************************/
-sim.model.statistics = {
-  "nmrOfExtortions": {
-    range: "NonNegativeInteger",
-    label: "Number Extortions",
-    initialValue: 0
-  },
-  "nmrOfLoots": {
-    range: "NonNegativeInteger",
-    label: "Number Lootings",
-    initialValue: 0
-  },
-  "nmrOfExpands": {
-    range: "NonNegativeInteger",
-    label: "Number Expansions",
-    initialValue: 0
-  },
-  "nmrOfFights": {
-    range: "NonNegativeInteger",
-    label: "Number Fights",
-    initialValue: 0
-  },
-  "nmrOfReports": {
-    range: "NonNegativeInteger",
-    label: "Number Reports",
-    initialValue: 0
-  },
-  "nmrOfFlees": {
-    range: "NonNegativeInteger",
-    label: "Number Fled Ent.",
-    initialValue: 0,
-    showTimeSeries: true,
-    computeOnlyAtEnd: false
-  },
-  "nmrOfRecruits": {
-    range: "NonNegativeInteger",
-    label: "Number Recruitments",
-    initialValue: 0
-  },
-  "nmrOfExpels": {
-    range: "NonNegativeInteger",
-    label: "Number Expels",
-    initialValue: 0
-  }
-};
+sim.model.statistics = {};
