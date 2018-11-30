@@ -11,7 +11,7 @@
 /******************************************************************************
  * Simulation Parameters
  ******************************************************************************/
-sim.scenario.simulationEndTime = 100;
+sim.scenario.simulationEndTime = 365;
 sim.scenario.idCounter = 1; // optional
 //sim.scenario.randomSeed = 1234; // optional
 /*******************************************************************************
@@ -101,12 +101,6 @@ sim.model.v.recruitRate = {
   initialValue: "[0.5,0.5,0.5]",
   label: "RGs Recruit Rate",
   hint: "The rate of rebels recruited per recruitment per Rebel Group"
-};
-sim.model.v.allianceThreshold = {
-  range: "string",
-  initialValue: "[0.5,0.5,0.5]",
-  label: "RGs Alliance Threshold",
-  hint: "The maximum power threshold to form an alliance"
 };
 sim.model.v.freqDemand = {
   range: "string",
@@ -231,8 +225,8 @@ sim.experiment.parameterDefs = [
         "[0.05,0.05,0.1]", "[0.05,0.1,0.05]", "[0.1,0.05,0.05]" ]
     } )
 ];
-sim.experiment.replications = 10;
-sim.experiment.seeds = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ];
+sim.experiment.replications = 2;
+sim.experiment.seeds = [ 1, 2 ];
 sim.experiment.storeEachExperimentScenarioRun = true;
 /*******************************************************************************
  * Define Initial State
@@ -260,7 +254,6 @@ sim.scenario.setupInitialState = function () {
   var rebelCosts = JSON.parse( sim.v.rebelCosts );
   var recruitThreshold = JSON.parse( sim.v.recruitThreshold );
   var recruitRate = JSON.parse( sim.v.recruitRate );
-  var allianceThreshold = JSON.parse( sim.v.allianceThreshold );
   var freqDemand = JSON.parse( sim.v.freqDemand );
   var freqExpand = JSON.parse( sim.v.freqExpand );
   var freqAllocate = JSON.parse( sim.v.freqAllocate );
@@ -277,7 +270,6 @@ sim.scenario.setupInitialState = function () {
       rebelCost: rebelCosts[ i ],
       recruitThreshold: recruitThreshold[ i ],
       recruitRate: recruitRate[ i ],
-      allianceThreshold: allianceThreshold[ i ],
       extortedEnterprises: [],
       extortionRate: extortionRates[ i ],
       reports: {},

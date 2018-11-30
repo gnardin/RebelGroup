@@ -32,10 +32,6 @@ var RebelGroup = new cLASS( {
       range: "Decimal",
       label: "Maximum Recruitment Rate"
     },
-    "allianceThreshold": {
-      range: "Decimal",
-      label: "Alliance Power Threshold"
-    },
     "extortedEnterprises": {
       range: "Enterprise",
       minCard: 0,
