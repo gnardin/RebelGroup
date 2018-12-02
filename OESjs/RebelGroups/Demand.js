@@ -20,7 +20,8 @@ var Demand = new cLASS( {
       var strengthRatio;
 
       if ( this.rebelGroup.nmrOfRebels > 0 ) {
-        strengthRatio = sim.model.f.globalRelativeStrength( this.rebelGroup );
+        strengthRatio =
+          sim.model.f.globalRelativeStrength( this.rebelGroup );
         this.rebelGroup.extortedEnterprises.forEach( ( enterprise ) => {
           /**
            * Decision to extort or loot

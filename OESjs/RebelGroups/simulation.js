@@ -78,6 +78,12 @@ sim.model.v.nmrOfRebels = {
   label: "RGs Size",
   hint: "The number of rebel members per Rebel Group"
 };
+sim.model.v.propOfEnterprises = {
+  range: "string",
+  initialValue: "[0.4,0.3,0.3]",
+  label: "RGs Prop Enterprises",
+  hint: "The proportion of Enterprises per Rebel Group"
+};
 sim.model.v.extortionRates = {
   range: "string",
   initialValue: "[0.1,0.1,0.1]",
@@ -135,13 +141,15 @@ sim.model.v.fightExpansion = {
  * @return Global relative strength ratio
  */
 sim.model.f.globalRelativeStrength = function ( rebelGroup ) {
-  var sumOfRebels = 0, globalRelativeStrength = 0;
+  var sumOfRebels, globalRelativeStrength;
   var rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
 
+  sumOfRebels = 0;
   Object.keys( rebelGroupsObj ).forEach( function ( objId ) {
     sumOfRebels += rebelGroupsObj[ objId ].nmrOfRebels;
   } );
 
+  globalRelativeStrength = 0;
   if ( sumOfRebels > 0 ) {
     globalRelativeStrength = rebelGroup.nmrOfRebels / sumOfRebels;
   }
@@ -154,7 +162,7 @@ sim.model.f.globalRelativeStrength = function ( rebelGroup ) {
  *
  * @param rebelGroup Rebel Group
  * @param opponent Opponent Rebel Group
- * @returns Relative strength of the rebelGroup
+ * @returns Relative strength of the rebelGroups
  */
 sim.model.f.relativeStrength = function ( rebelGroup, opponent ) {
   var relativeStrength = 0;
@@ -216,7 +224,9 @@ sim.scenario.initialState.events = [];
 /* Initial Functions */
 sim.scenario.setupInitialState = function () {
   var rebelGroupsObj, rebelGroupsKeys, rebelGroup;
-  var enterprisesObj, enterprise, objId, i;
+  var enterprisesObj, enterprise;
+  var nmrEnts, totalEnts, totalProp;
+  var objId, i;
 
   // Enterprises input parameters
   var income = JSON.parse( sim.v.income );
@@ -226,6 +236,7 @@ sim.scenario.setupInitialState = function () {
 
   // Rebel Groups parameters
   var nmrOfRebels = JSON.parse( sim.v.nmrOfRebels );
+  var propOfEnterprises = JSON.parse( sim.v.propOfEnterprises );
   var extortionRates = JSON.parse( sim.v.extortionRates );
   var rebelCosts = JSON.parse( sim.v.rebelCosts );
   var recruitThreshold = JSON.parse( sim.v.recruitThreshold );
@@ -297,14 +308,37 @@ sim.scenario.setupInitialState = function () {
     } ) );
   }
 
-  /* Randomly associate Enterprises and Rebel Groups */
+  /* Adjust the proportion of Enterprises */
+  nmrEnts = {};
+  totalEnts = 0;
+  totalProp = propOfEnterprises.reduce( ( a, b ) => a + b, 0 );
+  for ( i = 0; i < sim.v.nmrOfRebelGroups; i += 1 ) {
+    objId = i + 1;
+
+    nmrEnts[ objId ] = Math.min( sim.v.nmrOfEnterprises - totalEnts,
+      Math.ceil( ( propOfEnterprises[ i ] / totalProp ) *
+        sim.v.nmrOfEnterprises ) );
+
+    totalEnts += nmrEnts[ objId ];
+  }
+
+  /* Randomly associate Enterprises with Rebel Groups */
   rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
   rebelGroupsKeys = Object.keys( rebelGroupsObj );
   enterprisesObj = cLASS[ "Enterprise" ].instances;
   Object.keys( enterprisesObj ).forEach( function ( id ) {
     enterprise = enterprisesObj[ id ];
-    rebelGroup = rebelGroupsObj[ rebelGroupsKeys[ rand.uniformInt( 0,
-      rebelGroupsKeys.length - 1 ) ] ];
+
+    do {
+      objId = rebelGroupsKeys[ rand.uniformInt( 0,
+        rebelGroupsKeys.length - 1 ) ];
+    } while ( nmrEnts[ objId ] === 0 );
+    rebelGroup = rebelGroupsObj[ objId ];
+
+    nmrEnts[ objId ] -= 1;
+    if ( nmrEnts[ objId ] === 0 ) {
+      rebelGroupsKeys.splice( rebelGroupsKeys.indexOf( objId ), 1 );
+    }
 
     enterprise.rebelGroup = rebelGroup;
     rebelGroup.extortedEnterprises =
@@ -328,6 +362,11 @@ sim.scenario.setupInitialState = function () {
     "nmrOfExpands": {
       range: "NonNegativeInteger",
       label: "Number Expansions",
+      initialValue: 0
+    },
+    "nmrOfAlliances": {
+      range: "NonNegativeInteger",
+      label: "Number Alliances",
       initialValue: 0
     },
     "nmrOfFights": {
@@ -358,7 +397,8 @@ sim.scenario.setupInitialState = function () {
       initialValue: 0
     }
   };
-  rebelGroupsKeys.forEach( function ( id ) {
+
+  Object.keys( rebelGroupsObj ).forEach( function ( id ) {
     // Rebel Group's Size
     sim.model.statistics[ "nmrOfRebels" + id ] = {
       objectType: "RebelGroup",
@@ -370,20 +410,8 @@ sim.scenario.setupInitialState = function () {
     };
   } );
 
-  // Rebel Group's Wealth
-  // rebelGroupsKeys.forEach( function ( id ) {
-  //   sim.model.statistics[ "wealth" + id ] = {
-  //     objectType: "RebelGroup",
-  //     objectIdRef: id,
-  //     property: "wealth",
-  //     label: "Wealth Rebel Group " + id,
-  //     initialValue: 0,
-  //     showTimeSeries: true
-  //   };
-  // } );
-
   // Number of Extorted Enterprise
-  rebelGroupsKeys.forEach( function ( id ) {
+  Object.keys( rebelGroupsObj ).forEach( function ( id ) {
     sim.model.statistics[ "nmrOfExtorted" + id ] = {
       range: "NonNegativeInteger",
       label: "Enterprises Extorted by Rebel Group " + id,

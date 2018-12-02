@@ -34,6 +34,7 @@ var RebelGroup = new cLASS( {
     },
     "extortedEnterprises": {
       range: "Enterprise",
+      label: "Extorted Enterprises",
       minCard: 0,
       maxCard: Infinity
     },

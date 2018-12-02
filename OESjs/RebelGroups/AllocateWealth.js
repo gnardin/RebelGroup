@@ -18,7 +18,8 @@ var AllocateWealth = new cLASS( {
     "onEvent": function () {
       var followupEvents = [];
       var deltaRebels = 0, recruit = 0, expel = 0;
-      var strengthRatio = sim.model.f.globalRelativeStrength( this.rebelGroup );
+      var strengthRatio =
+        sim.model.f.globalRelativeStrength( this.rebelGroup );
       var totalSalary = this.rebelGroup.nmrOfRebels * this.rebelGroup.rebelCost;
 
       if ( this.rebelGroup.wealth > totalSalary ) {
