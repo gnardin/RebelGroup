@@ -200,13 +200,13 @@ var Fight = new cLASS( {
         for ( i = 0; i < strong.members.length; i += 1 ) {
           rebelGroup = rebelGroups[ strong.members[ i ] ];
           rebelGroup.nmrOfRebels -= Math.ceil( rebelGroup.nmrOfRebels *
-            ( weakProb / strong.members.length ) );
+            weakProb );
         }
 
         for ( i = 0; i < weak.members.length; i += 1 ) {
           rebelGroup = rebelGroups[ weak.members[ i ] ];
           rebelGroup.nmrOfRebels -= Math.ceil( rebelGroup.nmrOfRebels *
-            ( strongProb / weak.members.length ) );
+            strongProb );
         }
 
         sim.stat.nmrOfFights += 1;
