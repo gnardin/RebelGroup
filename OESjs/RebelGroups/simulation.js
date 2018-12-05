@@ -74,7 +74,7 @@ sim.model.v.nmrOfRebelGroups = {
 };
 sim.model.v.nmrOfRebels = {
   range: "string",
-  initialValue: "[1000,800,500]",
+  initialValue: "[500,500,500]",
   label: "RGs Size",
   hint: "The number of rebel members per Rebel Group"
 };
@@ -204,11 +204,12 @@ sim.experiment.title = "Basic";
 sim.experiment.parameterDefs = [
   new oes.ExperimentParamDef(
     {
-      name: "extortionRates", values: [ "[0.1,0.1,0.1]", "[0.05,0.05,0.05]",
-        "[0.05,0.1,0.1]", "[0.1,0.05,0.1]", "[0.1,0.05,0.1]",
-        "[0.05,0.05,0.1]", "[0.05,0.1,0.05]", "[0.1,0.05,0.05]" ]
+      name: "extortionRates", values: [ "[0.1,0.1,0.1]" ]
     } )
 ];
+// , "[0.05,0.05,0.05]",
+//   "[0.05,0.1,0.1]", "[0.1,0.05,0.1]", "[0.1,0.05,0.1]",
+//   "[0.05,0.05,0.1]", "[0.05,0.1,0.05]", "[0.1,0.05,0.05]"
 sim.experiment.replications = 2;
 sim.experiment.seeds = [ 126, 8758 ];
 //, 635, 2653, 198, 681, 8734, 6523, 2643, 27
@@ -372,7 +373,9 @@ sim.scenario.setupInitialState = function () {
     "nmrOfFights": {
       range: "NonNegativeInteger",
       label: "Number Fights",
-      initialValue: 0
+      initialValue: 0,
+      showTimeSeries: true,
+      computeOnlyAtEnd: false
     },
     "nmrOfReports": {
       range: "NonNegativeInteger",
@@ -395,6 +398,13 @@ sim.scenario.setupInitialState = function () {
       range: "NonNegativeInteger",
       label: "Number Expels",
       initialValue: 0
+    },
+    "nmrOfDeaths": {
+      range: "NonNegativeInteger",
+      label: "Number Deaths",
+      initialValue: 0,
+      showTimeSeries: true,
+      computeOnlyAtEnd: false
     }
   };
 

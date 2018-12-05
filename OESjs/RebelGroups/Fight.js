@@ -22,6 +22,7 @@ var Fight = new cLASS( {
       var ally, allyProb, allied, attackerAlliance, opponentAlliance;
       var strong, strongProb;
       var weak, weakProb;
+      var nmrOfDeaths;
       var rebelGroup, nmrOfExtorted, nmrOfRebels, nmrTransfer, totalTransfer;
       var rebelGroups = cLASS[ "RebelGroup" ].instances;
       var rebelGroupsKeys = Object.keys( rebelGroups );
@@ -195,19 +196,21 @@ var Fight = new cLASS( {
         }
 
         // Fight decreases RG size proportional to opposite RG's strength
+        nmrOfDeaths = 0;
         for ( i = 0; i < strong.members.length; i += 1 ) {
           rebelGroup = rebelGroups[ strong.members[ i ] ];
-          rebelGroup.nmrOfRebels -= Math.ceil( rebelGroup.nmrOfRebels *
-            weakProb );
+          nmrOfDeaths += Math.ceil( rebelGroup.nmrOfRebels * weakProb );
+          rebelGroup.nmrOfRebels -= nmrOfDeaths;
         }
 
         for ( i = 0; i < weak.members.length; i += 1 ) {
           rebelGroup = rebelGroups[ weak.members[ i ] ];
-          rebelGroup.nmrOfRebels -= Math.ceil( rebelGroup.nmrOfRebels *
-            strongProb );
+          nmrOfDeaths = Math.ceil( rebelGroup.nmrOfRebels * strongProb );
+          rebelGroup.nmrOfRebels -= nmrOfDeaths;
         }
 
         sim.stat.nmrOfFights += 1;
+        sim.stat.nmrOfDeaths += nmrOfDeaths;
       }
 
       return followupEvents;

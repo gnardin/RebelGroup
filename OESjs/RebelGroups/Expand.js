@@ -70,12 +70,12 @@ var Expand = new cLASS( {
         fightProb = 0;
         if ( enterprise.rebelGroup !== null ) {
           strengthRatio = sim.model.f.normalizeValue(
-            sim.model.f.relativeStrength( this.rebelGroup,
-              enterprise.rebelGroup ) );
+            sim.model.f.relativeStrength( enterprise.rebelGroup,
+              this.rebelGroup ) );
 
           /* Fight Probability */
           fightProb = sim.model.f.sigmoid( 1, 1, 1,
-            -1.5, ( strengthRatio * 4 ) );
+            1.5, ( strengthRatio * 4 ) );
         } else {
           enterprise.rebelGroup = this.rebelGroup;
           this.rebelGroup.extortedEnterprises.push( enterprise );
