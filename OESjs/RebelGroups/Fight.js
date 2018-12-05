@@ -132,11 +132,10 @@ var Fight = new cLASS( {
           for ( i = 0; i < strong.members.length; i += 1 ) {
             rebelGroup = rebelGroups[ strong.members[ i ] ];
             for ( j = 0; j < nmrTransfer[ i ]; j += 1 ) {
-              enterprise = enterprises.splice( 0, 1 );
+              enterprise = enterprises.splice( 0, 1 )[ 0 ];
               enterprise.rebelGroup = rebelGroup;
               enterprise.nmrOfLootings = 0;
-              rebelGroup.extortedEnterprises =
-                rebelGroup.extortedEnterprises.concat( enterprise );
+              rebelGroup.extortedEnterprises.push( enterprise );
             }
           }
         } else {
@@ -186,11 +185,10 @@ var Fight = new cLASS( {
             for ( i = 0; i < weak.members.length; i += 1 ) {
               rebelGroup = rebelGroups[ weak.members[ i ] ];
               for ( j = 0; j < nmrTransfer[ i ]; j += 1 ) {
-                enterprise = enterprises.splice( 0, 1 );
+                enterprise = enterprises.splice( 0, 1 )[ 0 ];
                 enterprise.rebelGroup = rebelGroup;
                 enterprise.nmrOfLootings = 0;
-                rebelGroup.extortedEnterprises =
-                  rebelGroup.extortedEnterprises.concat( enterprise );
+                rebelGroup.extortedEnterprises.push( enterprise );
               }
             }
           }

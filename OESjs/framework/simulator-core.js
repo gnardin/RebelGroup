@@ -159,7 +159,7 @@ RoleConstraintViolation.prototype.constructor = RoleConstraintViolation;
 /*******************************************************************************
  * @fileOverview A collection of utilities: methods, objects, etc used all over the code.
  * @author Mircea Diaconescu
- * @copyright Copyright © 2014 Gerd Wagner, Mircea Diaconescu et al, 
+ * @copyright Copyright © 2014 Gerd Wagner, Mircea Diaconescu et al,
  *            Chair of Internet Technology, Brandenburg University of Technology, Germany.
  * @date July 08, 2014, 11:04:23
  * @license The MIT License (MIT)
@@ -190,15 +190,15 @@ util.capitalizeFirstChar = function (str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 /**
- * Copy all own (property and method) slots of a number of untyped objects 
+ * Copy all own (property and method) slots of a number of untyped objects
  * to a new untyped object.
  * @author Gerd Wagner
  * @return {object}  The merge result.
  */
 util.mergeObjects = function () {
-  var i = 0, k = 0, n = arguments.length, m = 0, 
+  var i = 0, k = 0, n = arguments.length, m = 0,
       foundArrayArg = false,
-      foundObjectArg = false, 
+      foundObjectArg = false,
       arg = null, mergedResult,
       keys=[], key="";
   for (i = 0; i < n; i++) {
@@ -222,9 +222,9 @@ util.mergeObjects = function () {
         keys = Object.keys( arg);
         m = keys.length;
         for (k = 0; k < m; k++) {
-          key = keys[k]; 
+          key = keys[k];
           mergedResult[key] = arg[key];
-        }      
+        }
       } else {
         throw "util.mergeObjects: incompatible objects were found! Trying to merge "+
               "an Object with an Array! Expected Object arguments only!";
@@ -385,7 +385,7 @@ util.mergeObjects = function () {
   return mergeObj;
 };
 /**
- * Swap two elements of an array 
+ * Swap two elements of an array
  * using the ES6 method Object.assign for creating a shallow clone of an object
  * @param a  the array
  * @param i  the first index
@@ -661,7 +661,7 @@ function cLASS (classSlots) {
     constr.prototype.constructor = constr;
     // merge superclass property declarations with own property declarations
     constr.properties = Object.create( superclass.properties);
-   //  assign own property declarations, possibly overriding super-props																		 
+   //  assign own property declarations, possibly overriding super-props
     Object.keys( propDefs).forEach( function (p) {
       constr.properties[p] = propDefs[p];
     });
@@ -1460,9 +1460,9 @@ cLASS.RingBuffer.prototype.toString = function (n) {
  };
 
  /**
- * @fileOverview  A library of DOM element creation methods and 
+ * @fileOverview  A library of DOM element creation methods and
  * other DOM manipulation methods.
- * 
+ *
  * @author Gerd Wagner
  */
 
@@ -1499,7 +1499,7 @@ var dom = {
    },
    /**
     * Create an img element
-    * 
+    *
     * @param {string} id
     * @param {string} classValues
     * @param {object} content
@@ -1514,7 +1514,7 @@ var dom = {
     },
   /**
    * Create an option element
-   * 
+   *
    * @param {object} content
    * @return {object}
    */
@@ -1526,7 +1526,7 @@ var dom = {
   },
   /**
    * Create a button element
-   * 
+   *
    * @param {string} id
    * @param {string} classValues
    * @param {object} content
@@ -1547,7 +1547,7 @@ var dom = {
   },
   /**
    * Create a labeled output field
-   * 
+   *
    * @param {{labelText: string, name: string?, value: string?}}
    *        slots  The view definition slots.
    * @return {object}
@@ -2298,7 +2298,7 @@ oBJECTvIEW.prototype.render = function (objViewParentEl) {
   createUiElemsForVmFields();
   // create DOM elements (like buttons) for all user actions of the UI/view model
   createUiElemsForUserActions( uiContainerEl);
-  return dataBinding;  // a map of field names to corresponding DOM elements 
+  return dataBinding;  // a map of field names to corresponding DOM elements
 };
 /**
  * Set up a tabular UI for defining/editing entity records of a given
@@ -3246,7 +3246,7 @@ sTORAGEmANAGER.prototype.retrieveAll = function (mc) {
  */
 sTORAGEmANAGER.prototype.update = function (mc, id, slots) {
   var adapterName = this.adapter.name,
-      dbName = this.adapter.dbName, 
+      dbName = this.adapter.dbName,
       currentSM = this;
   return new Promise( function (resolve) {
     var objectBeforeUpdate = null, properties = mc.properties,
@@ -3679,9 +3679,9 @@ sTORAGEmANAGER.adapters["IndexedDB"] = {
   }
 };
  /**
- * @fileOverview  A library of DOM element creation methods and 
+ * @fileOverview  A library of DOM element creation methods and
  * other DOM manipulation methods.
- * 
+ *
  * @author Gerd Wagner
  */
  /**
@@ -3818,7 +3818,7 @@ var svg = {
   XLINK_NS: "http://www.w3.org/1999/xlink",
   /**
   * Create an SVG element
-  * 
+  *
   * @param {object} params  a lsit of optional parameters
   * @return {node} svgElement
   */
@@ -3845,12 +3845,12 @@ var svg = {
   },
   /**
   * Create a rect element
-  * 
-  * @param {number} x 
-  * @param {number} y 
-  * @param {number} width 
-  * @param {number} height 
-  * @param {object} optParams 
+  *
+  * @param {number} x
+  * @param {number} y
+  * @param {number} width
+  * @param {number} height
+  * @param {object} optParams
   *
   * @return (object)
   */
@@ -3865,12 +3865,12 @@ var svg = {
   },
   /**
   * Create a circle element
-  * 
-  * @param {number} x 
-  * @param {number} y 
-  * @param {number} width 
-  * @param {number} height 
-  * @param {string} color 
+  *
+  * @param {number} x
+  * @param {number} y
+  * @param {number} width
+  * @param {number} height
+  * @param {string} color
   *
   * @return (object)
   */
@@ -3883,14 +3883,14 @@ var svg = {
     return el;
   },
   /**
-   * Create a line element 
-   * 
-   * @param {number} x1 
-   * @param {number} y1 
-   * @param {number} x2 
-   * @param {number} y2 
+   * Create a line element
+   *
+   * @param {number} x1
+   * @param {number} y1
+   * @param {number} x2
+   * @param {number} y2
    * @param {string} color  the stroke color
-   * @param {number} width 
+   * @param {number} width
    * @return {object}
    */
   createLine: function (x1, y1, x2, y2, optParams) {
@@ -3904,7 +3904,7 @@ var svg = {
   },
   /**
    * Create a path element
-   * 
+   *
    * @param {number} d  the path description
    * @param {string} color  the stroke color
    * @param {number} width  the stroke width
@@ -3918,7 +3918,7 @@ var svg = {
   },
   /**
   * Create a group element
-  * 
+  *
   * @return gNode
   */
   createGroup: function (optParams) {
@@ -3933,7 +3933,7 @@ var svg = {
   * @param {string} name the content of the node
   * @param {number} fontSize of the content
   * @param {string} color of the content
-  * 
+  *
   * @return text object
   */
   createText: function ( x, y, txt, style) {
@@ -4365,7 +4365,7 @@ Prism.languages.javascript=Prism.languages.extend("clike",{"class-name":[Prism.l
 /*******************************************************************************
  * Binary Heap function based on the Appendix 2 Binary Heaps Haverbeke, M.
  * Eloquent JavaScript 3rd Edition
- * 
+ *
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany.
  * @license The MIT License (MIT)
  * @author Luis Gustavo Nardin
@@ -4381,7 +4381,7 @@ BinaryHeap.prototype.push = function ( element ) {
 BinaryHeap.prototype.pop = function () {
   var result = this.content[0];
   var end = this.content.pop();
-  
+
   if ( this.content.length > 0 ) {
     this.content[0] = end;
     this.sinkDown( 0 );
@@ -4395,12 +4395,12 @@ BinaryHeap.prototype.remove = function ( element ) {
     if ( this.content[i] !== element ) {
       continue;
     }
-    
+
     end = this.content.pop();
     if ( i === len - 1 ) {
       break;
     }
-    
+
     this.content[i] = end;
     this.bubbleUp( i );
     this.sinkDown( i );
@@ -4429,14 +4429,14 @@ BinaryHeap.prototype.bubbleUp = function ( n ) {
   var element = this.content[n];
   var score = this.scoreFunction( element );
   var parentN, parent;
-  
+
   while ( n > 0 ) {
     parentN = Math.floor( (n + 1) / 2 ) - 1;
     parent = this.content[parentN];
     if ( score >= this.scoreFunction( parent ) ) {
       break;
     }
-    
+
     this.content[parentN] = element;
     this.content[n] = parent;
     n = parentN;
@@ -4448,7 +4448,7 @@ BinaryHeap.prototype.sinkDown =
       var element = this.content[n];
       var elemScore = this.scoreFunction( element );
       var swap, child1, child2, child1N, child2N, child1Score, child2Score;
-      
+
       while ( true ) {
         child2N = (n + 1) * 2;
         child1N = child2N - 1;
@@ -5399,7 +5399,7 @@ sim.logStep = function (stepLog) {
 };
 /*******************************************************************************
  * EventList maintains an ordered list of events using Binary Heap
- * 
+ *
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany.
  * @license The MIT License (MIT)
  * @author Luis Gustavo Nardin
@@ -5604,8 +5604,8 @@ oes.stat.prepareTimeSeriesCompression = function (maxLength) {
     + oes.stat.timeSeriesCompressionSteps + " (1 means no compression)");
 };
 /**
- * Reset the statistics variables. This means that any computed 
- * value is reset to the initial value and all the connection with 
+ * Reset the statistics variables. This means that any computed
+ * value is reset to the initial value and all the connection with
  * object(s) references are recreated.
  */
 oes.stat.reset = function () {
@@ -5734,8 +5734,8 @@ oes.stat.computePopulationAggregate = function (statVar) {
   return aggr;
 };
 /**
- * Compute the values of the statistic variables which are only required 
- * to be computed at the simulation end. This method has to be called when 
+ * Compute the values of the statistic variables which are only required
+ * to be computed at the simulation end. This method has to be called when
  * the simulation ends.
  */
 oes.stat.computeOnlyAtEndStatistics = function () {
@@ -6504,7 +6504,7 @@ sim.runStep = function (followupEvents) {
           }
           followupEvents = e.onEvent();
         }  //***end of switch***
-        
+
         // render event appearances if defined
         if (sim.config.visualize && sim.ui.animations && sim.ui.animations[eventTypeName]) {
           sim.ui.animations[eventTypeName].play();

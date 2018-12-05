@@ -78,6 +78,7 @@ var Expand = new cLASS( {
             -1.5, ( strengthRatio * 4 ) );
         } else {
           enterprise.rebelGroup = this.rebelGroup;
+          this.rebelGroup.extortedEnterprises.push( enterprise );
         }
 
         if ( rand.uniform() < fightProb ) {
@@ -107,6 +108,7 @@ var Expand = new cLASS( {
 
         sim.stat.nmrOfExpands += 1;
       }
+
       return followupEvents;
     }
   }

@@ -159,7 +159,7 @@ RoleConstraintViolation.prototype.constructor = RoleConstraintViolation;
 /*******************************************************************************
  * @fileOverview A collection of utilities: methods, objects, etc used all over the code.
  * @author Mircea Diaconescu
- * @copyright Copyright © 2014 Gerd Wagner, Mircea Diaconescu et al, 
+ * @copyright Copyright © 2014 Gerd Wagner, Mircea Diaconescu et al,
  *            Chair of Internet Technology, Brandenburg University of Technology, Germany.
  * @date July 08, 2014, 11:04:23
  * @license The MIT License (MIT)
@@ -190,15 +190,15 @@ util.capitalizeFirstChar = function (str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 /**
- * Copy all own (property and method) slots of a number of untyped objects 
+ * Copy all own (property and method) slots of a number of untyped objects
  * to a new untyped object.
  * @author Gerd Wagner
  * @return {object}  The merge result.
  */
 util.mergeObjects = function () {
-  var i = 0, k = 0, n = arguments.length, m = 0, 
+  var i = 0, k = 0, n = arguments.length, m = 0,
       foundArrayArg = false,
-      foundObjectArg = false, 
+      foundObjectArg = false,
       arg = null, mergedResult,
       keys=[], key="";
   for (i = 0; i < n; i++) {
@@ -222,9 +222,9 @@ util.mergeObjects = function () {
         keys = Object.keys( arg);
         m = keys.length;
         for (k = 0; k < m; k++) {
-          key = keys[k]; 
+          key = keys[k];
           mergedResult[key] = arg[key];
-        }      
+        }
       } else {
         throw "util.mergeObjects: incompatible objects were found! Trying to merge "+
               "an Object with an Array! Expected Object arguments only!";
@@ -385,7 +385,7 @@ util.mergeObjects = function () {
   return mergeObj;
 };
 /**
- * Swap two elements of an array 
+ * Swap two elements of an array
  * using the ES6 method Object.assign for creating a shallow clone of an object
  * @param a  the array
  * @param i  the first index
@@ -661,7 +661,7 @@ function cLASS (classSlots) {
     constr.prototype.constructor = constr;
     // merge superclass property declarations with own property declarations
     constr.properties = Object.create( superclass.properties);
-   //  assign own property declarations, possibly overriding super-props																		 
+   //  assign own property declarations, possibly overriding super-props
     Object.keys( propDefs).forEach( function (p) {
       constr.properties[p] = propDefs[p];
     });
@@ -1926,7 +1926,7 @@ sTORAGEmANAGER.prototype.retrieveAll = function (mc) {
     .then( function (records) {
       var i=0, newObj=null;
       if (createLog) {
-        console.log( records.length +" "+ mc.Name +" records retrieved.")
+        console.log( records.length +" "+ mc.Name +" records retrieved.");
       }
       if (validateAfterRetrieve) {
         for (i=0; i < records.length; i++) {
@@ -1952,7 +1952,7 @@ sTORAGEmANAGER.prototype.retrieveAll = function (mc) {
  */
 sTORAGEmANAGER.prototype.update = function (mc, id, slots) {
   var adapterName = this.adapter.name,
-      dbName = this.adapter.dbName, 
+      dbName = this.adapter.dbName,
       currentSM = this;
   return new Promise( function (resolve) {
     var objectBeforeUpdate = null, properties = mc.properties,
@@ -2141,7 +2141,7 @@ sTORAGEmANAGER.adapters["LocalStorage"] = {
       table = JSON.parse( tableString);
       keys = Object.keys( table);
       console.log( keys.length + " " + mc.Name + " records loaded.");
-      for (i=0; i < keys.length; i++) {
+      for (i=0; i < keys.length; i+=1) {
         key = keys[i];
         mc.instances[key] = mc.createObjectFromRecord( table[key]);
       }
@@ -2745,7 +2745,7 @@ Random.prototype.shuffleArray = function (a) {
 /*******************************************************************************
  * Binary Heap function based on the Appendix 2 Binary Heaps Haverbeke, M.
  * Eloquent JavaScript 3rd Edition
- * 
+ *
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany.
  * @license The MIT License (MIT)
  * @author Luis Gustavo Nardin
@@ -2761,7 +2761,7 @@ BinaryHeap.prototype.push = function ( element ) {
 BinaryHeap.prototype.pop = function () {
   var result = this.content[0];
   var end = this.content.pop();
-  
+
   if ( this.content.length > 0 ) {
     this.content[0] = end;
     this.sinkDown( 0 );
@@ -2775,12 +2775,12 @@ BinaryHeap.prototype.remove = function ( element ) {
     if ( this.content[i] !== element ) {
       continue;
     }
-    
+
     end = this.content.pop();
     if ( i === len - 1 ) {
       break;
     }
-    
+
     this.content[i] = end;
     this.bubbleUp( i );
     this.sinkDown( i );
@@ -2808,52 +2808,53 @@ BinaryHeap.prototype.size = function () {
 BinaryHeap.prototype.bubbleUp = function ( n ) {
   var element = this.content[n];
   var score = this.scoreFunction( element );
-  var parentN, parent;
-  
+  var parentN, parentE;
+
   while ( n > 0 ) {
     parentN = Math.floor( (n + 1) / 2 ) - 1;
-    parent = this.content[parentN];
-    if ( score >= this.scoreFunction( parent ) ) {
+    parentE = this.content[parentN];
+    if ( score >= this.scoreFunction( parentE ) ) {
       break;
     }
-    
+
     this.content[parentN] = element;
-    this.content[n] = parent;
+    this.content[n] = parentE;
     n = parentN;
   }
 };
-BinaryHeap.prototype.sinkDown =
-    function ( n ) {
-      var length = this.content.length;
-      var element = this.content[n];
-      var elemScore = this.scoreFunction( element );
-      var swap, child1, child2, child1N, child2N, child1Score, child2Score;
-      
-      while ( true ) {
-        child2N = (n + 1) * 2;
-        child1N = child2N - 1;
-        swap = null;
-        if ( child1N < length ) {
-          child1 = this.content[child1N];
-          child1Score = this.scoreFunction( child1 );
-          if ( child1Score < elemScore ) {
-            swap = child1N;
-          }
-        }
-        if ( child2N < length ) {
-          child2 = this.content[child2N];
-          child2Score = this.scoreFunction( child2 );
-          if ( child2Score < (swap == null ? elemScore : child1Score) ) {
-            swap = child2N;
-          }
-        }
-        if ( swap == null ) break;
+BinaryHeap.prototype.sinkDown = function ( n ) {
+  var len = this.content.length;
+  var element = this.content[n];
+  var elemScore = this.scoreFunction( element );
+  var swap, child1, child2, child1N, child2N, child1Score, child2Score;
 
-        this.content[n] = this.content[swap];
-        this.content[swap] = element;
-        n = swap;
+  while ( true ) {
+    child2N = (n + 1) * 2;
+    child1N = child2N - 1;
+    swap = null;
+    if ( child1N < len ) {
+      child1 = this.content[child1N];
+      child1Score = this.scoreFunction( child1 );
+      if ( child1Score < elemScore ) {
+        swap = child1N;
       }
-    };
+    }
+    if ( child2N < len ) {
+      child2 = this.content[child2N];
+      child2Score = this.scoreFunction( child2 );
+      if ( child2Score < (swap == null ? elemScore : child1Score) ) {
+        swap = child2N;
+      }
+    }
+    if ( swap == null ) {
+      break;
+    }
+
+    this.content[n] = this.content[swap];
+    this.content[swap] = element;
+    n = swap;
+  }
+};
 
 /*******************************************************************************
  * This library file contains several OES foundation elements
@@ -3770,7 +3771,7 @@ oes.setupFrontEndSimEnv = function () {
 
 /*******************************************************************************
  * EventList maintains an ordered list of events using Binary Heap
- * 
+ *
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany.
  * @license The MIT License (MIT)
  * @author Luis Gustavo Nardin
@@ -3804,19 +3805,18 @@ oes.EventList.prototype.getAllEvents = function () {
 oes.EventList.prototype.isEmpty = function () {
   return this.heap.isEmpty();
 };
-oes.EventList.prototype.removeNextEvents =
-    function () {
-      var nextTime = 0, nextEvents = [];
-      if ( this.heap.isEmpty() ) {
-        return [];
-      }
-      nextTime = this.heap.getFirst().occTime;
-      while ( !this.heap.isEmpty() &&
-          this.heap.getFirst().occTime === nextTime ) {
-        nextEvents.push( this.heap.pop() );
-      }
-      return nextEvents;
-    };
+oes.EventList.prototype.removeNextEvents = function () {
+  var nextTime = 0, nextEvents = [];
+  if ( this.heap.isEmpty() ) {
+    return [];
+  }
+  nextTime = this.heap.getFirst().occTime;
+  while ( !this.heap.isEmpty() &&
+      this.heap.getFirst().occTime === nextTime ) {
+    nextEvents.push( this.heap.pop() );
+  }
+  return nextEvents;
+};
 oes.EventList.prototype.clear = function ( e ) {
   this.heap.clear();
 };
@@ -3975,8 +3975,8 @@ oes.stat.prepareTimeSeriesCompression = function (maxLength) {
     + oes.stat.timeSeriesCompressionSteps + " (1 means no compression)");
 };
 /**
- * Reset the statistics variables. This means that any computed 
- * value is reset to the initial value and all the connection with 
+ * Reset the statistics variables. This means that any computed
+ * value is reset to the initial value and all the connection with
  * object(s) references are recreated.
  */
 oes.stat.reset = function () {
@@ -4105,8 +4105,8 @@ oes.stat.computePopulationAggregate = function (statVar) {
   return aggr;
 };
 /**
- * Compute the values of the statistic variables which are only required 
- * to be computed at the simulation end. This method has to be called when 
+ * Compute the values of the statistic variables which are only required
+ * to be computed at the simulation end. This method has to be called when
  * the simulation ends.
  */
 oes.stat.computeOnlyAtEndStatistics = function () {
@@ -4875,7 +4875,7 @@ sim.runStep = function (followupEvents) {
           }
           followupEvents = e.onEvent();
         }  //***end of switch***
-        
+
         // render event appearances if defined
         if (sim.config.visualize && sim.ui.animations && sim.ui.animations[eventTypeName]) {
           sim.ui.animations[eventTypeName].play();
@@ -5080,7 +5080,7 @@ sim.runExperimentScenarioStep = function () {
   //-----------------------------------------------------
   advanceSimulationTime();
   // extract and process next events
-  if (sim.time === nextEvtTime) {
+  if ( sim.time === nextEvtTime ) {
     nextEvents = sim.FEL.removeNextEvents();
     for (i=0; i < nextEvents.length; i++) {
       e = nextEvents[i];

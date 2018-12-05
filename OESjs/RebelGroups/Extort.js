@@ -52,7 +52,6 @@ var Extort = new cLASS( {
       }
 
       sim.stat.nmrOfExtortions += 1;
-      // sim.stat.amountExtorted += extortion;
 
       return followupEvents;
     }

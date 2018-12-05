@@ -209,8 +209,9 @@ sim.experiment.parameterDefs = [
         "[0.05,0.05,0.1]", "[0.05,0.1,0.05]", "[0.1,0.05,0.05]" ]
     } )
 ];
-sim.experiment.replications = 10;
-sim.experiment.seeds = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ];
+sim.experiment.replications = 2;
+sim.experiment.seeds = [ 126, 8758 ];
+//, 635, 2653, 198, 681, 8734, 6523, 2643, 27
 sim.experiment.storeEachExperimentScenarioRun = true;
 /*******************************************************************************
  * Define Initial State
@@ -234,7 +235,7 @@ sim.scenario.setupInitialState = function () {
   var fleeProb = JSON.parse( sim.v.fleeProb );
   var fleeThreshold = JSON.parse( sim.v.fleeThreshold );
 
-  // Rebel Groups parameters
+  // Rebel Groups input parameters
   var nmrOfRebels = JSON.parse( sim.v.nmrOfRebels );
   var propOfEnterprises = JSON.parse( sim.v.propOfEnterprises );
   var extortionRates = JSON.parse( sim.v.extortionRates );
@@ -341,8 +342,7 @@ sim.scenario.setupInitialState = function () {
     }
 
     enterprise.rebelGroup = rebelGroup;
-    rebelGroup.extortedEnterprises =
-      rebelGroup.extortedEnterprises.concat( enterprise );
+    rebelGroup.extortedEnterprises.push( enterprise );
   } );
 
   /*****************************************************************************

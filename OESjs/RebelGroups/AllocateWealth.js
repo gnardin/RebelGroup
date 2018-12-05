@@ -66,8 +66,9 @@ AllocateWealth.recurrence = function ( e ) {
   return e.rebelGroup.freqAllocate;
 };
 AllocateWealth.createNextEvent = function ( e ) {
+  var nextTime = e.occTime + AllocateWealth.recurrence( e );
   return new AllocateWealth( {
-    occTime: e.occTime + AllocateWealth.recurrence( e ),
+    occTime: nextTime,
     rebelGroup: e.rebelGroup
   } );
 };
