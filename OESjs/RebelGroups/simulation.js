@@ -370,6 +370,11 @@ sim.scenario.setupInitialState = function () {
       label: "Number Alliances",
       initialValue: 0
     },
+    "sumOfFights": {
+      range: "NonNegativeInteger",
+      label: "Number Fights",
+      initialValue: 0
+    },
     "nmrOfFights": {
       range: "NonNegativeInteger",
       label: "Number Fights",

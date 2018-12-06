@@ -210,6 +210,7 @@ var Fight = new cLASS( {
         }
 
         sim.stat.nmrOfFights += 1;
+        sim.stat.sumOfFights += 1;
         sim.stat.nmrOfDeaths += nmrOfDeaths;
       }
 
