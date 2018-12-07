@@ -2563,7 +2563,7 @@ Random.prototype.random = function() {
     }
     this.skip = true;
   }
-  return this.genrand_int32()*(1.0/4294967296.0);
+  return this.genrand_int32() * ( 1.0 / 4294967296.0 );
   /* divided by 2^32 */
 };
 
@@ -4513,7 +4513,7 @@ sim.initializeSimulator = function (dbName) {
     sim.nextMomentDeltaT = 1;
   }
   // set up a default random variate sampling method
-  if (sim.scenario.randomSeed) {  // use the Mersenne Twister RNG
+  if ( sim.scenario.randomSeed ) {  // use the Mersenne Twister RNG
     rand = new Random( sim.scenario.randomSeed);
   } else {  // use the JS built-in RNG
     rand = new Random();
@@ -4530,7 +4530,8 @@ sim.initializeSimulationRun = function (expParamSlots, seed) {
   // get ID counter from simulation scenario, or set to default value
   sim.idCounter = sim.scenario.idCounter || 1000;
   // set up a default random variate sampling method
-  if (!sim.experiment.replications && sim.scenario.randomSeed) {  // use the Mersenne Twister RNG
+  //if (!sim.experiment.replications && sim.scenario.randomSeed) {  // use the Mersenne Twister RNG
+  if (!expParamSlots && sim.scenario.randomSeed) {
     rand = new Random( sim.scenario.randomSeed);
   } else if (seed) {  // experiment-defined replication-specific seed
     rand = new Random( seed);
