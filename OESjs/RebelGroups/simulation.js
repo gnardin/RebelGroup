@@ -68,7 +68,7 @@ sim.model.v.fleeThreshold = {
 };
 sim.model.v.nmrOfRebelGroups = {
   range: "NonNegativeInteger",
-  initialValue: 3,
+  initialValue: 2,
   label: "Number Rebel Groups",
   hint: "The number of Rebel Groups"
 };
@@ -238,14 +238,22 @@ sim.scenario.setupInitialState = function () {
 
   // Rebel Groups input parameters
   var nmrOfRebels = JSON.parse( sim.v.nmrOfRebels );
-  var propOfEnterprises = JSON.parse( sim.v.propOfEnterprises );
-  var extortionRates = JSON.parse( sim.v.extortionRates );
-  var rebelCosts = JSON.parse( sim.v.rebelCosts );
-  var recruitThreshold = JSON.parse( sim.v.recruitThreshold );
-  var recruitRate = JSON.parse( sim.v.recruitRate );
-  var freqDemand = JSON.parse( sim.v.freqDemand );
-  var freqExpand = JSON.parse( sim.v.freqExpand );
-  var freqAllocate = JSON.parse( sim.v.freqAllocate );
+  var propOfEnterprises =
+    JSON.parse( sim.v.propOfEnterprises ).slice( 0, sim.v.nmrOfRebelGroups );
+  var extortionRates =
+    JSON.parse( sim.v.extortionRates ).slice( 0, sim.v.nmrOfRebelGroups );
+  var rebelCosts =
+    JSON.parse( sim.v.rebelCosts ).slice( 0, sim.v.nmrOfRebelGroups );
+  var recruitThreshold =
+    JSON.parse( sim.v.recruitThreshold ).slice( 0, sim.v.nmrOfRebelGroups );
+  var recruitRate =
+    JSON.parse( sim.v.recruitRate ).slice( 0, sim.v.nmrOfRebelGroups );
+  var freqDemand =
+    JSON.parse( sim.v.freqDemand ).slice( 0, sim.v.nmrOfRebelGroups );
+  var freqExpand =
+    JSON.parse( sim.v.freqExpand ).slice( 0, sim.v.nmrOfRebelGroups );
+  var freqAllocate =
+    JSON.parse( sim.v.freqAllocate ).slice( 0, sim.v.nmrOfRebelGroups );
 
   /* Create Rebel Groups */
   for ( i = 0; i < sim.v.nmrOfRebelGroups; i += 1 ) {
