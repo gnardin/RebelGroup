@@ -204,12 +204,12 @@ sim.experiment.title = "Basic";
 sim.experiment.parameterDefs = [
   new oes.ExperimentParamDef(
     {
-      name: "extortionRates", values: [ "[0.1,0.1,0.1]" ]
+      name: "extortionRates", values: [ "[0.1,0.1,0.1]",
+        "[0.05,0.05,0.05]", "[0.05,0.1,0.1]", "[0.1,0.05,0.1]",
+        "[0.1,0.05,0.1]", "[0.05,0.05,0.1]", "[0.05,0.1,0.05]",
+        "[0.1,0.05,0.05]" ]
     } )
 ];
-// , "[0.05,0.05,0.05]",
-//   "[0.05,0.1,0.1]", "[0.1,0.05,0.1]", "[0.1,0.05,0.1]",
-//   "[0.05,0.05,0.1]", "[0.05,0.1,0.05]", "[0.1,0.05,0.05]"
 sim.experiment.replications = 2;
 sim.experiment.seeds = [ 126, 8758 ];
 //, 635, 2653, 198, 681, 8734, 6523, 2643, 27
@@ -410,6 +410,28 @@ sim.scenario.setupInitialState = function () {
       initialValue: 0,
       showTimeSeries: true,
       computeOnlyAtEnd: false
+    },
+    "aliveRGs": {
+      range: "NonNegativeInteger",
+      label: "Alive Rebel Groups",
+      initialValue: 0,
+      showTimeSeries: false,
+      computeOnlyAtEnd: true,
+      expression: function () {
+        var aliveRGs = "";
+        var rebelGroups = cLASS[ "RebelGroup" ].instances;
+
+        Object.keys( rebelGroups ).forEach( function ( id ) {
+          if ( rebelGroups[ id ].nmrOfRebels > 0 ) {
+            if ( aliveRGs.length > 0 ) {
+              aliveRGs += "0" + id;
+            } else {
+              aliveRGs += id;
+            }
+          }
+        } );
+        return parseInt( aliveRGs );
+      }
     }
   };
 
