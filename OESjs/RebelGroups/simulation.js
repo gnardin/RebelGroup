@@ -210,9 +210,8 @@ sim.experiment.parameterDefs = [
         "[0.1,0.05,0.05]" ]
     } )
 ];
-sim.experiment.replications = 2;
-sim.experiment.seeds = [ 126, 8758 ];
-//, 635, 2653, 198, 681, 8734, 6523, 2643, 27
+sim.experiment.replications = 10;
+sim.experiment.seeds = [ 126, 8758, 635, 2653, 198, 681, 8734, 6523, 2643, 27 ];
 sim.experiment.storeEachExperimentScenarioRun = true;
 /*******************************************************************************
  * Define Initial State
