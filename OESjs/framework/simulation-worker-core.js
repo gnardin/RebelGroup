@@ -4525,13 +4525,13 @@ sim.initializeSimulator = function (dbName) {
  ************************************************************/
 sim.initializeSimulationRun = function (expParamSlots, seed) {
   var logInfo={};
+  var isExperimentRun=expParamSlots !== undefined || seed;
   sim.step = 0;  // simulation loop steps
   sim.time = 0;  // simulation time
   // get ID counter from simulation scenario, or set to default value
   sim.idCounter = sim.scenario.idCounter || 1000;
   // set up a default random variate sampling method
-  //if (!sim.experiment.replications && sim.scenario.randomSeed) {  // use the Mersenne Twister RNG
-  if (!expParamSlots && sim.scenario.randomSeed) {
+  if (!isExperimentRun && sim.scenario.randomSeed) {  // use the Mersenne Twister RNG
     rand = new Random( sim.scenario.randomSeed);
   } else if (seed) {  // experiment-defined replication-specific seed
     rand = new Random( seed);
