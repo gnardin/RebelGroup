@@ -13,7 +13,7 @@
  ******************************************************************************/
 sim.scenario.simulationEndTime = 365;
 sim.scenario.idCounter = 1; // optional
-//sim.scenario.randomSeed = 1234; // optional
+//sim.scenario.randomSeed = 3746; // optional
 /*******************************************************************************
  * Simulation Config
  ******************************************************************************/
@@ -30,60 +30,101 @@ sim.model.timeIncrement = 1; // optional
 
 /* Object, Event, and Activity types */
 sim.model.objectTypes = [ "RebelGroup", "Enterprise" ];
-sim.model.eventTypes = [
-  "Income", "Demand", "Extort", "Loot", "Expand", "Fight", "AllocateResource",
-  "Report", "Flee"
+sim.model.eventTypes = [ "Income", "Demand", "Extort", "Loot", "Expand",
+  "Fight", "AllocateWealth", "Report", "Flee"
 ];
 sim.model.activityTypes = [];
 
 /* Global Variables */
-sim.model.v.nmrOfRebelGroups = {
-  range: "NonNegativeInteger",
-  initialValue: 2,
-  //label: "Number Rebel Groups",
-  //hint: "The number of rebel groups"
-};
 sim.model.v.nmrOfEnterprises = {
   range: "NonNegativeInteger",
   initialValue: 1000,
   label: "Number Enterprises",
-  hint: "The number of enterprises"
+  hint: "The number of Enterprises"
 };
-sim.model.v.nmrOfRebels1 = {
+sim.model.v.income = {
+  range: "string",
+  initialValue: "[200,50]",
+  label: "Ents Income",
+  hint: "The income of the Enterprises (Normal)"
+};
+sim.model.v.freqIncome = {
+  range: "string",
+  initialValue: "[1,1]",
+  label: "Ents Income Frequency",
+  hint: "The frequency the Enterprises receive income (UniformInt)"
+};
+sim.model.v.fleeProb = {
+  range: "string",
+  initialValue: "[0.5,0.5]",
+  label: "Ents Flee Probability",
+  hint: "The probability an Enterprise flees (Uniform [0,1])"
+};
+sim.model.v.fleeThreshold = {
+  range: "string",
+  initialValue: "[3,3]",
+  label: "Ents Flee Threshold",
+  hint: "The threshold an Enterprise flees (UniformInt)"
+};
+sim.model.v.nmrOfRebelGroups = {
   range: "NonNegativeInteger",
-  initialValue: 1000,
-  label: "Rebel Group 1 Size",
-  hint: "The number of rebels members of rebel group 1"
+  initialValue: 2,
+  label: "Number Rebel Groups",
+  hint: "The number of Rebel Groups"
 };
-sim.model.v.extortionRate1 = {
-  range: "PositiveDecimal",
-  initialValue: 0.1,
-  label: "Rebel Group 1 Extortion",
-  hint: "The extortion rate of rebel group 1",
+sim.model.v.nmrOfRebels = {
+  range: "string",
+  initialValue: "[500,500,500]",
+  label: "RGs Size",
+  hint: "The number of rebel members per Rebel Group"
 };
-sim.model.v.rebelCost1 = {
-  range: "PositiveDecimal",
-  initialValue: 291.00,
-  label: "Rebel Group 1 Cost",
-  hint: "The monthly cost per rebel for rebel group 1"
+sim.model.v.propOfEnterprises = {
+  range: "string",
+  initialValue: "[0.4,0.3,0.3]",
+  label: "RGs Prop Enterprises",
+  hint: "The proportion of Enterprises per Rebel Group"
 };
-sim.model.v.nmrOfRebels2 = {
-  range: "NonNegativeInteger",
-  initialValue: 800,
-  label: "Rebel Group 2 Size",
-  hint: "The number of rebels members of rebel group 2"
+sim.model.v.extortionRates = {
+  range: "string",
+  initialValue: "[0.1,0.1,0.1]",
+  label: "RGs Extortion",
+  hint: "The extortion rate per Rebel Group"
 };
-sim.model.v.rebelCost2 = {
-  range: "PositiveDecimal",
-  initialValue: 291.00,
-  label: "Rebel Group 2 Cost",
-  hint: "The monthly cost per rebel for rebel group 2"
+sim.model.v.rebelCosts = {
+  range: "string",
+  initialValue: "[291,291,291]",
+  label: "RGs Cost",
+  hint: "The monthly cost per rebel per Rebel Group"
 };
-sim.model.v.extortionRate2 = {
-  range: "PositiveDecimal",
-  initialValue: 0.1,
-  label: "Rebel Group 2 Extortion",
-  hint: "The extortion rate of rebel group 2"
+sim.model.v.recruitThreshold = {
+  range: "string",
+  initialValue: "[0.8,0.8,0.8]",
+  label: "RGs Recruit Threshold",
+  hint: "The threshold to stop recruiting per Rebel Group"
+};
+sim.model.v.recruitRate = {
+  range: "string",
+  initialValue: "[0.5,0.5,0.5]",
+  label: "RGs Recruit Rate",
+  hint: "The rate of rebels recruited per recruitment per Rebel Group"
+};
+sim.model.v.freqDemand = {
+  range: "string",
+  initialValue: "[[30,2],[30,2],[30,2]]",
+  label: "RGs Demand Frequency",
+  hint: "The frequency each Rebel Group demand extortion money (Normal)"
+};
+sim.model.v.freqExpand = {
+  range: "string",
+  initialValue: "[[5,2],[5,2],[5,2]]",
+  label: "RGs Expansion Frequency",
+  hint: "The frequency each Rebel Group try to expand their domain (Normal)"
+};
+sim.model.v.freqAllocate = {
+  range: "string",
+  initialValue: "[[30,0],[30,0],[30,0]]",
+  label: "RGs Allocate Frequency",
+  hint: "The frequency each Rebel Group reallocate their wealth (Normal)"
 };
 sim.model.v.fightExpansion = {
   range: "NonNegativeInteger",
@@ -91,7 +132,6 @@ sim.model.v.fightExpansion = {
   label: "Fight Expansion",
   hint: "The number of enterprises conquered due to win a fight"
 };
-
 /* Global Functions */
 /**
  * Calculates the global relative strength of a Rebel Group. The Rebel Group's
@@ -101,13 +141,15 @@ sim.model.v.fightExpansion = {
  * @return Global relative strength ratio
  */
 sim.model.f.globalRelativeStrength = function ( rebelGroup ) {
-  var sumOfRebels = 0, globalRelativeStrength = 0;
+  var sumOfRebels, globalRelativeStrength;
   var rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
 
+  sumOfRebels = 0;
   Object.keys( rebelGroupsObj ).forEach( function ( objId ) {
     sumOfRebels += rebelGroupsObj[ objId ].nmrOfRebels;
   } );
 
+  globalRelativeStrength = 0;
   if ( sumOfRebels > 0 ) {
     globalRelativeStrength = rebelGroup.nmrOfRebels / sumOfRebels;
   }
@@ -120,7 +162,7 @@ sim.model.f.globalRelativeStrength = function ( rebelGroup ) {
  *
  * @param rebelGroup Rebel Group
  * @param opponent Opponent Rebel Group
- * @returns Relative strength of the rebelGroup
+ * @returns Relative strength of the rebelGroups
  */
 sim.model.f.relativeStrength = function ( rebelGroup, opponent ) {
   var relativeStrength = 0;
@@ -154,6 +196,24 @@ sim.model.f.sigmoid = function ( a, b, c, d, e ) {
   return a / ( b + ( c * Math.pow( Math.E, ( -1 * d * e ) ) ) );
 };
 /*******************************************************************************
+ * Define Experiments
+ ******************************************************************************/
+sim.experiment.id = 1;
+sim.experiment.experimentNo = 1;
+sim.experiment.title = "Basic";
+sim.experiment.parameterDefs = [
+  new oes.ExperimentParamDef(
+    {
+      name: "extortionRates", values: [ "[0.1,0.1,0.1]",
+        "[0.05,0.05,0.05]", "[0.05,0.1,0.1]", "[0.1,0.05,0.1]",
+        "[0.1,0.05,0.1]", "[0.05,0.05,0.1]", "[0.05,0.1,0.05]",
+        "[0.1,0.05,0.05]" ]
+    } )
+];
+sim.experiment.replications = 10;
+sim.experiment.seeds = [ 126, 8758, 635, 2653, 198, 681, 8734, 6523, 2643, 27 ];
+sim.experiment.storeEachExperimentScenarioRun = true;
+/*******************************************************************************
  * Define Initial State
  ******************************************************************************/
 /* Initial Objects */
@@ -164,88 +224,89 @@ sim.scenario.initialState.events = [];
 
 /* Initial Functions */
 sim.scenario.setupInitialState = function () {
-  var rebelGroupsObj, rebelGroupsKey, rebelGroup;
-  var enterprisesObj, enterprise, objId;
-  var i = sim.v.nmrOfRebelGroups + 1;
+  var rebelGroupsObj, rebelGroupsKeys, rebelGroup;
+  var enterprisesObj, enterprise;
+  var nmrEnts, totalEnts, totalProp;
+  var objId, i;
+
+  // Enterprises input parameters
+  var income = JSON.parse( sim.v.income );
+  var freqIncome = JSON.parse( sim.v.freqIncome );
+  var fleeProb = JSON.parse( sim.v.fleeProb );
+  var fleeThreshold = JSON.parse( sim.v.fleeThreshold );
+
+  // Rebel Groups input parameters
+  var nmrOfRebels = JSON.parse( sim.v.nmrOfRebels );
+  var propOfEnterprises =
+    JSON.parse( sim.v.propOfEnterprises ).slice( 0, sim.v.nmrOfRebelGroups );
+  var extortionRates =
+    JSON.parse( sim.v.extortionRates ).slice( 0, sim.v.nmrOfRebelGroups );
+  var rebelCosts =
+    JSON.parse( sim.v.rebelCosts ).slice( 0, sim.v.nmrOfRebelGroups );
+  var recruitThreshold =
+    JSON.parse( sim.v.recruitThreshold ).slice( 0, sim.v.nmrOfRebelGroups );
+  var recruitRate =
+    JSON.parse( sim.v.recruitRate ).slice( 0, sim.v.nmrOfRebelGroups );
+  var freqDemand =
+    JSON.parse( sim.v.freqDemand ).slice( 0, sim.v.nmrOfRebelGroups );
+  var freqExpand =
+    JSON.parse( sim.v.freqExpand ).slice( 0, sim.v.nmrOfRebelGroups );
+  var freqAllocate =
+    JSON.parse( sim.v.freqAllocate ).slice( 0, sim.v.nmrOfRebelGroups );
 
   /* Create Rebel Groups */
-  sim.addObject( new RebelGroup( {
-    id: 1,
-    name: "RebelGroup1",
-    shortLabel: "rg1",
-    wealth: sim.v.nmrOfRebels1 * sim.v.rebelCost1,
-    nmrOfRebels: sim.v.nmrOfRebels1,
-    rebelCost: sim.v.rebelCost1,
-    recruitThreshold: 0.8,
-    recruitRate: 0.5,
-    extortedEnterprises: [],
-    extortionRate: sim.v.extortionRate2,
-    reports: {},
-    freqDemand: Math.round( rand.normal( 30, 2 ) ),
-    freqExpand: Math.round( rand.normal( 5, 2 ) ),
-    freqAllocate: 30,
-    lastExpand: 0,
-    lastAmountExtorted: 0
-  } ) );
+  for ( i = 0; i < sim.v.nmrOfRebelGroups; i += 1 ) {
+    objId = i + 1;
+    sim.addObject( new RebelGroup( {
+      id: objId,
+      name: "RebelGroup" + objId,
+      shortLabel: "rg" + objId,
+      wealth: nmrOfRebels[ i ] * rebelCosts[ i ],
+      nmrOfRebels: nmrOfRebels[ i ],
+      rebelCost: rebelCosts[ i ],
+      recruitThreshold: recruitThreshold[ i ],
+      recruitRate: recruitRate[ i ],
+      extortedEnterprises: [],
+      extortionRate: extortionRates[ i ],
+      reports: {},
+      freqDemand: Math.round( rand.normal( freqDemand[ i ][ 0 ],
+        freqDemand[ i ][ 1 ] ) ),
+      freqExpand: Math.round( rand.normal( freqExpand[ i ][ 0 ],
+        freqExpand[ i ][ 1 ] ) ),
+      freqAllocate: Math.round( rand.normal( freqAllocate[ i ][ 0 ],
+        freqAllocate[ i ][ 1 ] ) ),
+      lastExpand: 0,
+      lastAmountExtorted: 0
+    } ) );
 
-  sim.scheduleEvent( new Demand( {
-    occTime: 1,
-    rebelGroup: 1
-  } ) );
-  sim.scheduleEvent( new Expand( {
-    occTime: 1,
-    rebelGroup: 1
-  } ) );
-  sim.scheduleEvent( new AllocateResource( {
-    occTime: 30,
-    rebelGroup: 1
-  } ) );
-
-  sim.addObject( new RebelGroup( {
-    id: 2,
-    name: "RebelGroup2",
-    shortLabel: "rg2",
-    wealth: sim.v.nmrOfRebels2 * sim.v.rebelCost2,
-    nmrOfRebels: sim.v.nmrOfRebels2,
-    rebelCost: sim.v.rebelCost2,
-    recruitThreshold: 0.8,
-    recruitRate: 0.5,
-    extortedEnterprises: [],
-    extortionRate: sim.v.extortionRate2,
-    reports: {},
-    freqDemand: Math.round( rand.normal( 30, 2 ) ),
-    freqExpand: Math.round( rand.normal( 5, 2 ) ),
-    freqAllocate: 30,
-    lastExpand: 0,
-    lastAmountExtorted: 0
-  } ) );
-
-  sim.scheduleEvent( new Demand( {
-    occTime: 1,
-    rebelGroup: 2
-  } ) );
-  sim.scheduleEvent( new Expand( {
-    occTime: 1,
-    rebelGroup: 2
-  } ) );
-  sim.scheduleEvent( new AllocateResource( {
-    occTime: 30,
-    rebelGroup: 2
-  } ) );
+    sim.scheduleEvent( new Demand( {
+      occTime: 1,
+      rebelGroup: objId
+    } ) );
+    sim.scheduleEvent( new Expand( {
+      occTime: 1,
+      rebelGroup: objId
+    } ) );
+    sim.scheduleEvent( new AllocateWealth( {
+      occTime: Math.round( rand.normal( freqAllocate[ i ][ 0 ],
+        freqAllocate[ i ][ 1 ] ) ),
+      rebelGroup: objId
+    } ) );
+  }
 
   /* Create Enterprises */
-  for ( ; i <= ( sim.v.nmrOfRebelGroups + sim.v.nmrOfEnterprises ); i += 1 ) {
-    objId = i;
+  for ( ; i < ( sim.v.nmrOfRebelGroups + sim.v.nmrOfEnterprises ); i += 1 ) {
+    objId = i + 1;
     sim.addObject( new Enterprise( {
       id: objId,
       name: "enterprise" + objId,
-      income: rand.normal( 200, 50 ),
-      freqIncome: 1,
+      income: rand.normal( income[ 0 ], income[ 1 ] ),
+      freqIncome: rand.uniformInt( freqIncome[ 0 ], freqIncome[ 1 ] ),
       rebelGroup: null,
       wealth: 0,
       accIncome: 0,
-      fleeProb: 0.5,
-      fleeThreshold: 3,
+      fleeProb: rand.uniform( fleeProb[ 0 ], fleeProb[ 1 ] ),
+      fleeThreshold: rand.uniformInt( fleeThreshold[ 0 ], fleeThreshold[ 1 ] ),
       nmrOfExtortions: 0,
       nmrOfLootings: 0
     } ) );
@@ -256,204 +317,156 @@ sim.scenario.setupInitialState = function () {
     } ) );
   }
 
-  /* Randomly associate Enterprises and Rebel Groups */
+  /* Adjust the proportion of Enterprises */
+  nmrEnts = {};
+  totalEnts = 0;
+  totalProp = propOfEnterprises.reduce( ( a, b ) => a + b, 0 );
+  for ( i = 0; i < sim.v.nmrOfRebelGroups; i += 1 ) {
+    objId = i + 1;
+
+    nmrEnts[ objId ] = Math.min( sim.v.nmrOfEnterprises - totalEnts,
+      Math.ceil( ( propOfEnterprises[ i ] / totalProp ) *
+        sim.v.nmrOfEnterprises ) );
+
+    totalEnts += nmrEnts[ objId ];
+  }
+
+  /* Randomly associate Enterprises with Rebel Groups */
   rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
-  rebelGroupsKey = Object.keys( rebelGroupsObj );
+  rebelGroupsKeys = Object.keys( rebelGroupsObj );
   enterprisesObj = cLASS[ "Enterprise" ].instances;
-  Object.keys( enterprisesObj ).forEach( function ( objId ) {
-    enterprise = enterprisesObj[ objId ];
-    rebelGroup = rebelGroupsObj[ rebelGroupsKey[ rand.uniformInt( 0,
-      rebelGroupsKey.length - 1 ) ] ];
+  Object.keys( enterprisesObj ).forEach( function ( id ) {
+    enterprise = enterprisesObj[ id ];
+
+    do {
+      objId = rebelGroupsKeys[ rand.uniformInt( 0,
+        rebelGroupsKeys.length - 1 ) ];
+    } while ( nmrEnts[ objId ] === 0 );
+    rebelGroup = rebelGroupsObj[ objId ];
+
+    nmrEnts[ objId ] -= 1;
+    if ( nmrEnts[ objId ] === 0 ) {
+      rebelGroupsKeys.splice( rebelGroupsKeys.indexOf( objId ), 1 );
+    }
 
     enterprise.rebelGroup = rebelGroup;
-    rebelGroup.extortedEnterprises =
-      rebelGroup.extortedEnterprises.concat( enterprise );
+    rebelGroup.extortedEnterprises.push( enterprise );
+  } );
+
+  /*****************************************************************************
+   * Define Output Statistics Variables
+   ****************************************************************************/
+  sim.model.statistics = {
+    "nmrOfExtortions": {
+      range: "NonNegativeInteger",
+      label: "Number Extortions",
+      initialValue: 0
+    },
+    "nmrOfLoots": {
+      range: "NonNegativeInteger",
+      label: "Number Lootings",
+      initialValue: 0
+    },
+    "nmrOfExpands": {
+      range: "NonNegativeInteger",
+      label: "Number Expansions",
+      initialValue: 0
+    },
+    "nmrOfAlliances": {
+      range: "NonNegativeInteger",
+      label: "Number Alliances",
+      initialValue: 0
+    },
+    "sumOfFights": {
+      range: "NonNegativeInteger",
+      label: "Number Fights",
+      initialValue: 0
+    },
+    "nmrOfFights": {
+      range: "NonNegativeInteger",
+      label: "Number Fights",
+      initialValue: 0,
+      showTimeSeries: true,
+      computeOnlyAtEnd: false
+    },
+    "nmrOfReports": {
+      range: "NonNegativeInteger",
+      label: "Number Reports",
+      initialValue: 0
+    },
+    "nmrOfFlees": {
+      range: "NonNegativeInteger",
+      label: "Number Fled Ent.",
+      initialValue: 0,
+      showTimeSeries: true,
+      computeOnlyAtEnd: false
+    },
+    "nmrOfRecruits": {
+      range: "NonNegativeInteger",
+      label: "Number Recruitments",
+      initialValue: 0
+    },
+    "nmrOfExpels": {
+      range: "NonNegativeInteger",
+      label: "Number Expels",
+      initialValue: 0
+    },
+    "nmrOfDeaths": {
+      range: "NonNegativeInteger",
+      label: "Number Deaths",
+      initialValue: 0,
+      showTimeSeries: true,
+      computeOnlyAtEnd: false
+    },
+    "aliveRGs": {
+      range: "NonNegativeInteger",
+      label: "Alive Rebel Groups",
+      initialValue: 0,
+      showTimeSeries: false,
+      computeOnlyAtEnd: true,
+      expression: function () {
+        var aliveRGs = "";
+        var rebelGroups = cLASS[ "RebelGroup" ].instances;
+
+        Object.keys( rebelGroups ).forEach( function ( id ) {
+          if ( rebelGroups[ id ].nmrOfRebels > 0 ) {
+            if ( aliveRGs.length > 0 ) {
+              aliveRGs += "0" + id;
+            } else {
+              aliveRGs += id;
+            }
+          }
+        } );
+        return parseInt( aliveRGs );
+      }
+    }
+  };
+
+  Object.keys( rebelGroupsObj ).forEach( function ( id ) {
+    // Rebel Group's Size
+    sim.model.statistics[ "nmrOfRebels" + id ] = {
+      objectType: "RebelGroup",
+      objectIdRef: id,
+      property: "nmrOfRebels",
+      label: "Size Rebel Group " + id,
+      initialValue: 0,
+      showTimeSeries: true
+    };
+  } );
+
+  // Number of Extorted Enterprise
+  Object.keys( rebelGroupsObj ).forEach( function ( id ) {
+    sim.model.statistics[ "nmrOfExtorted" + id ] = {
+      range: "NonNegativeInteger",
+      label: "Enterprises Extorted by Rebel Group " + id,
+      initialValue: 0,
+      showTimeSeries: true,
+      computeOnlyAtEnd: false,
+      expression: function () {
+        var rebelGroupObj = cLASS[ "RebelGroup" ].instances[ id ];
+        return rebelGroupObj.extortedEnterprises.length;
+      }
+    };
   } );
 };
-/*******************************************************************************
- * Define Output Statistics Variables
- ******************************************************************************/
-sim.model.statistics = {
-  "nmrOfExtortions": {
-    range: "NonNegativeInteger",
-    label: "Number Extortions",
-    initialValue: 0,
-    // showTimeSeries: true,
-    // computeOnlyAtEnd: false
-  },
-  "nmrOfLoots": {
-    range: "NonNegativeInteger",
-    label: "Number Lootings",
-    initialValue: 0,
-    // showTimeSeries: true,
-    // computeOnlyAtEnd: false
-  },
-  "nmrOfExpands": {
-    range: "NonNegativeInteger",
-    label: "Number Expansions",
-    initialValue: 0
-  },
-  "nmrOfFights": {
-    range: "NonNegativeInteger",
-    label: "Number Fights",
-    initialValue: 0
-  },
-  "nmrOfReports": {
-    range: "NonNegativeInteger",
-    label: "Number Reports",
-    initialValue: 0
-  },
-  "nmrOfFlees": {
-    range: "NonNegativeInteger",
-    label: "Number Fled Ent.",
-    initialValue: 0,
-    showTimeSeries: true,
-    computeOnlyAtEnd: false
-  },
-  "nmrOfRecruits": {
-    range: "NonNegativeInteger",
-    label: "Number Recruitments",
-    initialValue: 0
-  },
-  "nmrOfExpels": {
-    range: "NonNegativeInteger",
-    label: "Number Expels",
-    initialValue: 0
-  },
-  // "amountExtorted": {
-  //   range: "Decimal",
-  //   label: "Amount Extorted",
-  //   initialValue: 0
-  // },
-  // "amountLooted": {
-  //   range: "Decimal",
-  //   label: "Amount Looted",
-  //   initialValue: 0
-  // },
-  // "nmrOfRebels": {
-  //   range: "NonNegativeInteger",
-  //   label: "Number of Rebels",
-  //   initialValue: 0,
-  //   showTimeSeries: true,
-  //   computeOnlyAtEnd: false,
-  //   expression: function () {
-  //     var total = 0;
-  //     var rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
-  //     Object.keys( rebelGroupsObj ).forEach( function ( objId ) {
-  //       total += rebelGroupsObj[ objId ].nmrOfRebels;
-  //     } );
-  //     return total;
-  //   }
-  // },
-  "nmrOfRebels1": {
-    range: "NonNegativeInteger",
-    label: "Size of Rebel Group 1",
-    initialValue: 0,
-    showTimeSeries: true,
-    computeOnlyAtEnd: false,
-    expression: function () {
-      var rebelGroupObj = cLASS[ "RebelGroup" ].instances[ 1 ];
-
-      return rebelGroupObj.nmrOfRebels;
-    }
-  },
-  "nmrOfRebels2": {
-    range: "NonNegativeInteger",
-    label: "Size of Rebel Group 2",
-    initialValue: 0,
-    showTimeSeries: true,
-    computeOnlyAtEnd: false,
-    expression: function () {
-      var rebelGroupObj = cLASS[ "RebelGroup" ].instances[ 2 ];
-
-      return rebelGroupObj.nmrOfRebels;
-    }
-  },
-  // "nmrOfRebels3": {
-  //   range: "NonNegativeInteger",
-  //   label: "Number of Rebels (3)",
-  //   initialValue: 0,
-  //   showTimeSeries: true,
-  //   computeOnlyAtEnd: false,
-  //   expression: function () {
-  //     var rebelGroupObj = cLASS[ "RebelGroup" ].instances[ 3 ];
-
-  //     return rebelGroupObj.nmrOfRebels;
-  //   }
-  // },
-  // "nmrOfExtortedEnterprises": {
-  //   range: "NonNegativeInteger",
-  //   label: "Number of Extorted Enterprises",
-  //   initialValue: 0,
-  //   showTimeSeries: true,
-  //   computeOnlyAtEnd: false,
-  //   expression: function () {
-  //     var total = 0;
-  //     var rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
-  //     Object.keys( rebelGroupsObj ).forEach( function ( objId ) {
-  //       total += rebelGroupsObj[ objId ].extortedEnterprises.length;
-  //     } );
-  //     return total;
-  //   }
-  // },
-  "nmrOfExtorted1": {
-    range: "NonNegativeInteger",
-    label: "Enterprises Extorted by Group 1",
-    initialValue: 0,
-    showTimeSeries: true,
-    computeOnlyAtEnd: false,
-    expression: function () {
-      var rebelGroupObj = cLASS[ "RebelGroup" ].instances[ 1 ];
-
-      return rebelGroupObj.extortedEnterprises.length;
-    }
-  },
-  "nmrOfExtorted2": {
-    range: "NonNegativeInteger",
-    label: "Enterprises Extorted by Group 2",
-    initialValue: 0,
-    showTimeSeries: true,
-    computeOnlyAtEnd: false,
-    expression: function () {
-      var rebelGroupObj = cLASS[ "RebelGroup" ].instances[ 2 ];
-
-      return rebelGroupObj.extortedEnterprises.length;
-    }
-  },
-  // "nmrOfExtorted3": {
-  //   range: "NonNegativeInteger",
-  //   label: "Number of Extorted Enterprises (3)",
-  //   initialValue: 0,
-  //   showTimeSeries: true,
-  //   computeOnlyAtEnd: false,
-  //   expression: function () {
-  //     var rebelGroupObj = cLASS[ "RebelGroup" ].instances[ 3 ];
-
-  //     return rebelGroupObj.extortedEnterprises.length;
-  //   }
-  // },
-  // "wealth1": {
-  //   range: "Decimal",
-  //   label: "Wealth Rebel Group (1)",
-  //   initialValue: 0,
-  //   showTimeSeries: true,
-  //   computeOnlyAtEnd: false,
-  //   expression: function () {
-  //     var rebelGroupObj = cLASS[ "RebelGroup" ].instances[ 1 ];
-
-  //     return rebelGroupObj.wealth;
-  //   }
-  // },
-  // "wealth2": {
-  //   range: "Decimal",
-  //   label: "Wealth Rebel Group (2)",
-  //   initialValue: 0,
-  //   showTimeSeries: true,
-  //   computeOnlyAtEnd: false,
-  //   expression: function () {
-  //     var rebelGroupObj = cLASS[ "RebelGroup" ].instances[ 2 ];
-
-  //     return rebelGroupObj.wealth;
-  //   }
-  // }
-};
+sim.model.statistics = {};

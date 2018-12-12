@@ -18,66 +18,200 @@ var Fight = new cLASS( {
   methods: {
     "onEvent": function () {
       var followupEvents = [];
-      var strongRG, weakRG, strongRGProb, weakRGProb, enterprise, index, len, i;
+      var enterprise, enterprises, index, len, i, j;
+      var ally, allyProb, allied, attackerAlliance, opponentAlliance;
+      var strong, strongProb;
+      var weak, weakProb;
+      var nmrOfDeaths;
+      var rebelGroup, nmrOfExtorted, nmrOfRebels, nmrTransfer, totalTransfer;
+      var rebelGroups = cLASS[ "RebelGroup" ].instances;
+      var rebelGroupsKeys = Object.keys( rebelGroups );
 
-      // Define the strong and weak Rebel Groups
+      /* Define whether to Form Alliance */
+      ally = false;
       if ( this.attacker.nmrOfRebels > this.opponent.nmrOfRebels ) {
-        strongRG = this.attacker;
-        weakRG = this.opponent;
-      } else {
-        strongRG = this.opponent;
-        weakRG = this.attacker;
+        allyProb = ( sim.model.f.globalRelativeStrength( this.attacker ) -
+          sim.model.f.globalRelativeStrength( this.opponent ) );
+
+        if ( rand.uniform() < allyProb ) {
+          ally = true;
+        }
       }
 
-      // Rebel Groups fight only if they have rebels
-      if ( ( strongRG.nmrOfRebels > 0 ) || ( weakRG.nmrOfRebels > 0 ) ) {
-        strongRGProb = sim.model.f.relativeStrength( strongRG, weakRG );
-        weakRGProb = sim.model.f.relativeStrength( weakRG, strongRG );
+      /* Choose an Ally */
+      attackerAlliance = {
+        leader: this.attacker,
+        members: [ this.attacker.id ],
+        nmrOfExtorted: this.attacker.extortedEnterprises.length,
+        nmrOfRebels: this.attacker.nmrOfRebels
+      };
+      opponentAlliance = {
+        leader: this.opponent,
+        members: [ this.opponent.id ],
+        nmrOfExtorted: this.opponent.extortedEnterprises.length,
+        nmrOfRebels: this.opponent.nmrOfRebels
+      };
+      if ( ally ) {
+        rebelGroupsKeys.splice(
+          rebelGroupsKeys.indexOf( this.attacker.id ), 1 );
+        rebelGroupsKeys.splice(
+          rebelGroupsKeys.indexOf( this.opponent.id ), 1 );
+        rand.shuffleArray( rebelGroupsKeys );
+
+        allied = false;
+        for ( i = 0; ( i < rebelGroupsKeys.length ) & !allied; i += 1 ) {
+          rebelGroup = rebelGroups[ rebelGroupsKeys[ i ] ];
+          if ( ( opponentAlliance.nmrOfRebels + rebelGroup.nmrOfRebels ) >
+            this.attacker.nmrOfRebels ) {
+            opponentAlliance.members.push( rebelGroup.id );
+            opponentAlliance.nmrOfExtorted +=
+              rebelGroup.extortedEnterprises.length;
+            opponentAlliance.nmrOfRebels += rebelGroup.nmrOfRebels;
+            allied = true;
+
+            sim.stat.nmrOfAlliances += 1;
+          }
+        }
+      }
+
+      /* Define the strong and weak rebel groups */
+      if ( this.attacker.nmrOfRebels > opponentAlliance.nmrOfRebels ) {
+        strong = attackerAlliance;
+        weak = opponentAlliance;
+      } else {
+        strong = opponentAlliance;
+        weak = attackerAlliance;
+      }
+
+      // Rebel Groups fight only if both have rebels
+      if ( ( strong.nmrOfRebels > 0 ) || ( weak.nmrOfRebels > 0 ) ) {
+        strongProb = sim.model.f.relativeStrength( strong, weak );
+        weakProb = sim.model.f.relativeStrength( weak, strong );
 
         // Probability the strong Rebel Group wins the fight
-        if ( rand.uniform() < strongRGProb ) {
+        if ( rand.uniform() < strongProb ) {
+
           // Define number of Enterprises to transfer
-          len = weakRG.extortedEnterprises.length;
-          if ( len >= sim.v.fightExpansion ) {
-            len = sim.v.fightExpansion;
+          len = Math.min( weak.nmrOfExtorted, sim.v.fightExpansion );
+
+          // Proportion to transfer from each weak Rebel Group
+          totalTransfer = 0;
+          nmrTransfer = [];
+          for ( i = 0; i < weak.members.length; i += 1 ) {
+            nmrOfExtorted =
+              rebelGroups[ weak.members[ i ] ].extortedEnterprises.length;
+            nmrOfRebels = rebelGroups[ weak.members[ i ] ].nmrOfRebels;
+            nmrTransfer[ i ] = Math.min( Math.ceil( nmrOfExtorted *
+              ( nmrOfRebels / weak.nmrOfRebels ) ), len - totalTransfer );
+            totalTransfer += nmrTransfer[ i ];
           }
-          // Transfer random Enterprise from weak to strong Rebel Group
-          for ( i = 0; i < len; i += 1 ) {
-            index = rand.uniformInt( 0, weakRG.extortedEnterprises.length - 1 );
-            enterprise = weakRG.extortedEnterprises[ index ];
-            weakRG.extortedEnterprises.splice( index, 1 );
-            enterprise.rebelGroup = strongRG;
-            strongRG.extortedEnterprises =
-              strongRG.extortedEnterprises.concat( enterprise );
-            enterprise.nmrOfLootings = 0;
+
+          // Select random Enterprises from weak Rebel Group
+          enterprises = [];
+          for ( i = 0; i < weak.members.length; i += 1 ) {
+            rebelGroup = rebelGroups[ weak.members[ i ] ];
+            for ( j = 0; j < nmrTransfer[ i ]; j += 1 ) {
+              index = rand.uniformInt( 0,
+                rebelGroup.extortedEnterprises.length - 1 );
+              enterprises.push( rebelGroup.extortedEnterprises[ index ] );
+              rebelGroup.extortedEnterprises.splice( index, 1 );
+            }
+          }
+
+          // Proportion to transfer to each strong Rebel Group
+          totalTransfer = 0;
+          nmrTransfer = [];
+          for ( i = 0; i < strong.members.length; i += 1 ) {
+            nmrOfRebels = rebelGroups[ strong.members[ i ] ].nmrOfRebels;
+            nmrTransfer[ i ] = Math.min( Math.ceil( enterprises.length *
+              ( nmrOfRebels / strong.nmrOfRebels ) ), len - totalTransfer );
+            totalTransfer += nmrTransfer[ i ];
+          }
+
+          // Transfer Enterprises to strong Rebel Groups
+          rand.shuffleArray( enterprises );
+          for ( i = 0; i < strong.members.length; i += 1 ) {
+            rebelGroup = rebelGroups[ strong.members[ i ] ];
+            for ( j = 0; j < nmrTransfer[ i ]; j += 1 ) {
+              enterprise = enterprises.splice( 0, 1 )[ 0 ];
+              enterprise.rebelGroup = rebelGroup;
+              enterprise.nmrOfLootings = 0;
+              rebelGroup.extortedEnterprises.push( enterprise );
+            }
           }
         } else {
+
           // Probability the weak Rebel Group wins the fight
-          if ( rand.uniform() < weakRGProb ) {
+          if ( rand.uniform() < weakProb ) {
+
             // Define number of Enterprises to transfer
-            len = strongRG.extortedEnterprises.length;
-            if ( len >= sim.v.fightExpansion ) {
-              len = sim.v.fightExpansion;
+            len = Math.min( strong.nmrOfExtorted, sim.v.fightExpansion );
+
+            // Proportion to transfer from each strong Rebel Group
+            totalTransfer = 0;
+            nmrTransfer = [];
+            for ( i = 0; i < strong.members.length; i += 1 ) {
+              nmrOfExtorted =
+                rebelGroups[ strong.members[ i ] ].extortedEnterprises.length;
+              nmrOfRebels = rebelGroups[ strong.members[ i ] ].nmrOfRebels;
+              nmrTransfer[ i ] = Math.min( Math.ceil( nmrOfExtorted *
+                ( nmrOfRebels / strong.nmrOfRebels ) ), len - totalTransfer );
+              totalTransfer += nmrTransfer[ i ];
             }
-            // Transfer random Enterprise from strong to weak Rebel Group
-            for ( i = 0; i < len; i += 1 ) {
-              index = rand.uniformInt( 0,
-                strongRG.extortedEnterprises.length - 1 );
-              enterprise = strongRG.extortedEnterprises[ index ];
-              strongRG.extortedEnterprises.splice( index, 1 );
-              enterprise.rebelGroup = weakRG;
-              weakRG.extortedEnterprises =
-                weakRG.extortedEnterprises.concat( enterprise );
-              enterprise.nmrOfLootings = 0;
+
+            // Select random Enterprises from strong Rebel Group
+            enterprises = [];
+            for ( i = 0; i < strong.members.length; i += 1 ) {
+              rebelGroup = rebelGroups[ strong.members[ i ] ];
+              for ( j = 0; j < nmrTransfer[ i ]; j += 1 ) {
+                index = rand.uniformInt( 0,
+                  rebelGroup.extortedEnterprises.length - 1 );
+                enterprises.push( rebelGroup.extortedEnterprises[ index ] );
+                rebelGroup.extortedEnterprises.splice( index, 1 );
+              }
+            }
+
+            // Proportion to transfer to each weak Rebel Group
+            totalTransfer = 0;
+            nmrTransfer = [];
+            for ( i = 0; i < weak.members.length; i += 1 ) {
+              nmrOfRebels = rebelGroups[ weak.members[ i ] ].nmrOfRebels;
+              nmrTransfer[ i ] = Math.min( Math.ceil( enterprises.length *
+                ( nmrOfRebels / weak.nmrOfRebels ) ), len - totalTransfer );
+              totalTransfer += nmrTransfer[ i ];
+            }
+
+            // Transfer Enterprises to weak Rebel Groups
+            rand.shuffleArray( enterprises );
+            for ( i = 0; i < weak.members.length; i += 1 ) {
+              rebelGroup = rebelGroups[ weak.members[ i ] ];
+              for ( j = 0; j < nmrTransfer[ i ]; j += 1 ) {
+                enterprise = enterprises.splice( 0, 1 )[ 0 ];
+                enterprise.rebelGroup = rebelGroup;
+                enterprise.nmrOfLootings = 0;
+                rebelGroup.extortedEnterprises.push( enterprise );
+              }
             }
           }
         }
 
         // Fight decreases RG size proportional to opposite RG's strength
-        strongRG.nmrOfRebels -= Math.ceil( strongRG.nmrOfRebels * weakRGProb );
-        weakRG.nmrOfRebels -= Math.ceil( weakRG.nmrOfRebels * strongRGProb );
+        nmrOfDeaths = 0;
+        for ( i = 0; i < strong.members.length; i += 1 ) {
+          rebelGroup = rebelGroups[ strong.members[ i ] ];
+          nmrOfDeaths += Math.ceil( rebelGroup.nmrOfRebels * weakProb );
+          rebelGroup.nmrOfRebels -= nmrOfDeaths;
+        }
+
+        for ( i = 0; i < weak.members.length; i += 1 ) {
+          rebelGroup = rebelGroups[ weak.members[ i ] ];
+          nmrOfDeaths = Math.ceil( rebelGroup.nmrOfRebels * strongProb );
+          rebelGroup.nmrOfRebels -= nmrOfDeaths;
+        }
 
         sim.stat.nmrOfFights += 1;
+        sim.stat.sumOfFights += 1;
+        sim.stat.nmrOfDeaths += nmrOfDeaths;
       }
 
       return followupEvents;

@@ -35,7 +35,7 @@ var Loot = new cLASS( {
 
       if ( this.enterprise.rebelGroup.id === this.rebelGroup.id ) {
         if ( ( rand.uniform() < fleeProb ) ||
-          ( this.enterprise.nmrOfLootings > this.enterprise.fleeThreshold ) ) {
+          ( this.enterprise.nmrOfLootings >= this.enterprise.fleeThreshold ) ) {
           followupEvents.push( new Flee( {
             occTime: this.occTime + 1,
             enterprise: this.enterprise
@@ -59,7 +59,6 @@ var Loot = new cLASS( {
       }
 
       sim.stat.nmrOfLoots += 1;
-      sim.stat.amountLooted += amount;
 
       return followupEvents;
     }

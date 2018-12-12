@@ -140,7 +140,7 @@ oes.ui.setupDescription = function () {
   el.id = "metaData";
   el.innerHTML = "Copyright "+ sim.model.creator + " ("+ license +
       "), created on "+ created.toLocaleDateString() +" with the <i>Object Event "+
-      "Simulation (OES)</i> framework <a href='http://www.sim4edu.com/downloads'>OESjs</a>,"+
+      "Simulation (OES)</i> framework <a href='https://www.sim4edu.com/downloads'>OESjs</a>,"+
       " last modified on "+ modified.toLocaleDateString() + contributions +
       artworkCredits + " | <a href='https://sim4edu.com/credits.html'>OESjs Credits</a>";
   dom.insertAfter( el, refEl);

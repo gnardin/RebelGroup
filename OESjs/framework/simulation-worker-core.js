@@ -159,7 +159,7 @@ RoleConstraintViolation.prototype.constructor = RoleConstraintViolation;
 /*******************************************************************************
  * @fileOverview A collection of utilities: methods, objects, etc used all over the code.
  * @author Mircea Diaconescu
- * @copyright Copyright © 2014 Gerd Wagner, Mircea Diaconescu et al, 
+ * @copyright Copyright © 2014 Gerd Wagner, Mircea Diaconescu et al,
  *            Chair of Internet Technology, Brandenburg University of Technology, Germany.
  * @date July 08, 2014, 11:04:23
  * @license The MIT License (MIT)
@@ -190,15 +190,15 @@ util.capitalizeFirstChar = function (str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 /**
- * Copy all own (property and method) slots of a number of untyped objects 
+ * Copy all own (property and method) slots of a number of untyped objects
  * to a new untyped object.
  * @author Gerd Wagner
  * @return {object}  The merge result.
  */
 util.mergeObjects = function () {
-  var i = 0, k = 0, n = arguments.length, m = 0, 
+  var i = 0, k = 0, n = arguments.length, m = 0,
       foundArrayArg = false,
-      foundObjectArg = false, 
+      foundObjectArg = false,
       arg = null, mergedResult,
       keys=[], key="";
   for (i = 0; i < n; i++) {
@@ -222,9 +222,9 @@ util.mergeObjects = function () {
         keys = Object.keys( arg);
         m = keys.length;
         for (k = 0; k < m; k++) {
-          key = keys[k]; 
+          key = keys[k];
           mergedResult[key] = arg[key];
-        }      
+        }
       } else {
         throw "util.mergeObjects: incompatible objects were found! Trying to merge "+
               "an Object with an Array! Expected Object arguments only!";
@@ -369,7 +369,7 @@ util.cloneObject = function (o) {
  * to a new (untyped) object.
  * @author Gerd Wagner
  * @return {object}  The merge result.
- */
+ *
 util.mergeObjects = function () {
   var i=0, k=0, obj=null, mergeObj={}, keys=[], key="";
   for (i=0; i < arguments.length; i++) {
@@ -384,8 +384,9 @@ util.mergeObjects = function () {
   }
   return mergeObj;
 };
+ */
 /**
- * Swap two elements of an array 
+ * Swap two elements of an array
  * using the ES6 method Object.assign for creating a shallow clone of an object
  * @param a  the array
  * @param i  the first index
@@ -410,7 +411,7 @@ util.shuffleArray = function (a) {
   }
 };
 /**
- * Computes the Cartesian Product of an array of arrays
+ * Compute the Cartesian Product of an array of arrays
  * From https://stackoverflow.com/a/36234242/2795909
  * @param {Array} arr - An array of arrays of values to be combined
  */
@@ -423,6 +424,16 @@ util.cartesianProduct = function (arr) {
     }).reduce( function (a,b) {return a.concat(b)}, [])
   }, [[]])
 };
+
+var math = {};
+/**
+ * Compute the sum of an array of numbers
+ * @param {Array} arr - An array of numbers
+ */
+math.sum = function (arr) {
+  function add( a, b) {return a + b;}
+  return arr.reduce( add, 0);
+}
 
 /**
  * Predefined class for creating enumerations as special JS objects.
@@ -551,31 +562,34 @@ function cLASS (classSlots) {
   var propDefs = classSlots.properties || {},  // property declarations
       methods = classSlots.methods || {},
       supertypeName = classSlots.supertypeName,
-      superclass=null, constr=null,
+      superclass=null, constr=null, missingRangeProp="",
       propsWithInitialValFunc = [];
   // check Class definition constraints
   if (supertypeName && !cLASS[supertypeName]) {
     throw "Specified supertype "+ supertypeName +" has not been defined!";
   }
   if (!Object.keys( propDefs).every( function (p) {
+        if (!propDefs[p].range) missingRangeProp = p;
         return (propDefs[p].range !== undefined);
       }) ) {
-    throw "No range defined for some property of class "+ classSlots.Name +" !";
+    throw "No range defined for property "+ missingRangeProp +
+        " of class "+ classSlots.Name +" !";
   }
-  // define a constructor function for creating a new cLASS
+  // define a constructor function for creating a new object
   constr = function (instanceSlots) {
+    if (!instanceSlots) return;
     if (supertypeName) {
       // invoke supertype constructor
       cLASS[supertypeName].call( this, instanceSlots);
     }
     // assign own properties
     Object.keys( propDefs).forEach( function (p) {
-      var range = propDefs[p].range, Class=null,
+      var pDef = propDefs[p], range = pDef.range, Class=null,
           val, rangeTypes=[], i=0, validationResult=null;
-      if (typeof instanceSlots === "object" && instanceSlots[p]) {
+      if (typeof instanceSlots === "object" && p in instanceSlots) {
         // property p has an initialization slot
         val = instanceSlots[p];
-        validationResult = cLASS.check( p, propDefs[p], val);
+        validationResult = cLASS.check( p, pDef, val);
         if (!(validationResult instanceof NoConstraintViolation)) throw validationResult;
         // is range a class (or class disjunction)?
         if (typeof range === "string" && typeof val !== "object" &&
@@ -598,15 +612,23 @@ function cLASS (classSlots) {
             this[p] = cLASS[range].instances[String(val)] || val;
           }
         } else this[p] = val;
-      } else if (propDefs[p].initialValue !== undefined) {  // assign initial value
-        if (typeof propDefs[p].initialValue === "function") {
+      } else if (pDef.initialValue !== undefined) {  // assign initial value
+        if (typeof pDef.initialValue === "function") {
           propsWithInitialValFunc.push(p);
-        } else this[p] = propDefs[p].initialValue;
+        } else this[p] = pDef.initialValue;
       } else if (p === "id" && range === "AutoNumber") {    // assign auto-ID
-        if (typeof this.constructor.getAutoId === "function") this[p] = this.constructor.getAutoId();
-        else if (this.constructor.idCounter !== undefined) this[p] = ++this.constructor.idCounter;
-      } else if (!propDefs[p].optional) {  // assign default value to mandatory properties
-        if (cLASS.isIntegerType(range) || cLASS.isDecimalType(range)) {
+        if (typeof this.constructor.getAutoId === "function") {
+          this[p] = this.constructor.getAutoId();
+        } else if (this.constructor.idCounter !== undefined) {
+          this[p] = ++this.constructor.idCounter;
+        }
+      } else if (!pDef.optional) {  // assign default values to mandatory properties
+        if (pDef.maxCard > 1) {
+          if (pDef.minCard === 0) {  // optional multi-valued property
+            if (pDef.range in cLASS && !pDef.isOrdered) this[p] = {};  // map
+            else this[p] = [];  // array list
+          } else throw "A non-empty collection value for "+ p +" is required!";
+        } else if (cLASS.isIntegerType(range) || cLASS.isDecimalType(range)) {
           this[p] = 0;
         } else if (range === "String") {
           this[p] = "";
@@ -615,18 +637,21 @@ function cLASS (classSlots) {
         } else if (typeof range === "object") {
           if (["Array", "ArrayList"].includes(range.dataType)) {
             this[p] = [];
-          } else if (range["dataType"] === "Map") {
+          } else if (range.dataType === "Map") {
             this[p] = {};
           }
+        } else {
+          throw "A value for "+ p +" is required when creating a(n) "+ classSlots.Name;
+          console.log("instanceSlots = ", JSON.stringify(instanceSlots));
         }
       }
       // initialize historical properties
-      if (propDefs[p].historySize) {
+      if (pDef.historySize) {
         this.history = this.history || {};  // a map
-        this.history[p] = propDefs[p].decimalPlaces ?
-            new cLASS.RingBuffer( propDefs[p].range, propDefs[p].historySize,
-                {decimalPlaces: propDefs[p].decimalPlaces}) :
-            new cLASS.RingBuffer( propDefs[p].range, propDefs[p].historySize);
+        this.history[p] = pDef.decimalPlaces ?
+            new cLASS.RingBuffer( pDef.range, pDef.historySize,
+                {decimalPlaces: pDef.decimalPlaces}) :
+            new cLASS.RingBuffer( pDef.range, pDef.historySize);
       }
     }, this);
     // call the functions for initial value expressions
@@ -650,6 +675,7 @@ function cLASS (classSlots) {
   constr.Name = classSlots.Name;
   if (classSlots.isComplexDatatype) constr.isComplexDatatype = true;
   if (classSlots.isAbstract) constr.isAbstract = true;
+  if (classSlots.label) constr.label = classSlots.label;
   if (classSlots.shortLabel) constr.shortLabel = classSlots.shortLabel;
   if (classSlots.primaryKey) constr.primaryKey = classSlots.primaryKey;
   if (classSlots.tableName) constr.tableName = classSlots.tableName;
@@ -661,7 +687,7 @@ function cLASS (classSlots) {
     constr.prototype.constructor = constr;
     // merge superclass property declarations with own property declarations
     constr.properties = Object.create( superclass.properties);
-   //  assign own property declarations, possibly overriding super-props																		 
+   //  assign own property declarations, possibly overriding super-props
     Object.keys( propDefs).forEach( function (p) {
       constr.properties[p] = propDefs[p];
     });
@@ -775,9 +801,11 @@ function cLASS (classSlots) {
       if (val === undefined || val === null) return "";
       if (propDecl.maxCard && propDecl.maxCard > 1) {
         if (Array.isArray( val)) {
-          valuesToConvert = val.slice(0);  // clone;
+          valuesToConvert = val.length>0 ? val.slice(0) : [];  // clone;
+        } else if (typeof val === "object") {
+          valuesToConvert = Object.keys( val);
         } else console.log("The value of a multi-valued " +
-            "datatype property like "+ prop +"must be an array!");
+            "property like "+ prop +" must be an array or a map!");
       } else valuesToConvert = [val];
       valuesToConvert.forEach( function (v,i) {
         if (typeof propDecl.val2str === "function") {
@@ -803,13 +831,16 @@ function cLASS (classSlots) {
           propDecl.stringified = true;
         }
       }, this);
-      displayStr = valuesToConvert[0];
-      if (propDecl.maxCard && propDecl.maxCard > 1) {
-        displayStr = "[" + displayStr;
-        for (k=1; k < valuesToConvert.length; k++) {
-          displayStr += listSep + valuesToConvert[k];
+      if (valuesToConvert.length === 0) displayStr = "[]";
+      else {
+        displayStr = valuesToConvert[0];
+        if (propDecl.maxCard && propDecl.maxCard > 1) {
+          displayStr = "[" + displayStr;
+          for (k=1; k < valuesToConvert.length; k++) {
+            displayStr += listSep + valuesToConvert[k];
+          }
+          displayStr = displayStr + "]";
         }
-        displayStr = displayStr + "]";
       }
       return displayStr;
     };
@@ -899,7 +930,7 @@ cLASS.isIntegerType = function (T) {
  cLASS.check = function (fld, decl, val, optParams) {
    var constrVio=null, valuesToCheck=[],
        msg = decl.patternMessage || "",
-       minCard = decl.minCard || 0,  // by default, a multi-valued property is optional
+       minCard = decl.minCard!=="umdefined" ? decl.minCard : decl.optional?0:1,  // by default, a property is mandatory
        maxCard = decl.maxCard || 1,  // by default, a property is single-valued
        min = decl.min || 0, max = decl.max,
        range = decl.range,
@@ -918,7 +949,7 @@ cLASS.isIntegerType = function (T) {
      if (Array.isArray( val) ) {
        valuesToCheck = val;
      } else if (typeof range === "string" && cLASS[range]) {
-       if (!decl.ordered) {
+       if (!decl.isOrdered) {
          valuesToCheck = Object.keys( val).map( function (id) {
            return val[id];
          });
@@ -1286,7 +1317,6 @@ cLASS.isIntegerType = function (T) {
            fld +" must not have more than "+ maxCard +" members!");
      }
    }
-   //val = maxCard === 1 ? valuesToCheck[0] : valuesToCheck;
    // return deserialized value available in validationResult.checkedValue
    return new NoConstraintViolation( maxCard === 1 ? valuesToCheck[0] : valuesToCheck);
  };
@@ -1918,15 +1948,17 @@ sTORAGEmANAGER.prototype.retrieve = function (mc, id) {
  */
 sTORAGEmANAGER.prototype.retrieveAll = function (mc) {
   var adapterName = this.adapter.name,
-      dbName = this.adapter.dbName;
+      dbName = this.adapter.dbName,
+      createLog = this.createLog,
+      validateAfterRetrieve = this.validateAfterRetrieve;
   return new Promise( function (resolve) {
     sTORAGEmANAGER.adapters[adapterName].retrieveAll( dbName, mc)
     .then( function (records) {
       var i=0, newObj=null;
-      if (this.createLog) {
-        console.log( records.length +" "+ mcName +" records retrieved.")
+      if (createLog) {
+        console.log( records.length +" "+ mc.Name +" records retrieved.")
       }
-      if (this.validateAfterRetrieve) {
+      if (validateAfterRetrieve) {
         for (i=0; i < records.length; i++) {
           try {
             newObj = new mc( records[i]);
@@ -1937,7 +1969,8 @@ sTORAGEmANAGER.prototype.retrieveAll = function (mc) {
           }
         }
       }
-    }).then( resolve);
+      resolve( records);
+    })
   });
 };
 /**
@@ -1949,7 +1982,7 @@ sTORAGEmANAGER.prototype.retrieveAll = function (mc) {
  */
 sTORAGEmANAGER.prototype.update = function (mc, id, slots) {
   var adapterName = this.adapter.name,
-      dbName = this.adapter.dbName, 
+      dbName = this.adapter.dbName,
       currentSM = this;
   return new Promise( function (resolve) {
     var objectBeforeUpdate = null, properties = mc.properties,
@@ -2588,7 +2621,6 @@ Random.prototype.exponential = function (lambda) {
     throw new SyntaxError("exponential() must "     // ARG_CHECK
         + " be called with 'lambda' parameter"); // ARG_CHECK
   }                                                   // ARG_CHECK
-
   var r = this.random();
   return -Math.log(r) / lambda;
 };
@@ -2598,15 +2630,12 @@ Random.prototype.gamma = function (alpha, beta) {
     throw new SyntaxError("gamma() must be called"  // ARG_CHECK
         + " with alpha and beta parameters"); // ARG_CHECK
   }                                                   // ARG_CHECK
-
   /* Based on Python 2.6 source code of random.py.
    */
-
   if (alpha > 1.0) {
     var ainv = Math.sqrt(2.0 * alpha - 1.0);
     var bbb = alpha - this.LOG4;
     var ccc = alpha + ainv;
-
     while (true) {
       var u1 = this.random();
       if ((u1 < 1e-7) || (u > 0.9999999)) {
@@ -2656,7 +2685,6 @@ Random.prototype.normal = function (mu, sigma) {
     throw new SyntaxError("normal() must be called"  // ARG_CHECK
         + " with mu and sigma parameters");      // ARG_CHECK
   }                                                    // ARG_CHECK
-
   var z = this.lastNormal;
   this.lastNormal = NaN;
   if (!z) {
@@ -2673,21 +2701,31 @@ Random.prototype.pareto = function (alpha) {
     throw new SyntaxError("pareto() must be called" // ARG_CHECK
         + " with alpha parameter");             // ARG_CHECK
   }                                                   // ARG_CHECK
-
   var u = this.random();
   return 1.0 / Math.pow((1 - u), 1.0 / alpha);
 };
 
+Random.prototype.weibull = function (alpha, beta) {
+  if (arguments.length != 2) {                         // ARG_CHECK
+    throw new SyntaxError("weibull() must be called" // ARG_CHECK
+        + " with alpha and beta parameters");    // ARG_CHECK
+  }                                                   // ARG_CHECK
+  var u = 1.0 - this.random();
+  return alpha * Math.pow(-Math.log(u), 1.0 / beta);
+};
+
 Random.prototype.triangular = function (lower, upper, mode) {
   // http://en.wikipedia.org/wiki/Triangular_distribution
-  if (arguments.length != 3) {                         // ARG_CHECK
-    throw new SyntaxError("triangular() must be called" // ARG_CHECK
-        + " with lower, upper and mode parameters");    // ARG_CHECK
-  }                                                   // ARG_CHECK
-
+  if (arguments.length != 3) {
+    throw new SyntaxError("triangular() must be called"
+        + " with 3 parameters (lower, upper and mode)");
+  }
+  if (!(lower < upper && lower <= mode && mode <= upper)) {
+    throw new SyntaxError("The lower, upper and mode parameters " +
+        "must satisfy the conditions l < U and l <= m <= u!");
+  }
   var c = (mode - lower) / (upper - lower);
   var u = this.random();
-
   if (u <= c) {
     return lower + Math.sqrt(u * (upper - lower) * (mode - lower));
   } else {
@@ -2713,19 +2751,35 @@ Random.prototype.uniformInt = function (lower, upper) {
   if (arguments.length != 2 ||
       !(Number.isInteger(lower) && Number.isInteger(upper))) {
     throw new SyntaxError("uniformInt() must be called"
-        + " with lower and upper integer values");
+        + " with lower and upper integer values!");
   }
   return lower + Math.floor( this.random() * (upper - lower + 1));
 };
 
-Random.prototype.weibull = function (alpha, beta) {
-  if (arguments.length != 2) {                         // ARG_CHECK
-    throw new SyntaxError("weibull() must be called" // ARG_CHECK
-        + " with alpha and beta parameters");    // ARG_CHECK
-  }                                                   // ARG_CHECK
-  var u = 1.0 - this.random();
-  return alpha * Math.pow(-Math.log(u), 1.0 / beta);
+Random.prototype.frequency = function (freqMap) {
+  if (typeof freqMap !== "object") {
+    throw new SyntaxError("rand.frequency() must be called"
+        + " with a frequency map argument!");
+  }
+  var probabilities = Object.values( freqMap);
+  if (math.sum( probabilities) !== 1 ) {
+    throw new SyntaxError("rand.frequency(): rel. frequency values " +
+        "do not add up to 1!");
+  }
+  var cumProb=0;
+  var cumProbs = probabilities.map( function (p) {
+    cumProb += p;
+    return cumProb;
+  });
+  var valueStrings = Object.keys( freqMap);
+  var valuesAreNumeric = !isNaN( parseInt( valueStrings[0]));
+  var randX = this.random(), i=0;
+  for (i=0; i <= cumProbs.length; i++) {
+    if (randX < cumProbs[i]) return valuesAreNumeric ?
+        parseInt( valueStrings[i]) : valueStrings[i];
+  }
 };
+
 /**
  * Shuffles array in place using the Fisher-Yates shuffle algorithm
  * @param {Array} a - An array of items to be shuffled
@@ -2742,7 +2796,7 @@ Random.prototype.shuffleArray = function (a) {
 /*******************************************************************************
  * Binary Heap function based on the Appendix 2 Binary Heaps Haverbeke, M.
  * Eloquent JavaScript 3rd Edition
- * 
+ *
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany.
  * @license The MIT License (MIT)
  * @author Luis Gustavo Nardin
@@ -2758,7 +2812,7 @@ BinaryHeap.prototype.push = function ( element ) {
 BinaryHeap.prototype.pop = function () {
   var result = this.content[0];
   var end = this.content.pop();
-  
+
   if ( this.content.length > 0 ) {
     this.content[0] = end;
     this.sinkDown( 0 );
@@ -2772,12 +2826,12 @@ BinaryHeap.prototype.remove = function ( element ) {
     if ( this.content[i] !== element ) {
       continue;
     }
-    
+
     end = this.content.pop();
     if ( i === len - 1 ) {
       break;
     }
-    
+
     this.content[i] = end;
     this.bubbleUp( i );
     this.sinkDown( i );
@@ -2806,14 +2860,14 @@ BinaryHeap.prototype.bubbleUp = function ( n ) {
   var element = this.content[n];
   var score = this.scoreFunction( element );
   var parentN, parent;
-  
+
   while ( n > 0 ) {
     parentN = Math.floor( (n + 1) / 2 ) - 1;
     parent = this.content[parentN];
     if ( score >= this.scoreFunction( parent ) ) {
       break;
     }
-    
+
     this.content[parentN] = element;
     this.content[n] = parent;
     n = parentN;
@@ -2825,7 +2879,7 @@ BinaryHeap.prototype.sinkDown =
       var element = this.content[n];
       var elemScore = this.scoreFunction( element );
       var swap, child1, child2, child1N, child2N, child1Score, child2Score;
-      
+
       while ( true ) {
         child2N = (n + 1) * 2;
         child1N = child2N - 1;
@@ -2927,12 +2981,16 @@ oes.Object = new cLASS({
     }
   }
 });
+/***
+ * Events subsume activities. While instantaneous events have an occTime,
+ * activities may not have an occTime on creation, but only a startTime.
+ * For events with duration it holds that occTime = startTime + duration.
+ */
 oes.Event = new cLASS({
   Name: "eVENT",
   isAbstract: true,
   properties: {
-    // for events with duration: occTime = startTime + duration
-    "occTime": {range: "NonNegativeNumber"},
+    "occTime": {range: "NonNegativeNumber", optional:true},
     "priority": {range: "NonNegativeNumber", optional:true},
     // only meaningful for events with duration
     "startTime": {range: "NonNegativeNumber", optional:true},
@@ -3124,15 +3182,15 @@ oes.ActivityEnd = new cLASS({
  * onActivityStart/onActivityEnd event rule methods.
  *
  * A simple processing node has an input queue for work objects and a successor
- * processing node. Work objects may be either of a generic type "wORKoBJECT" or
- * of a model-specific subtype of "wORKoBJECT" (such as "Customer").
+ * processing node. Work objects may be either of a generic type "pROCESSINGoBJECT" or
+ * of a model-specific subtype of "pROCESSINGoBJECT" (such as "Customer").
  *
  * A processing node object may be defined with a value for its "fixedDuration"
  * property or with a "randomDuration" function, applying to its processing
  * activities. If neither a fixedDuration nor a randomDuration method are defined,
  * the exponential distribution with an event rate of 1 is used as a default
  * function for getting durations. By default, a processing node processes one
- * work object at a time, but it may also have its "capacity" attribute set to
+ * processing object at a time, but it may also have its "capacity" attribute set to
  * a value greater than 1.
  *
  * In the general case, a processing node may have several input object types,
@@ -3146,10 +3204,12 @@ oes.ActivityEnd = new cLASS({
  */
 oes.ProcessingNode = new cLASS({
   Name: "pROCESSINGnODE",
+  label: "Processing Node",
   supertypeName: "oBJECT",
   properties: {
-    "inputQueue": {range: "oBJECT", shortLabel:"inpQ", minCard: 0, maxCard: Infinity},
-    "inputType": {range: "ObjectType", optional:true},  // default: "wORKoBJECT"
+    "inputQueue": {range: "oBJECT", label:"Input Queue", shortLabel:"inpQ",
+        minCard: 0, maxCard: Infinity, isOrdered:true},
+    "inputType": {range: "oBJECTtYPE", optional:true},  // default: "pROCESSINGoBJECT"
     "successorNode": {range: "pROCESSINGnODE|eXITnODE", optional:true},
     "fixedDuration": {range: "PositiveInteger", optional:true},
     "capacity": {range: "PositiveInteger", optional:true},
@@ -3163,12 +3223,12 @@ oes.ProcessingNode = new cLASS({
   methods: {}
 });
 /**
- * Work Objects are generic objects that arrive at an entry node of a PN
+ * Processing Objects are generic objects that arrive at an entry node of a PN
  * and are processed at one or more processing nodes before they leave the
  * PN at an exit node.
  */
-oes.WorkObject = new cLASS({
-  Name: "wORKoBJECT",
+oes.ProcessingObject = new cLASS({
+  Name: "pROCESSINGoBJECT",
   supertypeName: "oBJECT",
   properties: {
     "arrivalTime": { range: "Number", label: "Arrival time",
@@ -3229,7 +3289,7 @@ oes.ProcessingActivityEnd = new cLASS({
  * used for computing the time between two consecutive arrival events, or a per-
  * instance-defined "arrivalRecurrence" method slot for computing the recurrence
  * of arrival events; (4) a per-instance-defined "outputType" slot for defining
- * a custom output type (instead of the default "wORKoBJECT"). If neither an
+ * a custom output type (instead of the default "pROCESSINGoBJECT"). If neither an
  * "arrivalRate" nor an "arrivalRecurrence" method are defined, the exponential
  * distribution with an event rate of 1 is used as a default recurrence.
  *
@@ -3241,9 +3301,10 @@ oes.ProcessingActivityEnd = new cLASS({
  */
 oes.EntryNode = new cLASS({
   Name: "eNTRYnODE",
+  label: "Entry Node",
   supertypeName: "oBJECT",
   properties: {
-    "outputType": {range: "ObjectType", optional:true},  // default: "wORKoBJECT"
+    "outputType": {range: "oBJECTtYPE", optional:true},  // default: "pROCESSINGoBJECT"
     "successorNode": {range: "pROCESSINGnODE", optional:true},
     "maxNmrOfArrivals": {range: "PositiveInteger", optional:true},
     "arrivalRate": {range: "Decimal", optional:true},
@@ -3263,6 +3324,7 @@ oes.EntryNode = new cLASS({
  */
 oes.ExitNode = new cLASS({
   Name: "eXITnODE",
+  label: "Exit Node",
   supertypeName: "oBJECT",
   properties: {
     "nmrOfDepartedObjects": {range: "NonNegativeInteger", optional:true},
@@ -3279,6 +3341,8 @@ oes.ExitNode = new cLASS({
  */
 oes.Arrival = new cLASS({
   Name: "aRRIVAL",
+  label: "Arrival",
+  shortLabel: "Arr",
   supertypeName: "eVENT",
   properties: {
     "entryNode": {range: "eNTRYnODE"},
@@ -3295,10 +3359,11 @@ oes.Arrival.defaultRecurrence = function () {
  */
 oes.Departure = new cLASS({
   Name: "dEPARTURE",
+  shortLabel: "Dep",
   supertypeName: "eVENT",
   properties: {
     "exitNode": {range: "eXITnODE"},
-    "workObject": {range: "wORKoBJECT"}
+    "processingObject": {range: "pROCESSINGoBJECT"}
   }
 });
 
@@ -3334,14 +3399,15 @@ oes.ExperimentDef = new cLASS({
   Name: "eXPERIMENTdEF",
   properties: {
     "id": {range: "AutoNumber"},
-    "model": {range: "NonEmptyString", label:"Model name"},
+    "model": {range: "NonEmptyString", label:"Model name", optional:true},
     "scenarioNo": {range: "PositiveInteger", label:"Scenario number"},
-    "experimentNo": {range: "PositiveInteger", label:"Experiment number"},
+    "experimentNo": {range: "PositiveInteger", label:"Experiment number",
+        hint:"The sequence number relative to the underlying simulation scenario"},
     "experimentTitle": {range: "NonEmptyString", optional:true, label:"Experiment title"},
     "replications": {range:"PositiveInteger", label:"Number of replications"},
     "parameterDefs": {range: "eXPERIMENTpARAMdEF", minCard: 0, maxCard: Infinity,
-        ordered:true, label:"Parameter definitions"},
-    "seeds": {range: Array, optional:true}  // seeds.length = #replications
+        isOrdered:true, label:"Parameter definitions"},
+    "seeds": {range: Array, optional:true}  // seeds.length = replications
   }
 });
 oes.ExperimentDef.idCounter = 0;  // retrieve actual value from IDB
@@ -3349,9 +3415,9 @@ oes.ExperimentDef.idCounter = 0;  // retrieve actual value from IDB
 oes.ExperimentRun = new cLASS({
   Name: "eXPERIMENTrUN",
   properties: {
-    "id": {range: "AutoNumber"},  // possibly a timestamp
-    "experimentDef": {range: "eXPERIMENTdEF"},
-    "dateTime": {range: "DateTime"}
+    "id": {range: "AutoNumber", label:"ID"},  // possibly a timestamp
+    "experimentDef": {range: "eXPERIMENTdEF", label:"Experiment def."},
+    "dateTime": {range: "DateTime", label:"Date/time"}
   }
 });
 oes.ExperimentRun.getAutoId = function () {
@@ -3363,9 +3429,17 @@ oes.ExperimentScenarioRun = new cLASS({
   properties: {
     "id": {range: "AutoNumber"},  // possibly a timestamp
     "experimentRun": {range: "eXPERIMENTrUN"},
-    "experimentScenarioNo": {range: "PositiveInteger"},
+    "experimentScenarioNo": {range: "NonNegativeInteger"},
     "parameterValueCombination": {range: Array},
-    "outputStatistics": {range: Object}
+    "outputStatistics": {range: Object,
+      label:"Output statistics",
+      val2str: function (v) {
+        return JSON.stringify( v);
+      },
+      str2val: function (str) {
+        return JSON.parse( str);
+      },
+    }
   }
 });
 oes.ExperimentScenarioRun.getAutoId = function () {
@@ -3375,7 +3449,7 @@ oes.ExperimentScenarioRun.getAutoId = function () {
 /**
  * Define lists of predefined cLASSes as reserved names for constraint checks
  */
-oes.predefinedObjectTypes = ["oBJECT","wORKoBJECT","pROCESSINGnODE","eNTRYnODE","eXITnODE"];
+oes.predefinedObjectTypes = ["oBJECT","pROCESSINGoBJECT","pROCESSINGnODE","eNTRYnODE","eXITnODE"];
 oes.predefinedEventTypes = ["eVENT","aCTIVITYsTART","aCTIVITYeND","aRRIVAL",
     "pROCESSINGaCTIVITYsTART","pROCESSINGaCTIVITYeND","dEPARTURE"];
 oes.predefinedActivityTypes = ["aCTIVITY","pROCESSINGaCTIVITY"];
@@ -3408,10 +3482,10 @@ sim.experiment = {
   objectName: "experiment",
   properties: {
     "experimentNo": {range:"AutoNumber", label:"Experiment number",
-      hint:"Automatically assigned sequence number for experiment"},
+        hint:"Automatically assigned sequence number for experiment"},
     "experimentTitle": {range:"String", optional: true, label:"Experiment title"},
     "replications": {range:"PositiveInteger", label:"Number of replications",
-        hint:"Number of replications/repetitions per scenario"},
+        hint:"Number of replications/repetitions per experiment scenario"},
     "parameterDefs": {
         range: "eXPERIMENTpARAMdEF", maxCard: Infinity,
         label:"Experiment parameters",
@@ -3423,14 +3497,17 @@ sim.experiment = {
   parameters: [],
   scenarios:[],  // are created by the simulator
   validate: function () {
-    var exp = sim.experiment;
+    var errMsgs=[], exp = sim.experiment;
     if (exp.replications > 0) {
-      var errMsgs=[];
-      if (exp.seeds && (!Array.isArray( exp.seeds) || exp.seeds.length !== exp.replications)) {
-        errMsgs = ["Not enough seeds for number of replications!"];
+      if (exp.seeds) {
+        if (!Array.isArray( exp.seeds)) {
+          errMsgs = ["The experiment 'seeds' parameter must have an array value! Illegal value: "+ JSON.stringify(exp.seeds)];
+        } else if (exp.seeds.length < exp.replications) {
+          errMsgs = ["Not enough seeds for number of replications!"];
+        }
       }
-      return errMsgs;
     }
+    return errMsgs;
   }
 };
 
@@ -3667,6 +3744,7 @@ oes.verifySimulation = function () {
   if (sim.model.statistics) {
     Object.keys( sim.model.statistics).forEach( function (varName) {
       var statVar = sim.model.statistics[varName],
+          OT = statVar.objectType,
           aggrFunc = statVar.aggregationFunction;
       // variable bound to specific object
       if (statVar.objectIdRef && !statVar.objectType) {
@@ -3679,8 +3757,8 @@ oes.verifySimulation = function () {
             varName +"</var>: <code>"+ aggrFunc +
             "</code> is not an admissible aggregation function name!");
       }
-      // variable is bound to an aggregate over an ObjectType population
-      if (!statVar.objectIdRef && statVar.property && !(OT && cLASS[OT] && aggrFunc)) {
+      // if variable is bound to a property, objectIdRef or objectType must be provided
+      if (statVar.property && !statVar.objectIdRef && !(OT && cLASS[OT])) {
         errMsgs.push( "Invalid definition of statistics variable <var>"+
             varName +"</var>:"+ (!OT ? " object type name missing!" :
                                  !cLASS[OT] ? " object type "+ OT +" not defined!" :
@@ -3701,7 +3779,7 @@ oes.verifySimulation = function () {
   return errMsgs;
 };
 /**
- * Set up front-end simulation environment
+ * Set up Storage Management
  *
  * @method
  * @author Gerd Wagner
@@ -3734,7 +3812,6 @@ oes.setupFrontEndSimEnv = function () {
   if (sim.model.space.type) oes.space.initialize();
   // set up initial state
   sim.initializeModelVariables();
-  console.log("sim.v.nmrOfEnterprises: "+ sim.v.nmrOfEnterprises);
   sim.createInitialObjEvt();
   // initialize statistics
   if (sim.model.statistics) oes.stat.initialize();
@@ -3760,7 +3837,7 @@ oes.setupFrontEndSimEnv = function () {
 
 /*******************************************************************************
  * EventList maintains an ordered list of events using Binary Heap
- * 
+ *
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany.
  * @license The MIT License (MIT)
  * @author Luis Gustavo Nardin
@@ -3873,8 +3950,8 @@ oes.stat.initialize = function () {
       else if (typeof sim.model.v[globVar] === "object") {
         initialVal = sim.model.v[globVar].initialValue || 0;
       } else initialVal = sim.model.v[globVar];
-    } else if (statVar.objectIdRef && statVar.property) {
-      // the variable is bound to a specific object
+    } else if (statVar.property && statVar.objectIdRef) {
+      // the variable is bound to a property slot of a specific object
       objIdRefStr = String( statVar.objectIdRef);
       if (statVar.objectType) OT = statVar.objectType;
       else OT = sim.objects[objIdRefStr].constructor.Name;
@@ -3892,7 +3969,26 @@ oes.stat.initialize = function () {
           }
         }
         initialVal = objectRef[statVar.property];
-      } else throw "No object found for objectIdRef"+ objIdRefStr +"in oes.stat.initialize";
+      } else {
+        throw "No object found for object ID "+ objIdRefStr +" in oes.stat.initialize";
+      }
+    } else if (statVar.property && statVar.objectType && !statVar.aggregationFunction) {
+      // the variable is bound to a collection of property slots
+      initialVal = {};
+      OT = statVar.objectType;
+      if (!sim.model.objectTypes.includes( OT)) {
+        throw "Specified object type not found in oes.stat.initialize!";
+      }
+      Object.keys( cLASS[OT].instances).forEach( function (objIdStr) {
+        initialVal[objIdStr] = cLASS[OT].instances[objIdStr][statVar.property];
+      });
+      if (statVar.aggregationFunction &&
+          aggReturnType[statVar.aggregationFunction]) {
+        statVar.range = aggReturnType[statVar.aggregationFunction];
+      } else {
+        propDecl = cLASS[OT].properties[statVar.property];
+        statVar.range = propDecl.range;
+      }
     } else if (statVar.gridCellProperty && sim.space.grid) {
       // statistics variable for grid cell property
       if (!statVar.range) {
@@ -3905,8 +4001,10 @@ oes.stat.initialize = function () {
         }
       }
     }
-    // has the variable's time series to be stored/returned?
-    if (statVar.showTimeSeries) {
+    // is the variable's time series to be created?
+    statVar.createTimeSeries = (statVar.showTimeSeries || sim.experiment.timeSeriesStatisticsVariables &&
+        sim.experiment.timeSeriesStatisticsVariables.includes( statVar));
+    if (statVar.createTimeSeries) {
       if (sim.timeIncrement === undefined){
         sim.stat.timeSeries[varName] = [[],[]];
       } else {
@@ -3919,8 +4017,9 @@ oes.stat.initialize = function () {
     // is variable bound to an aggregate over an ObjectType population?
     statVar.isBoundToPopulationAggregate =
         (!statVar.objectIdRef && statVar.property && OT);
-    if (statVar.range) statVar.isIntegerType = cLASS.isIntegerType( statVar.range);
-    else if (statVar.globalVariable && typeof sim.model.v[globVar] === "object" &&
+    if (statVar.range) {
+      statVar.isIntegerType = cLASS.isIntegerType( statVar.range);
+    } else if (statVar.globalVariable && typeof sim.model.v[globVar] === "object" &&
              statVar.aggregationFunction && statVar.aggregationFunction !== "avg") {
       statVar.isIntegerType = cLASS.isIntegerType( sim.model.v[globVar].range);
     } else {
@@ -3965,8 +4064,8 @@ oes.stat.prepareTimeSeriesCompression = function (maxLength) {
     + oes.stat.timeSeriesCompressionSteps + " (1 means no compression)");
 };
 /**
- * Reset the statistics variables. This means that any computed 
- * value is reset to the initial value and all the connection with 
+ * Reset the statistics variables. This means that any computed
+ * value is reset to the initial value and all the connection with
  * object(s) references are recreated.
  */
 oes.stat.reset = function () {
@@ -3978,10 +4077,10 @@ oes.stat.reset = function () {
  */
 oes.stat.updateStatistics = function () {
   var i=0, statVar=null,
-      variables = Object.keys( sim.model.statistics),
-      n = variables.length;
+      statVarNames = Object.keys( sim.model.statistics),
+      n = statVarNames.length;
   for (i=0; i<n; i++) {
-    statVar = sim.model.statistics[variables[i]];
+    statVar = sim.model.statistics[statVarNames[i]];
     // computeOnlyAtEnd statistic variables are ignored at this point
     if (!statVar.computeOnlyAtEnd) oes.stat.updateStatisticsVariable( statVar);
   }
@@ -3992,7 +4091,7 @@ oes.stat.updateStatistics = function () {
  * @param statVar  the statistics variable declaration
  */
 oes.stat.updateStatisticsVariable = function (statVar) {
-  var varName = statVar.name, valueAtCurrentStep = 0;
+  var varName = statVar.name, valueAtCurrentStep;
   var cellsOnX = 0, cellsOnY = 0, i = 0, j = 0;
   var grid = null;
   var sum = 0, pName = '';
@@ -4001,8 +4100,15 @@ oes.stat.updateStatisticsVariable = function (statVar) {
     valueAtCurrentStep = statVar.expression() || 0;
   } else if (statVar.globalVariable) { // value obtained from a global variable
     valueAtCurrentStep = sim.v[statVar.globalVariable] || 0;
-  } else if (statVar.objectRef) { // value obtained from an object property
+  } else if (statVar.objectRef) { // value obtained from an object's property slot
     valueAtCurrentStep = statVar.objectRef[statVar.property] || 0;
+  } else if (statVar.property && statVar.objectType && !statVar.aggregationFunction) {
+    // the variable is bound to a collection of property slots
+    valueAtCurrentStep = {};
+    OT = statVar.objectType;
+    Object.keys( cLASS[OT].instances).forEach( function (objIdStr) {
+      valueAtCurrentStep[objIdStr] = cLASS[OT].instances[objIdStr][statVar.property];
+    });
   } else if (statVar.entryNode) { // PN statistics
     valueAtCurrentStep = statVar.entryNode.nmrOfArrivedObjects || 0;
   } else if (statVar.exitNode) { // PN statistics
@@ -4034,7 +4140,7 @@ oes.stat.updateStatisticsVariable = function (statVar) {
   if (statVar.isIntegerType) sim.stat[varName] = parseInt( valueAtCurrentStep);
   else sim.stat[varName] = valueAtCurrentStep;
   // check if the variable's time series has to be stored/returned
-  if (statVar.showTimeSeries) {
+  if (statVar.createTimeSeries) {
     if (sim.timeIncrement) {
       //sim.stat.timeSeries[varName][sim.step] = sim.stat[varName];
       sim.stat.timeSeries[varName].push( sim.stat[varName]);
@@ -4095,8 +4201,8 @@ oes.stat.computePopulationAggregate = function (statVar) {
   return aggr;
 };
 /**
- * Compute the values of the statistic variables which are only required 
- * to be computed at the simulation end. This method has to be called when 
+ * Compute the values of the statistic variables which are only required
+ * to be computed at the simulation end. This method has to be called when
  * the simulation ends.
  */
 oes.stat.computeOnlyAtEndStatistics = function () {
@@ -4164,13 +4270,11 @@ oes.stat.avg = function (oldValue, newValue) {
 /*
 Improvements/extensions
 v1
-
- - Add observation UIs for visualizing variables in "monitors"
  - improve the initial state definition UI:
-   + Support setting model variables (provided they have a label)
-   + add events
+   + support value changes via IndexedDB
    + allowing adding/dropping objects in the ClassPopulationWidget
    + supporting enumeration attributes in the ClassPopulationWidget
+ - Add observation UIs for visualizing variables in "monitors"
 
  - make a sims/basic-tests.html that invokes one or more seeded scenario simulations and checks statistics results
  - Define set/get for scenario.visualize and use the setter for dropping/setting-up the visualization (canvas)
@@ -4178,9 +4282,6 @@ v1
 
  - run experiment scenarios in parallel worker threads using the navigator.hardwareConcurrency information
    (see https://developer.mozilla.org/en-US/docs/Web/API/NavigatorConcurrentHardware/hardwareConcurrency)
-
- - Add an "empirical" method to rand
- - Allow defining statistics per ObjectType::property, and not only per object.property
 
  - improve clock-time measuring and support real-time simulation enabled by realtimeFactor set to 1
  - Refactor the simulation step/loop by parametrizing pre-defined events from an extension library (such as "PN Models")
@@ -4191,7 +4292,7 @@ v1
  - Allow setting a waiting timeout for the input queues of processing nodes (corresponding
    to AnyLogic's "Enable exit on timeout")
  - Implement support for the "capacity" attribute of processing nodes (by popping/forwarding
-   more than one work objects)
+   more than one processing objects)
  - Allow processing nodes to specify a maximum queue length (limited queue capacity)
 
  *** later ***
@@ -4301,7 +4402,7 @@ sim.initializeModelVariables = function (expParamSlots) {
       sim.v[varName] = expParamSlots[varName];
     } else /* if (sim.v[varName] === undefined) */ {
       if (typeof mv === "object") {
-        sim.v[varName] = mv.value !== undefined ? mv.value : mv.initialValue;
+        sim.v[varName] = (mv.value !== undefined) ? mv.value : mv.initialValue;
       } else {
         sim.v[varName] = mv;
       }
@@ -4313,8 +4414,8 @@ sim.initializeModelVariables = function (expParamSlots) {
  ********************************************************/
 sim.createInitialObjEvt = function () {
   var initState = sim.scenario.initialState,
-      initialObjDefs = initState ? initState.objects : null,
-      initialEvtDefs = initState ? initState.events : null;
+      initialEvtDefs=null, initialObjDefs=null,
+      entryNodes = {};
   // clear initial state data structures
   sim.objects = {};  // a map of all objects (accessible by ID)
   sim.namedObjects = {};  // a map of objects accessible by a unique name
@@ -4328,9 +4429,8 @@ sim.createInitialObjEvt = function () {
   if (typeof sim.scenario.setupInitialState === "function") {
     sim.scenario.setupInitialState();
   }
-  initialObjDefs = initState.objects || null;
-  initialEvtDefs = initState.events || null;
   // register initial objects
+  initialObjDefs = initState.objects;
   if (initialObjDefs) {  // a map of object definitions
     Object.keys( initialObjDefs).forEach( function (idStr) {
       var objSlots = util.cloneObject( initialObjDefs[idStr]),
@@ -4379,6 +4479,7 @@ sim.createInitialObjEvt = function () {
     });
   });
   // schedule initial events
+  initialEvtDefs = initState.events;
   if (initialEvtDefs) {  // an array of JS object definitions
     initialEvtDefs.forEach( function (evt) {
       var e = util.cloneObject( evt),  // clone event object definition
@@ -4393,27 +4494,28 @@ sim.createInitialObjEvt = function () {
   /**************************************************************
    * Special settings for PN models
    **************************************************************/
+  entryNodes = oes.EntryNode.instances;
   // schedule initial arrival events for the entry nodes of a PN
-  Object.keys( oes.EntryNode.instances).forEach( function (en) {
-    var occT=0, arrEvt=null;
-    // has no recurrence function been defined?
-    if (!en.recurrence) {
+  Object.keys( entryNodes).forEach( function (nodeIdStr) {
+    var occT=0, arrEvt=null, entryNode = entryNodes[nodeIdStr];
+    // has no arrival recurrence function been defined for this entry node?
+    if (!entryNode.arrivalRecurrence) {
       // use the default recurrence
       occT = oes.Arrival.defaultRecurrence();
     } else {
-      occT = en.recurrence();
+      occT = entryNode.arrivalRecurrence();
     }
-    arrEvt = new oes.Arrival({ occTime: occT, entryNode: en});
+    arrEvt = new oes.Arrival({ occTime: occT, entryNode: entryNode});
     sim.scheduleEvent( arrEvt);
   });
   // declare implicit statistics variables for PN entry node statistics
-  if (Object.keys( oes.EntryNode.instances).length > 0 &&
-      !sim.model.statistics) {
+  if (Object.keys( entryNodes).length > 0 && !sim.model.statistics) {
     sim.model.statistics = {};
   }
-  Object.keys( oes.EntryNode.instances).forEach( function (nodeIdStr) {
-    var entryNode = oes.EntryNode.instances[nodeIdStr],
-        varName = entryNode.name + "_arrObj";
+  Object.keys( entryNodes).forEach( function (nodeIdStr) {
+    var entryNode = entryNodes[nodeIdStr],
+        varName = Object.keys( entryNodes).length === 1 ?
+            "arrivedObjects" : entryNode.name +"_arrivedObjects";
     entryNode.nmrOfArrivedObjects = 0;
     sim.model.statistics[varName] = {
       range: "NonNegativeInteger",
@@ -4424,16 +4526,18 @@ sim.createInitialObjEvt = function () {
   });
   // declare implicit statistics variables for PN exit node statistics
   Object.keys( oes.ExitNode.instances).forEach( function (nodeIdStr) {
-    var exitNode = oes.ExitNode.instances[nodeIdStr];
+    var exitNode = oes.ExitNode.instances[nodeIdStr],
+        varName = Object.keys( oes.ExitNode.instances).length === 1 ?
+            "departedObjects" : exitNode.name +"_departedObjects";
     exitNode.nmrOfDepartedObjects = 0;
-    sim.model.statistics[exitNode.name + "_depObj"] = {
+    sim.model.statistics[varName] = {
       range: "NonNegativeInteger",
       label: "Departed objects",
       exitNode: exitNode,
       computeOnlyAtEnd: true
     };
     exitNode.cumulativeTimeInSystem = 0;
-    sim.model.statistics[exitNode.name + "_cumTime"] = {
+    sim.model.statistics[varName] = {
       range: "Decimal",
       label: "Average time in system",
       exitNode: exitNode,
@@ -4442,7 +4546,7 @@ sim.createInitialObjEvt = function () {
       expression: function () {
         return exitNode.cumulativeTimeInSystem / exitNode.nmrOfDepartedObjects
       }
-    }
+    };
   });
 };
 /*************************************************************
@@ -4469,7 +4573,7 @@ sim.updateInitialStateObjects = function () {
  * Settings that do not vary across scenarios in an experiment
  ************************************************************/
 sim.initializeSimulator = function (dbName) {
-  var x=0;
+  var x=0, i=0;
   sim.FEL = new oes.EventList();  // the Future Events List (FEL)
   // complete model definition by setting objectTypes and eventTypes if not defined
   if (!sim.model.objectTypes) sim.model.objectTypes = [];
@@ -4510,6 +4614,18 @@ sim.initializeSimulator = function (dbName) {
   } else {  // use the JS built-in RNG
     rand = new Random();
   }
+  // initialize experiment(s)
+  if (sim.experiment.replications) {  // an experiment has been defined
+    if (!sim.experiment.parameterDefs) sim.experiment.parameterDefs = [];
+    sim.experiment.parameterDefs.forEach( function (paramDef, i, a) {
+      if (paramDef.constructor !== oes.ExperimentParamDef) {
+        a[i] = new oes.ExperimentParamDef( paramDef);
+      }
+    });
+    if (sim.experiment.constructor !== oes.ExperimentDef) {
+      sim.experiment = new oes.ExperimentDef( sim.experiment);
+    }
+  }
   if (dbName) oes.setupStorageManagement( dbName);
 };
 /*************************************************************
@@ -4517,12 +4633,13 @@ sim.initializeSimulator = function (dbName) {
  ************************************************************/
 sim.initializeSimulationRun = function (expParamSlots, seed) {
   var logInfo={};
+  var isExperimentRun=expParamSlots !== undefined || seed;
   sim.step = 0;  // simulation loop steps
   sim.time = 0;  // simulation time
   // get ID counter from simulation scenario, or set to default value
   sim.idCounter = sim.scenario.idCounter || 1000;
   // set up a default random variate sampling method
-  if (!sim.experiment.replications && sim.scenario.randomSeed) {  // use the Mersenne Twister RNG
+  if (!isExperimentRun && sim.scenario.randomSeed) {  // use the Mersenne Twister RNG
     rand = new Random( sim.scenario.randomSeed);
   } else if (seed) {  // experiment-defined replication-specific seed
     rand = new Random( seed);
@@ -4564,12 +4681,12 @@ sim.runScenario = function (useWorker) {
   if (!useWorker) {  // running in main thread
     sim.useWorker = false;
     sim.initializeSimulationRun();
-    sim.runStep();  // loops by self-invocation via setTimeout
+    sim.runScenarioStep();  // loops by self-invocation via setTimeout
   } else {  // running in worker thread
     sim.useWorker = true;
     sim.initializeSimulationRun();
     while (sim.time < sim.scenario.simulationEndTime) {
-      sim.runStep();
+      sim.runScenarioStep();
       // update the progress bar and the simulation step/time
       if (sim.time > nextProgressIncrement) {
         self.postMessage({
@@ -4595,11 +4712,11 @@ sim.runScenario = function (useWorker) {
  Scenario Simulation Step for Main Thread Execution
  loops by self-invocation via setTimeout
 ********************************************************/
-sim.runStep = function (followupEvents) {
+sim.runScenarioStep = function (followupEvents) {
   var nextEvents=[], followupEvt=null, i=0, j=0,
       EventClass=null, participantRoles={}, nextExoEvt=null, e=null,
       ActivityEndET=null, AT=null, a=null,
-      WorkObject=null, o=null, slots={}, nextNode=null, occT=0,
+      ProcessingObject=null, o=null, slots={}, nextNode=null, occT=0,
       nextEvtTime = sim.FEL.getNextOccurrenceTime(),  // 0 if there is no next event
       stepStartTime = (new Date()).getTime(),
       totalStepTime = 0, stepDiffTimeDelay = 0,
@@ -4639,14 +4756,14 @@ sim.runStep = function (followupEvents) {
       return;
     }
   }
-  if (followupEvents) {  // runStep was called from user action event handler
+  if (followupEvents) {  // runScenarioStep was called from user action event handler
     // schedule follow-up events
     for (j=0; j < followupEvents.length; j++) {
       sim.FEL.add( followupEvents[j]);
     }
     // clear followUpEvents list
     followupEvents = [];
-  } else {  // normal invocation of runStep
+  } else {  // normal invocation of runScenarioStep
     followupEvents = [];
     advanceSimulationTime();
     // update the sim-control UI via the fields' data binding to UI output elements
@@ -4781,7 +4898,7 @@ sim.runStep = function (followupEvents) {
               followupEvents.push( new oes.Departure({
                 occTime: e.occTime + sim.nextMomentDeltaT,
                 exitNode: nextNode,
-                workObject: o
+                processingObject: o
               }));
             }
             // are there more items in the input queue?
@@ -4797,14 +4914,14 @@ sim.runStep = function (followupEvents) {
           break;
         case "aRRIVAL":  // at an entry node
           if (e.entryNode.outputType) {
-            WorkObject = cLASS[e.entryNode.outputType];
+            ProcessingObject = cLASS[e.entryNode.outputType];
           } else {  // default
-            WorkObject = oes.WorkObject;
+            ProcessingObject = oes.ProcessingObject;
           }
           // update statistics
           e.entryNode.nmrOfArrivedObjects++;
-          // create newly arrived work object
-          o = new WorkObject({arrivalTime: e.occTime});
+          // create newly arrived processing object
+          o = new ProcessingObject({arrivalTime: e.occTime});
           sim.addObject( o);
           // invoke onArrival event rule method
           if (e.entryNode.onArrival) followupEvents = e.entryNode.onArrival();
@@ -4837,11 +4954,11 @@ sim.runStep = function (followupEvents) {
         case "dEPARTURE":
           // update statistics
           e.exitNode.nmrOfDepartedObjects++;
-          e.exitNode.cumulativeTimeInSystem += e.occTime - e.workObject.arrivalTime;
+          e.exitNode.cumulativeTimeInSystem += e.occTime - e.processingObject.arrivalTime;
           // invoke onDeparture event rule method
           if (e.exitNode.onDeparture) followupEvents = e.exitNode.onDeparture();
           // remove object from simulation
-          sim.removeObject( e.workObject);
+          sim.removeObject( e.processingObject);
           break;
         default:  //***** all types of user-defined events *****
           // check if a user interaction has been triggered
@@ -4867,6 +4984,7 @@ sim.runStep = function (followupEvents) {
           }
           followupEvents = e.onEvent();
         }  //***end of switch***
+
         // render event appearances if defined
         if (sim.config.visualize && sim.ui.animations && sim.ui.animations[eventTypeName]) {
           sim.ui.animations[eventTypeName].play();
@@ -4917,7 +5035,7 @@ sim.runStep = function (followupEvents) {
     } else {
       // continue simulation loop
       // in the browser, use setTimeout to prevent script blocking
-      setTimeout( sim.runStep, stepDiffTimeDelay);
+      setTimeout( sim.runScenarioStep, stepDiffTimeDelay);
     }
   }
 };
@@ -4927,49 +5045,47 @@ sim.runStep = function (followupEvents) {
 sim.runExperiment = function () {
   var exp = sim.experiment, cp=[], valueSets=[], i=0, j=0, k=0, M=0,
       N = exp.parameterDefs.length, increm=0, x=0, expPar={},
+      expRunId = (new Date()).getTime(),
       valueCombination=[], expParamSlots={},
       tenthRunLength=0,  // a tenth of the total run time
       nextProgressIncrementStep=0;  // thresholds for updating the progress bar
-  exp.runId = oes.ExperimentRun.getAutoId();
   try {
     sim.storeMan.add( oes.ExperimentRun, {
-      id: exp.runId,
+      id: expRunId,
       experimentDef: exp.id,
       dateTime: (new Date()).toISOString(),
     });
   } catch (e) {
     console.log( JSON.stringify(e));
   }
-  for (i=0; i < N; i++) {
-    expPar = exp.parameterDefs[i];
-    if (!expPar.values) {
-      // create value set
-      expPar.values = [];
-      increm = expPar.stepSize || 1;
-      for (x = expPar.startValue; x <= expPar.endValue; x += increm) {
-        expPar.values.push( x);
+  if (N === 0) {  // simple experiment (without parameters)
+    cp = [[]];  // only 1 empty parameter value combination
+  } else {
+    for (i=0; i < N; i++) {
+      expPar = exp.parameterDefs[i];
+      if (!expPar.values) {
+        // create value set
+        expPar.values = [];
+        increm = expPar.stepSize || 1;
+        for (x = expPar.startValue; x <= expPar.endValue; x += increm) {
+          expPar.values.push( x);
+        }
       }
+      valueSets.push( expPar.values);
     }
-    valueSets.push( expPar.values);
+    cp = util.cartesianProduct( valueSets);
   }
-  cp = util.cartesianProduct( valueSets);
-  // loop over all combinations of experiment parameter values
   M = cp.length;  // size of cartesian product
   tenthRunLength = (M * exp.replications) / 10;
   nextProgressIncrementStep = tenthRunLength;
+  // loop over all combinations of experiment parameter values
   for (i=0; i < M; i++) {
     valueCombination = cp[i];  // a JS array
     // initialize the scenario record
     exp.scenarios[i] = {stat:{}};
     exp.scenarios[i].parameterValues = valueCombination;
-    // initialize scenario statistics
-    Object.keys( sim.model.statistics).forEach( function (varName) {
-      if (sim.model.statistics[varName].label) {  // output statistics
-        exp.scenarios[i].stat[varName] = 0;
-      }
-    });
     // create experiment parameter slots for assigning corresponding model variables
-    for (j=0; j < N; j++) {
+    for (j = 0; j < N; j++) {
       expParamSlots[exp.parameterDefs[j].name] = valueCombination[j];
     }
     // run experiment scenario replications
@@ -4987,24 +5103,31 @@ sim.runExperiment = function () {
         }
       }
       oes.stat.computeOnlyAtEndStatistics();
+      // initialize scenario statistics
+      Object.keys( sim.model.statistics).forEach( function (varName) {
+        if (sim.model.statistics[varName].label) {  // output statistics
+          exp.scenarios[i].stat[varName] = 0;
+        }
+      });
       // aggregate scenario run statistics from sim.stat to sim.experiment.scenarios[i].stat
       Object.keys( sim.model.statistics).forEach( function (varName) {
         if (sim.model.statistics[varName].label) {  // output statistics
           exp.scenarios[i].stat[varName] += sim.stat[varName];
         }
       });
+      if (sim.experiment.storeEachExperimentScenarioRun) {
+        sim.storeMan.add( oes.ExperimentScenarioRun, {
+          id: expRunId + i * exp.replications + k,
+          experimentRun: expRunId,
+          experimentScenarioNo: i,
+          parameterValueCombination: exp.scenarios[i].parameterValues,
+          outputStatistics: JSON.parse( JSON.stringify( sim.stat ) )
+        });
+      }
       // update the progress bar
       if (i*k > nextProgressIncrementStep) {
         self.postMessage({progressIncrement: 10});
         nextProgressIncrementStep += tenthRunLength;
-      }
-      if (sim.experiment.storeEachExperimentScenarioRun) {
-        sim.storeMan.add( oes.ExperimentScenarioRun, {
-          experimentRun: exp.runId,
-          experimentScenarioNo: i,
-          parameterValueCombination: exp.scenarios[i].parameterValues,
-          outputStatistics: exp.scenarios[i].stat
-        });
       }
     }
     // compute average values
@@ -5023,7 +5146,7 @@ sim.runExperiment = function () {
       // store the average statistics aggregated over all exp. scenario runs
       try {
         sim.storeMan.add( oes.ExperimentScenarioRun, {
-          experimentRun: exp.runId,
+          experimentRun: expRunId,
           experimentScenarioNo: i,
           parameterValueCombination: exp.scenarios[i].parameterValues,
           outputStatistics: exp.scenarios[i].stat
@@ -5042,7 +5165,7 @@ sim.runExperimentScenarioStep = function () {
   var nextEvents=[], followupEvt=null, i=0, j=0,
       EventClass=null, participantRoles={}, nextExoEvt=null, e=null,
       ActivityEndET=null, AT=null, a=null,
-      WorkObject=null, o=null, slots={}, nextNode=null, occT=0,
+      ProcessingObject=null, o=null, slots={}, nextNode=null, occT=0,
       nextEvtTime = sim.FEL.getNextOccurrenceTime(),  // 0 if there is no next event
       eventTypeName="", followupEvents=[];
   function advanceSimulationTime () {
@@ -5195,7 +5318,7 @@ sim.runExperimentScenarioStep = function () {
               followupEvents.push( new oes.Departure({
                 occTime: e.occTime + sim.nextMomentDeltaT,
                 exitNode: nextNode,
-                workObject: o
+                processingObject: o
               }));
             }
             // are there more items in the input queue?
@@ -5211,14 +5334,14 @@ sim.runExperimentScenarioStep = function () {
           break;
         case "aRRIVAL":  // at an entry node
           if (e.entryNode.outputType) {
-            WorkObject = cLASS[e.entryNode.outputType];
+            ProcessingObject = cLASS[e.entryNode.outputType];
           } else {  // default
-            WorkObject = oes.WorkObject;
+            ProcessingObject = oes.ProcessingObject;
           }
           // update statistics
           e.entryNode.nmrOfArrivedObjects++;
-          // create newly arrived work object
-          o = new WorkObject({arrivalTime: e.occTime});
+          // create newly arrived processing object
+          o = new ProcessingObject({arrivalTime: e.occTime});
           sim.addObject( o);
           // invoke onArrival event rule method
           if (e.entryNode.onArrival) followupEvents = e.entryNode.onArrival();
@@ -5251,11 +5374,11 @@ sim.runExperimentScenarioStep = function () {
         case "dEPARTURE":
           // update statistics
           e.exitNode.nmrOfDepartedObjects++;
-          e.exitNode.cumulativeTimeInSystem += e.occTime - e.workObject.arrivalTime;
+          e.exitNode.cumulativeTimeInSystem += e.occTime - e.processingObject.arrivalTime;
           // invoke onDeparture event rule method
           if (e.exitNode.onDeparture) followupEvents = e.exitNode.onDeparture();
           // remove object from simulation
-          sim.removeObject( e.workObject);
+          sim.removeObject( e.processingObject);
           break;
         default:  //***** all types of user-defined events *****
           followupEvents = e.onEvent();

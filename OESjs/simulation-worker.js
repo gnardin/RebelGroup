@@ -21,20 +21,17 @@ if (sim.model.activityTypes) {
 
 //=================================================================
 
-sim.initializeSimulator();
 onmessage = function (e) {
   if (e.data.runExperiment) {
+    sim.initializeSimulator( e.data.dbName);
     sim.runExperiment();
-  } else {
-    if (e.data.endTime) {
-      sim.scenario.simulationEndTime = e.data.endTime;
-    }
-    if (e.data.createLog !== undefined) {
-      sim.config.createLog = e.data.createLog;
-    }
+  } else {  // receive variable values changed via the UI
+    sim.initializeSimulator();
+    if (e.data.endTime) sim.scenario.simulationEndTime = e.data.endTime;
+    if (e.data.createLog !== undefined) sim.config.createLog = e.data.createLog;
     if (e.data.changedModelVarValues) {
       Object.keys( e.data.changedModelVarValues).forEach( function (varName) {
-        sim.model.v[varName].fieldValue = e.data.changedModelVarValues[varName];
+        sim.model.v[varName].value = e.data.changedModelVarValues[varName];
       });
     }
     sim.runScenario( true);  // run in worker thread

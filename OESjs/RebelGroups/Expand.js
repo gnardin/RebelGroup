@@ -68,16 +68,16 @@ var Expand = new cLASS( {
 
         // Probability to fight if the Enterprise already has main extorter
         fightProb = 0;
-        if ( enterprise.rebelGroup !== null ) {
+        if ( enterprise.rebelGroup === null ) {
+          enterprise.rebelGroup = this.rebelGroup;
+          this.rebelGroup.extortedEnterprises.push( enterprise );
+        } else {
           strengthRatio = sim.model.f.normalizeValue(
-            sim.model.f.relativeStrength( this.rebelGroup,
-              enterprise.rebelGroup ) );
+            sim.model.f.relativeStrength( enterprise.rebelGroup,
+              this.rebelGroup ) );
 
           /* Fight Probability */
-          fightProb = sim.model.f.sigmoid( 1, 1, 1,
-            -1.5, ( strengthRatio * 4 ) );
-        } else {
-          enterprise.rebelGroup = this.rebelGroup;
+          fightProb = sim.model.f.sigmoid( 1, 1, 1, 1.5, strengthRatio );
         }
 
         if ( rand.uniform() < fightProb ) {
@@ -107,6 +107,7 @@ var Expand = new cLASS( {
 
         sim.stat.nmrOfExpands += 1;
       }
+
       return followupEvents;
     }
   }

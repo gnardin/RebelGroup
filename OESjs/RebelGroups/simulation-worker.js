@@ -1,26 +1,28 @@
-self.importScripts( "../framework/simulation-worker-core.js" );
+self.importScripts("../framework/simulation-worker-core.js");
+self.importScripts("simulation.js");
 
-self.importScripts( "simulation.js" );
+if (sim.model.objectTypes) {
+  sim.model.objectTypes.forEach( function (objT) {
+    self.importScripts( objT + ".js");
+  });
+}
+if (sim.model.eventTypes) {
+  sim.model.eventTypes.forEach( function (evtT) {
+    self.importScripts( evtT + ".js");
+  });
+}
+if (sim.model.activityTypes) {
+  sim.model.activityTypes.forEach( function (actT) {
+    self.importScripts( actT + ".js");
+  });
+}
 
-if ( sim.model.objectTypes ) {
-  sim.model.objectTypes.forEach( function ( objT ) {
-    self.importScripts( objT + ".js" );
-  } );
-}
-if ( sim.model.eventTypes ) {
-  sim.model.eventTypes.forEach( function ( evtT ) {
-    self.importScripts( evtT + ".js" );
-  } );
-}
-if ( sim.model.activityTypes ) {
-  sim.model.activityTypes.forEach( function ( actT ) {
-    self.importScripts( actT + ".js" );
-  } );
-}
 //=================================================================
+
 onmessage = function (e) {
   if (e.data.runExperiment) {
     sim.initializeSimulator( e.data.dbName);
+    if (e.data.endTime) sim.scenario.simulationEndTime = e.data.endTime;
     sim.runExperiment();
   } else {  // receive variable values changed via the UI
     sim.initializeSimulator();

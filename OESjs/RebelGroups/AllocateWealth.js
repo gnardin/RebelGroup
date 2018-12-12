@@ -1,5 +1,5 @@
 /*******************************************************************************
- * AllocateResource event class
+ * AllocateWealth event class
  *
  * @copyright Copyright 2018 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
@@ -8,8 +8,8 @@
  * @author Luis Gustavo Nardin
  * @author Gerd Wagner
  ******************************************************************************/
-var AllocateResource = new cLASS( {
-  Name: "AllocateResource",
+var AllocateWealth = new cLASS( {
+  Name: "AllocateWealth",
   supertypeName: "eVENT",
   properties: {
     "rebelGroup": { range: "RebelGroup" }
@@ -18,7 +18,8 @@ var AllocateResource = new cLASS( {
     "onEvent": function () {
       var followupEvents = [];
       var deltaRebels = 0, recruit = 0, expel = 0;
-      var strengthRatio = sim.model.f.globalRelativeStrength( this.rebelGroup );
+      var strengthRatio =
+        sim.model.f.globalRelativeStrength( this.rebelGroup );
       var totalSalary = this.rebelGroup.nmrOfRebels * this.rebelGroup.rebelCost;
 
       if ( this.rebelGroup.wealth > totalSalary ) {
@@ -61,12 +62,13 @@ var AllocateResource = new cLASS( {
     }
   }
 } );
-AllocateResource.recurrence = function ( e ) {
+AllocateWealth.recurrence = function ( e ) {
   return e.rebelGroup.freqAllocate;
 };
-AllocateResource.createNextEvent = function ( e ) {
-  return new AllocateResource( {
-    occTime: e.occTime + AllocateResource.recurrence( e ),
+AllocateWealth.createNextEvent = function ( e ) {
+  var nextTime = e.occTime + AllocateWealth.recurrence( e );
+  return new AllocateWealth( {
+    occTime: nextTime,
     rebelGroup: e.rebelGroup
   } );
 };
