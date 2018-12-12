@@ -22,7 +22,7 @@
 
   <body onload="oes.ui.setupDescription()">
     <div id="frontMatter">
-      <h1>Rebel Groups Protection Racket</h1>
+      <h1>Rebel Groups Protection Rackets</h1>
       <p>
         <strong>Classification tags</strong>: Rebel Group, Civil War,
         Discrete-Event Simulation
@@ -46,7 +46,7 @@
         </h1>
         <div id="expl-CIM" class="expl"></div>
 
-        <p>The potentially relevant object types are:</p>
+        <p>The potentially relevant types of objects are:</p>
         <ol>
           <li>enterprises</li>
           <li>rebel groups</li>
@@ -63,13 +63,57 @@
         </h1>
         <div id="expl-CPM" class="expl"></div>
 
+
+        <p>The potentially relevant types of events are:</p>
+        <ol>
+          <li><em><strong>extortions</strong> of enterprises</em>: </li>
+          <li><em><strong>lootings</strong> of enterprises</em>: </li>
+          <li><em><strong>flights</strong> of enterprises</em>: </li>
+          <li><em><strong>recruitings or expellings</strong> of rebels by rebel groups</em>: </li>
+          <li><em><strong>expansions</strong> of rebel groups' territories</em>: </li>
+          <li><em><strong>reportings</strong> of extortions by expanding rebel groups</em>: </li>
+          <li><em><strong>fights</strong> between rebel groups</em>: </li>
+        </ol>
+
+
+      </section>
+    </section>
+
+    <section class="mbd collapsed">
+      <h1>
+        <span>►</span>Simulation Design Model <sup class="expl-req">?</sup>
+      </h1>
+      <div id="expl-DM" class="expl"></div>
+
+      <section>
+        <h1>
+          Information Design Model <sup class="expl-req">?</sup>
+        </h1>
+        <div id="expl-IDM" class="expl"></div>
+
+         <p>The model abstracts away from clans and households. It includes the following types of objects:</p>
+        <ol>
+          <li><i><b>Enterprise</b></i> with properties ...</li>
+          <li><i><b>RebelGroup</b></i> with properties ...</li>
+        </ol>
+
+        <figure>
+          <img src="media/img/IDM.png" width="1000" />
+          <figcaption>An information design model describing object types and event types.</figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h1>Process Design Model <sup class="expl-req">?</sup></h1>
+        <div id="expl-PDM" class="expl"></div>
+
         <table>
           <caption>Event rules</caption>
           <thead>
             <tr>
-              <td>Events</td>
-              <td>Participating objects</td>
-              <td>Caused state changes and follow-up events</td>
+              <td>ON (event type)</td>
+              <td>Participating agents/objects</td>
+              <td>DO (event routine, specifying caused state changes and follow-up events)</td>
             </tr>
           </thead>
           <tbody>
@@ -87,12 +131,12 @@
 			  faster pace to grow in size in comparison to the stronger competitor(s).</td>
             </tr>
             <tr>
-              <td>Allocating Resouces</td>
+              <td>AllocateResouces</td>
               <td>Rebel group</td>
               <td>Each period, the rebel group pays part of its wealth to maintain the costs for each single rebel. The costs are predetermined and can be altered.
 			  If the costs exceed the accumulated wealth, then the rebel group expels a fraction of rebels to match its income level. If the rebel group extorts income
 			  in excess of its current rebel size, then it grows according to its global strength. Weaker parties grow faster than stronger rebel groups but can never
-			  exceed an absolute growth above 0.5x of its current size in one period. Once a rebel group achieves hegemony (a group size relation defined as 4:1), then the rebel
+			  exceed an absolute growth above 50% of its current size in one period. Once a rebel group achieves hegemony (a group size relation defined as 4:1), then the rebel
 			  group does not grow anymore and saves its wealth for future allocation.</td>
             </tr>
 			<tr>
@@ -123,37 +167,6 @@
             </tr>
           </tbody>
         </table>
-
-      </section>
-    </section>
-
-    <section class="mbd collapsed">
-      <h1>
-        <span>►</span>Simulation Design Model <sup class="expl-req">?</sup>
-      </h1>
-      <div id="expl-DM" class="expl"></div>
-
-      <section>
-        <h1>
-          Information Design Model <sup class="expl-req">?</sup>
-        </h1>
-        <div id="expl-IDM" class="expl"></div>
-
-         <p>The model abstracts away from clans and households. It includes the following object types:</p>
-        <ol>
-          <li>Enterprise with properties ...</li>
-          <li>RebelGroup with properties ...</li>
-        </ol>
-
-        <figure>
-          <img src="media/img/IDM.png" width="1000" />
-          <figcaption>An information design model describing object types and event types.</figcaption>
-        </figure>
-      </section>
-
-      <section>
-        <h1>Process Design Model <sup class="expl-req">?</sup></h1>
-        <div id="expl-PDM" class="expl"></div>
 
         <table>
           <caption>Event Rule Design</caption>
