@@ -1,7 +1,5 @@
-
-self.importScripts( "../framework/simulation-worker-core.js" );
-
-self.importScripts( "simulation.js" );
+self.importScripts("../framework/simulation-worker-core.js");
+self.importScripts("simulation.js");
 
 if (sim.model.objectTypes) {
   sim.model.objectTypes.forEach( function (objT) {

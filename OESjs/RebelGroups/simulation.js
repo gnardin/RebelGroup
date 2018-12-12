@@ -11,9 +11,9 @@
 /******************************************************************************
  * Simulation Parameters
  ******************************************************************************/
-sim.scenario.simulationEndTime = 365;
+sim.scenario.simulationEndTime = 100;
 sim.scenario.idCounter = 1; // optional
-//sim.scenario.randomSeed = 3746; // optional
+sim.scenario.randomSeed = 3746; // optional
 /*******************************************************************************
  * Simulation Config
  ******************************************************************************/
@@ -210,7 +210,7 @@ sim.experiment.parameterDefs = [
         "[0.1,0.05,0.05]" ]
     } )
 ];
-sim.experiment.replications = 10;
+sim.experiment.replications = 1;
 sim.experiment.seeds = [ 126, 8758, 635, 2653, 198, 681, 8734, 6523, 2643, 27 ];
 sim.experiment.storeEachExperimentScenarioRun = true;
 /*******************************************************************************

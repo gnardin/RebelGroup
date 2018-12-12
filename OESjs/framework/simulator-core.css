@@ -379,7 +379,6 @@ pre[class*="language-"] {
     font-size: 90%;
     margin-top: 0;
     margin-bottom: 0.67em;
-    margin-left: 1em;
 }
 #model-menu button {
     display: inline-block;
@@ -552,4 +551,18 @@ div[id="time-series-chart"] {
 #InitialStateObjectsUI table.PopTable {
     max-height: 7em;
     scroll: auto
+}
+
+/* ==========================================================================
+   Print styles for printing the SVG chart
+   ========================================================================== */
+
+@media print {
+	@page {size: landscape}
+	
+    body {visibility: hidden;}
+	#time-series-chart {
+		visibility:visible;
+		position:absolute; top:0px; left:0px;
+	}
 }
