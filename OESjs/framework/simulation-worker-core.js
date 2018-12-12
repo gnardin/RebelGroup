@@ -3429,7 +3429,7 @@ oes.ExperimentScenarioRun = new cLASS({
   properties: {
     "id": {range: "AutoNumber"},  // possibly a timestamp
     "experimentRun": {range: "eXPERIMENTrUN"},
-    "experimentScenarioNo": {range: "PositiveInteger"},
+    "experimentScenarioNo": {range: "NonNegativeInteger"},
     "parameterValueCombination": {range: Array},
     "outputStatistics": {range: Object,
       label:"Output statistics",
@@ -4408,7 +4408,6 @@ sim.initializeModelVariables = function (expParamSlots) {
       }
     }
   });
-  // console.log( "sim.v = " + JSON.stringify(sim.v) );
 }
 /********************************************************
  * Create Initial Objects and Events
@@ -5122,7 +5121,7 @@ sim.runExperiment = function () {
           experimentRun: expRunId,
           experimentScenarioNo: i,
           parameterValueCombination: exp.scenarios[i].parameterValues,
-          outputStatistics: sim.stat
+          outputStatistics: JSON.parse( JSON.stringify( sim.stat ) )
         });
       }
       // update the progress bar
