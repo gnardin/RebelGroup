@@ -5121,7 +5121,7 @@ sim.runExperiment = function () {
           experimentRun: expRunId,
           experimentScenarioNo: i,
           parameterValueCombination: exp.scenarios[i].parameterValues,
-          outputStatistics: JSON.parse( JSON.stringify( sim.stat ) )
+          outputStatistics: Object.assign({}, sim.stat)
         });
       }
       // update the progress bar
