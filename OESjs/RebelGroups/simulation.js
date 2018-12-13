@@ -38,13 +38,13 @@ sim.model.activityTypes = [];
 /* Global Variables */
 sim.model.v.nmrOfEnterprises = {
   range: "NonNegativeInteger",
-  initialValue: 1000,
+  initialValue: 2000,
   label: "Number Enterprises",
   hint: "The number of Enterprises"
 };
 sim.model.v.income = {
   range: "string",
-  initialValue: "[200,50]",
+  initialValue: "[840,210]",
   label: "Ents Income",
   hint: "The income of the Enterprises (Normal)"
 };
@@ -56,73 +56,73 @@ sim.model.v.freqIncome = {
 };
 sim.model.v.fleeProb = {
   range: "string",
-  initialValue: "[0.5,0.5]",
+  initialValue: "[0.1,0.1]",
   label: "Ents Flee Probability",
   hint: "The probability an Enterprise flees (Uniform [0,1])"
 };
 sim.model.v.fleeThreshold = {
   range: "string",
-  initialValue: "[3,3]",
+  initialValue: "[30,30]",
   label: "Ents Flee Threshold",
   hint: "The threshold an Enterprise flees (UniformInt)"
 };
 sim.model.v.nmrOfRebelGroups = {
   range: "NonNegativeInteger",
-  initialValue: 2,
+  initialValue: 9,
   label: "Number Rebel Groups",
   hint: "The number of Rebel Groups"
 };
 sim.model.v.nmrOfRebels = {
   range: "string",
-  initialValue: "[500,500,500]",
+  initialValue: "[1500,500,50,50,50,50,50,50,50]",
   label: "RGs Size",
   hint: "The number of rebel members per Rebel Group"
 };
 sim.model.v.propOfEnterprises = {
   range: "string",
-  initialValue: "[0.4,0.3,0.3]",
+  initialValue: "[0.18,0.18,0.1,0.14,0.04,0.06,0.14,0.13,0.03]",
   label: "RGs Prop Enterprises",
   hint: "The proportion of Enterprises per Rebel Group"
 };
 sim.model.v.extortionRates = {
   range: "string",
-  initialValue: "[0.1,0.1,0.1]",
+  initialValue: "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]",
   label: "RGs Extortion",
   hint: "The extortion rate per Rebel Group"
 };
 sim.model.v.rebelCosts = {
   range: "string",
-  initialValue: "[291,291,291]",
+  initialValue: "[161,161,161,161,161,161,161,161,161]",
   label: "RGs Cost",
   hint: "The monthly cost per rebel per Rebel Group"
 };
 sim.model.v.recruitThreshold = {
   range: "string",
-  initialValue: "[0.8,0.8,0.8]",
+  initialValue: "[0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8]",
   label: "RGs Recruit Threshold",
   hint: "The threshold to stop recruiting per Rebel Group"
 };
 sim.model.v.recruitRate = {
   range: "string",
-  initialValue: "[0.5,0.5,0.5]",
+  initialValue: "[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]",
   label: "RGs Recruit Rate",
   hint: "The rate of rebels recruited per recruitment per Rebel Group"
 };
 sim.model.v.freqDemand = {
   range: "string",
-  initialValue: "[[30,2],[30,2],[30,2]]",
+  initialValue: "[[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2]]",
   label: "RGs Demand Frequency",
   hint: "The frequency each Rebel Group demand extortion money (Normal)"
 };
 sim.model.v.freqExpand = {
   range: "string",
-  initialValue: "[[5,2],[5,2],[5,2]]",
+  initialValue: "[[5,2],[5,2],[5,2],[5,2],[5,2],[5,2],[5,2],[5,2],[5,2]]",
   label: "RGs Expansion Frequency",
   hint: "The frequency each Rebel Group try to expand their domain (Normal)"
 };
 sim.model.v.freqAllocate = {
   range: "string",
-  initialValue: "[[30,0],[30,0],[30,0]]",
+  initialValue: "[[30,0],[30,0],[30,0],[30,0],[30,0],[30,0],[30,0],[30,0],[30,0]]",
   label: "RGs Allocate Frequency",
   hint: "The frequency each Rebel Group reallocate their wealth (Normal)"
 };
@@ -207,12 +207,12 @@ sim.experiment.parameterDefs = [
       name: "extortionRates", values: [ "[0.1,0.1,0.1]",
         "[0.05,0.05,0.05]", "[0.05,0.1,0.1]", "[0.1,0.05,0.1]",
         "[0.1,0.05,0.1]", "[0.05,0.05,0.1]", "[0.05,0.1,0.05]",
-        "[0.1,0.05,0.05]" ]
+        "[0.1,0.05,0.05]", "[0.1,0.05,0.05]"]
     } )
 ];
 sim.experiment.replications = 2;
 sim.experiment.seeds = [ 126, 8758 ];
-//, 635, 2653, 198, 681, 8734, 6523, 2643, 27
+//, 635, 2653, 198, 681, 8734, 6523, 2643, 27, 
 sim.experiment.storeEachExperimentScenarioRun = true;
 /*******************************************************************************
  * Define Initial State
