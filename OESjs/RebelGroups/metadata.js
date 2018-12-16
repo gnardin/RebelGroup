@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Rebel Groups Protection Racket simulation model metadata information
  *
- * @copyright Copyright 2018 Brandenburg University of Technology, Germany
+ * @copyright Copyright 2018-2019 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
  * @author Frances Duffy
  * @author Kamil Klosek
@@ -31,4 +31,4 @@ sim.model.license = "CC BY-NC";
 sim.model.creator = "Frances Duffy, Kamil Klosek, Luis Gustavo Nardin, " +
   "Gerd Wagner";
 sim.model.created = "2018-07-26";
-sim.model.modified = "2018-12-02";
+sim.model.modified = "2018-12-15";

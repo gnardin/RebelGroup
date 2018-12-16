@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Extort event class
  *
- * @copyright Copyright 2018 Brandenburg University of Technology, Germany
+ * @copyright Copyright 2018-2019 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
  * @author Frances Duffy
  * @author Kamil Klosek
@@ -42,7 +42,8 @@ var Extort = new cLASS( {
       this.enterprise.nmrOfExtortions += 1;
 
       // Enterprise reports if extorted by a different Rebel Group
-      if ( this.enterprise.rebelGroup.id !== this.rebelGroup.id ) {
+      if ( ( this.enterprise.rebelGroup !== null ) &&
+        ( this.enterprise.rebelGroup.id !== this.rebelGroup.id ) ) {
         followupEvents.push( new Report( {
           occTime: this.occTime + 1,
           rebelGroup: this.enterprise.rebelGroup,

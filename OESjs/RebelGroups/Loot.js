@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Loot event class
  *
- * @copyright Copyright 2018 Brandenburg University of Technology, Germany
+ * @copyright Copyright 2018-2019 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
  * @author Frances Duffy
  * @author Kamil Klosek
@@ -20,8 +20,6 @@ var Loot = new cLASS( {
       var followupEvents = [];
       var amount = this.enterprise.wealth;
 
-      /* CHECK Flee Probability */
-      /* TODO Replace it by a function */
       var fleeProb = this.enterprise.fleeProb;
 
       // Update Rebel Group
@@ -33,7 +31,8 @@ var Loot = new cLASS( {
       this.enterprise.accIncome = 0;
       this.enterprise.nmrOfLootings += 1;
 
-      if ( this.enterprise.rebelGroup.id === this.rebelGroup.id ) {
+      if ( ( this.enterprise.rebelGroup !== null ) &&
+        ( this.enterprise.rebelGroup.id === this.rebelGroup.id ) ) {
         if ( ( rand.uniform() < fleeProb ) ||
           ( this.enterprise.nmrOfLootings >= this.enterprise.fleeThreshold ) ) {
           followupEvents.push( new Flee( {

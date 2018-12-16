@@ -1,7 +1,7 @@
 /*******************************************************************************
  * AllocateWealth event class
  *
- * @copyright Copyright 2018 Brandenburg University of Technology, Germany
+ * @copyright Copyright 2018-2019 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
  * @author Frances Duffy
  * @author Kamil Klosek
@@ -52,6 +52,14 @@ var AllocateWealth = new cLASS( {
 
       this.rebelGroup.nmrOfRebels = Math.max( 0,
         this.rebelGroup.nmrOfRebels + recruit - expel );
+
+      // Release all Enterprises associated to a RebelGroup with nmrRebels = 0
+      if ( this.rebelGroup.nmrOfRebels === 0 ) {
+        this.rebelGroup.extortedEnterprises.forEach( function ( enterprise ) {
+          enterprise.rebelGroup = null;
+        } );
+        this.rebelGroup.extortedEnterprises = [];
+      }
 
       this.rebelGroup.lastAmountExtorted = 0;
 

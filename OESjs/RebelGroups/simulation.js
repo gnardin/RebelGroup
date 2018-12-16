@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Rebel Groups simulation model
  *
- * @copyright Copyright 2018 Brandenburg University of Technology, Germany
+ * @copyright Copyright 2018-2019 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
  * @author Frances Duffy
  * @author Kamil Klosek
@@ -300,10 +300,10 @@ sim.scenario.setupInitialState = function () {
     sim.addObject( new Enterprise( {
       id: objId,
       name: "enterprise" + objId,
+      wealth: 0,
+      rebelGroup: null,
       income: rand.normal( income[ 0 ], income[ 1 ] ),
       freqIncome: rand.uniformInt( freqIncome[ 0 ], freqIncome[ 1 ] ),
-      rebelGroup: null,
-      wealth: 0,
       accIncome: 0,
       fleeProb: rand.uniform( fleeProb[ 0 ], fleeProb[ 1 ] ),
       fleeThreshold: rand.uniformInt( fleeThreshold[ 0 ], fleeThreshold[ 1 ] ),
