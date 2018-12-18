@@ -276,7 +276,7 @@ sim.scenario.setupInitialState = function () {
       freqAllocate: Math.round( rand.normal( freqAllocate[ i ][ 0 ],
         freqAllocate[ i ][ 1 ] ) ),
       lastExpand: 0,
-      lastAmountExtorted: 0
+      lastAmountCollected: 0
     } ) );
 
     sim.scheduleEvent( new Demand( {

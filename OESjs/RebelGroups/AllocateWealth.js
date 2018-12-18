@@ -31,19 +31,19 @@ var AllocateWealth = new cLASS( {
         this.rebelGroup.wealth = 0;
       }
 
-      if ( ( this.rebelGroup.lastAmountExtorted > totalSalary ) &&
+      if ( ( this.rebelGroup.lastAmountCollected > totalSalary ) &&
         ( strengthRatio < this.rebelGroup.recruitThreshold ) ) {
         // Recruit
         deltaRebels =
-          Math.floor( ( this.rebelGroup.lastAmountExtorted - totalSalary ) /
+          Math.floor( ( this.rebelGroup.lastAmountCollected - totalSalary ) /
             this.rebelGroup.rebelCost );
 
         recruit = Math.floor( Math.min( deltaRebels * ( 1 - strengthRatio ),
           ( this.rebelGroup.nmrOfRebels * this.rebelGroup.recruitRate ) ) );
-      } else if ( totalSalary > this.rebelGroup.lastAmountExtorted ) {
+      } else if ( totalSalary > this.rebelGroup.lastAmountCollected ) {
         // Expel
         deltaRebels =
-          Math.ceil( ( totalSalary - this.rebelGroup.lastAmountExtorted ) /
+          Math.ceil( ( totalSalary - this.rebelGroup.lastAmountCollected ) /
             this.rebelGroup.rebelCost );
 
         expel = Math.min( this.rebelGroup.nmrOfRebels,
@@ -61,7 +61,7 @@ var AllocateWealth = new cLASS( {
         this.rebelGroup.extortedEnterprises = [];
       }
 
-      this.rebelGroup.lastAmountExtorted = 0;
+      this.rebelGroup.lastAmountCollected = 0;
 
       sim.stat.nmrOfRecruits += recruit;
       sim.stat.nmrOfExpels += expel;

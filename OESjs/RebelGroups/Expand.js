@@ -43,7 +43,7 @@ var Expand = new cLASS( {
         ( enterprisesKey.length >
           this.rebelGroup.extortedEnterprises.length ) ) {
 
-        // Select the poorest Enterprise with greater probability
+        // Select poorer Enterprise with greater probability
         wEnterprises = [];
         wEnterprises[ 0 ] = 1 / enterprisesObj[ enterprisesKey[ 0 ] ].wealth;
         for ( i = 1; i < enterprisesKey.length; i += 1 ) {

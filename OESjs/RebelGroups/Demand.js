@@ -26,17 +26,17 @@ var Demand = new cLASS( {
           /**
            * Decision to extort or loot
            *
-           * Rebel Groups loot based on their strength with respect to the other
-           * Rebel Groups, otherwise they extort
+           * Rebel Groups extort based on their strength with respect to
+           * all other Rebel Groups, otherwise they loot
            */
-          if ( rand.uniform() < ( 1 - strengthRatio ) ) {
-            followupEvents.push( new Loot( {
+          if ( rand.uniform() < strengthRatio ) {
+            followupEvents.push( new Extort( {
               occTime: this.occTime + 1,
               rebelGroup: this.rebelGroup,
               enterprise: enterprise
             } ) );
           } else {
-            followupEvents.push( new Extort( {
+            followupEvents.push( new Loot( {
               occTime: this.occTime + 1,
               rebelGroup: this.rebelGroup,
               enterprise: enterprise

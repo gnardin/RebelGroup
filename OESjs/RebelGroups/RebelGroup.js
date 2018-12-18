@@ -62,9 +62,9 @@ var RebelGroup = new cLASS( {
       range: "NonNegativeInteger",
       label: "Time Last Expansion"
     },
-    "lastAmountExtorted": {
+    "lastAmountCollected": {
       range: "Decimal",
-      label: "Amount Extorted Last Period"
+      label: "Amount Collected Last Period"
     }
   },
   methods: {

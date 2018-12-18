@@ -24,7 +24,7 @@ var Loot = new cLASS( {
 
       // Update Rebel Group
       this.rebelGroup.wealth += amount;
-      this.rebelGroup.lastAmountExtorted += amount;
+      this.rebelGroup.lastAmountCollected += amount;
 
       // Update Enterprise
       this.enterprise.wealth = 0;
