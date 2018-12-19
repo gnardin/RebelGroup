@@ -75,43 +75,43 @@ sim.model.v.nmrOfRebelGroups = {
 sim.model.v.nmrOfRebels = {
   range: "string",
   initialValue: "[500,500,500]",
-  label: "RGs Size",
+  label: "RG Rebel Members",
   hint: "The number of rebel members per Rebel Group"
 };
 sim.model.v.propOfEnterprises = {
   range: "string",
   initialValue: "[0.4,0.3,0.3]",
-  label: "RGs Prop Enterprises",
+  label: "RG Prop Enterprises",
   hint: "The proportion of Enterprises per Rebel Group"
 };
 sim.model.v.extortionRates = {
   range: "string",
   initialValue: "[0.1,0.1,0.1]",
-  label: "RGs Extortion",
+  label: "RG Extortion Rate",
   hint: "The extortion rate per Rebel Group"
 };
 sim.model.v.rebelCosts = {
   range: "string",
   initialValue: "[291,291,291]",
-  label: "RGs Cost",
+  label: "RG Rebel Cost",
   hint: "The monthly cost per rebel per Rebel Group"
 };
 sim.model.v.recruitThreshold = {
   range: "string",
   initialValue: "[0.8,0.8,0.8]",
-  label: "RGs Recruit Threshold",
+  label: "RG Recruit Threshold",
   hint: "The threshold to stop recruiting per Rebel Group"
 };
 sim.model.v.recruitRate = {
   range: "string",
   initialValue: "[0.5,0.5,0.5]",
-  label: "RGs Recruit Rate",
+  label: "RG Recruit Rate",
   hint: "The rate of rebels recruited per recruitment per Rebel Group"
 };
 sim.model.v.freqDemand = {
   range: "string",
   initialValue: "[[30,2],[30,2],[30,2]]",
-  label: "RGs Demand Frequency",
+  label: "RG Demand Frequency",
   hint: "The frequency each Rebel Group demand extortion money (Normal)"
 };
 sim.model.v.freqExpand = {
