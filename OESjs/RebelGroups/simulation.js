@@ -38,13 +38,13 @@ sim.model.activityTypes = [];
 /* Global Variables */
 sim.model.v.nmrOfEnterprises = {
   range: "NonNegativeInteger",
-  initialValue: 2000,
+  initialValue: 3000,
   label: "Number Enterprises",
   hint: "The number of Enterprises"
 };
 sim.model.v.income = {
   range: "string",
-  initialValue: "[840,210]",
+  initialValue: "[200,50]",
   label: "Ents Income",
   hint: "The income of the Enterprises (Normal)"
 };
@@ -56,13 +56,13 @@ sim.model.v.freqIncome = {
 };
 sim.model.v.fleeProb = {
   range: "string",
-  initialValue: "[0.1,0.1]",
+  initialValue: "[0.5,0.5]",
   label: "Ents Flee Probability",
   hint: "The probability an Enterprise flees (Uniform [0,1])"
 };
 sim.model.v.fleeThreshold = {
   range: "string",
-  initialValue: "[30,30]",
+  initialValue: "[3,3]",
   label: "Ents Flee Threshold",
   hint: "The threshold an Enterprise flees (UniformInt)"
 };
@@ -74,13 +74,13 @@ sim.model.v.nmrOfRebelGroups = {
 };
 sim.model.v.nmrOfRebels = {
   range: "string",
-  initialValue: "[1500,500,50,50,50,50,50,50,50]",
+  initialValue: "[500,500,500,500,500,500,500,500,500]",
   label: "RGs Size",
   hint: "The number of rebel members per Rebel Group"
 };
 sim.model.v.propOfEnterprises = {
   range: "string",
-  initialValue: "[0.18,0.18,0.1,0.14,0.04,0.06,0.14,0.13,0.03]",
+  initialValue: "[0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11]",
   label: "RGs Prop Enterprises",
   hint: "The proportion of Enterprises per Rebel Group"
 };
@@ -92,7 +92,7 @@ sim.model.v.extortionRates = {
 };
 sim.model.v.rebelCosts = {
   range: "string",
-  initialValue: "[161,161,161,161,161,161,161,161,161]",
+  initialValue: "[291,291,291,291,291,291,291,291,291]",
   label: "RGs Cost",
   hint: "The monthly cost per rebel per Rebel Group"
 };
@@ -204,10 +204,10 @@ sim.experiment.title = "Basic";
 sim.experiment.parameterDefs = [
   new oes.ExperimentParamDef(
     {
-      name: "extortionRates", values: [ "[0.1,0.1,0.1]",
-        "[0.05,0.05,0.05]", "[0.05,0.1,0.1]", "[0.1,0.05,0.1]",
-        "[0.1,0.05,0.1]", "[0.05,0.05,0.1]", "[0.05,0.1,0.05]",
-        "[0.1,0.05,0.05]", "[0.1,0.05,0.05]"]
+      name: "extortionRates", values: [ "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]",
+        "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]", "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]", "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]",
+        "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]", "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]", "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]",
+        "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]", "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]"]
     } )
 ];
 sim.experiment.replications = 2;
