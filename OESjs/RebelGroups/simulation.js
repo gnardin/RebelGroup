@@ -203,6 +203,10 @@ sim.experiment.experimentNo = 1;
 sim.experiment.title = "Basic";
 sim.experiment.parameterDefs = [
   new oes.ExperimentParamDef( {
+    name: "nmrOfEnterprises",
+    values: [ 1000, 3000 ]
+  } ),
+  new oes.ExperimentParamDef( {
       name: "extortionRates",
       values: [
         "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]",
@@ -214,11 +218,7 @@ sim.experiment.parameterDefs = [
         "[0.1,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05]",
         "[0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05]"
       ]
-    } ),
-  new oes.ExperimentParamDef( {
-    name: "nmrOfEnterprises",
-    values: [ 1000, 3000 ]
-  } )
+    } )
 ];
 sim.experiment.replications = 10;
 sim.experiment.seeds = [ 126, 8758, 635, 2653, 198, 681, 8734, 6523, 2643, 27 ];
