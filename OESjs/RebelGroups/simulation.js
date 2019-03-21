@@ -13,17 +13,14 @@
  ******************************************************************************/
 sim.scenario.simulationEndTime = 365;
 sim.scenario.idCounter = 1; // optional
-//sim.scenario.randomSeed = 3746; // optional
+// sim.scenario.randomSeed = 1234; // optional
 /*******************************************************************************
  * Simulation Config
  ******************************************************************************/
 // sim.config.stepDuration = 0; // optional
 // sim.config.createLog = false; // optional
 // sim.config.userInteractive = false; // optional
-sim.config.visualize = true; // optional
-sim.model.space.type = "IntegerGrid";
-sim.model.space.xMax = 1;
-sim.model.space.yMax = 1;
+// sim.config.visualize = true; // optional
 /*******************************************************************************
  * Simulation Model
  ******************************************************************************/
@@ -205,13 +202,23 @@ sim.experiment.id = 1;
 sim.experiment.experimentNo = 1;
 sim.experiment.title = "Basic";
 sim.experiment.parameterDefs = [
-  new oes.ExperimentParamDef(
-    {
-      name: "extortionRates", values: [ "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]",
-        "[0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05]", "[0.1,0.1,0.1,0.1,0.1,0.1,0.05,0.05,0.05]", "[0.1,0.1,0.1,0.1,0.1,0.05,0.05,0.05,0.05]",
-        "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.05,0.05]", "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.05]", "[0.1,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05]",
-        "[0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05]" ]
-    } )
+  new oes.ExperimentParamDef( {
+      name: "extortionRates",
+      values: [
+        "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]",
+        "[0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05]",
+        "[0.1,0.1,0.1,0.1,0.1,0.1,0.05,0.05,0.05]",
+        "[0.1,0.1,0.1,0.1,0.1,0.05,0.05,0.05,0.05]",
+        "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.05,0.05]",
+        "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.05]",
+        "[0.1,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05]",
+        "[0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05]"
+      ]
+    } ),
+  new oes.ExperimentParamDef( {
+    name: "nmrOfEnterprises",
+    values: [ 1000, 3000 ]
+  } )
 ];
 sim.experiment.replications = 10;
 sim.experiment.seeds = [ 126, 8758, 635, 2653, 198, 681, 8734, 6523, 2643, 27 ];
