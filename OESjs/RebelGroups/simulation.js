@@ -20,7 +20,10 @@ sim.scenario.idCounter = 1; // optional
 // sim.config.stepDuration = 0; // optional
 // sim.config.createLog = false; // optional
 // sim.config.userInteractive = false; // optional
-// sim.config.visualize = false; // optional
+sim.config.visualize = true; // optional
+sim.model.space.type = "IntegerGrid";
+sim.model.space.xMax = 1;
+sim.model.space.yMax = 1;
 /*******************************************************************************
  * Simulation Model
  ******************************************************************************/
