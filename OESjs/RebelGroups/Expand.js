@@ -33,8 +33,11 @@ var Expand = new cLASS( {
       globalStrengthRatio =
         sim.model.f.globalRelativeStrength( this.rebelGroup );
 
-      expandProb = sim.model.f.sigmoid( 1, 1, 10,
-        sim.model.f.normalizeValue( globalStrengthRatio ),
+      // expandProb = sim.model.f.sigmoid( 1, 1, 10,
+      //   sim.model.f.normalizeValue( globalStrengthRatio ),
+      //   ( this.occTime - this.rebelGroup.lastExpand ) );
+
+      expandProb = sim.model.f.sigmoid( 1, 1, 10, globalStrengthRatio,
         ( this.occTime - this.rebelGroup.lastExpand ) );
 
       // Expand if there are available Enterprises and rebels

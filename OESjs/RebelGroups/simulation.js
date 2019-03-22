@@ -13,7 +13,7 @@
  ******************************************************************************/
 sim.scenario.simulationEndTime = 365;
 sim.scenario.idCounter = 1; // optional
-// sim.scenario.randomSeed = 1234; // optional
+// sim.scenario.randomSeed = 198; // optional
 /*******************************************************************************
  * Simulation Config
  ******************************************************************************/
@@ -21,6 +21,9 @@ sim.scenario.idCounter = 1; // optional
 // sim.config.createLog = false; // optional
 // sim.config.userInteractive = false; // optional
 // sim.config.visualize = true; // optional
+// sim.model.space.type = "IntegerGrid";
+// sim.model.space.xMax = 1;
+// sim.model.space.yMax = 1;
 /*******************************************************************************
  * Simulation Model
  ******************************************************************************/
@@ -110,7 +113,8 @@ sim.model.v.recruitRate = {
 };
 sim.model.v.freqDemand = {
   range: "string",
-  initialValue: "[[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2]]",
+  initialValue:
+    "[[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2]]",
   label: "RG Demand Frequency",
   hint: "The frequency each Rebel Group demand extortion money (Normal)"
 };
@@ -122,7 +126,8 @@ sim.model.v.freqExpand = {
 };
 sim.model.v.freqAllocate = {
   range: "string",
-  initialValue: "[[30,0],[30,0],[30,0],[30,0],[30,0],[30,0],[30,0],[30,0],[30,0]]",
+  initialValue:
+    "[[30,0],[30,0],[30,0],[30,0],[30,0],[30,0],[30,0],[30,0],[30,0]]",
   label: "RGs Allocate Frequency",
   hint: "The frequency each Rebel Group reallocate their wealth (Normal)"
 };
@@ -207,18 +212,18 @@ sim.experiment.parameterDefs = [
     values: [ 1000, 3000 ]
   } ),
   new oes.ExperimentParamDef( {
-      name: "extortionRates",
-      values: [
-        "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]",
-        "[0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05]",
-        "[0.1,0.1,0.1,0.1,0.1,0.1,0.05,0.05,0.05]",
-        "[0.1,0.1,0.1,0.1,0.1,0.05,0.05,0.05,0.05]",
-        "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.05,0.05]",
-        "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.05]",
-        "[0.1,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05]",
-        "[0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05]"
-      ]
-    } )
+    name: "extortionRates",
+    values: [
+      "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]",
+      "[0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05]",
+      "[0.1,0.1,0.1,0.1,0.1,0.1,0.05,0.05,0.05]",
+      "[0.1,0.1,0.1,0.1,0.1,0.05,0.05,0.05,0.05]",
+      "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.05,0.05]",
+      "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.05]",
+      "[0.1,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05]",
+      "[0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05]"
+    ]
+  } )
 ];
 sim.experiment.replications = 10;
 sim.experiment.seeds = [ 126, 8758, 635, 2653, 198, 681, 8734, 6523, 2643, 27 ];
@@ -267,7 +272,8 @@ sim.scenario.setupInitialState = function () {
   /* Create Rebel Groups */
   for ( i = 0; i < sim.v.nmrOfRebelGroups; i += 1 ) {
     objId = i + 1;
-    sim.addObject( new RebelGroup( {
+
+    rebelGroup = new RebelGroup( {
       id: objId,
       name: "RebelGroup" + objId,
       shortLabel: "rg" + objId,
@@ -279,15 +285,17 @@ sim.scenario.setupInitialState = function () {
       extortedEnterprises: [],
       extortionRate: extortionRates[ i ],
       reports: {},
-      freqDemand: Math.round( rand.normal( freqDemand[ i ][ 0 ],
-        freqDemand[ i ][ 1 ] ) ),
-      freqExpand: Math.round( rand.normal( freqExpand[ i ][ 0 ],
-        freqExpand[ i ][ 1 ] ) ),
-      freqAllocate: Math.round( rand.normal( freqAllocate[ i ][ 0 ],
-        freqAllocate[ i ][ 1 ] ) ),
+      freqDemand: Math.abs( Math.round( rand.normal( freqDemand[ i ][ 0 ],
+        freqDemand[ i ][ 1 ] ) ) ),
+      freqExpand: Math.abs( Math.round( rand.normal( freqExpand[ i ][ 0 ],
+        freqExpand[ i ][ 1 ] ) ) ),
+      freqAllocate: Math.abs( Math.round( rand.normal( freqAllocate[ i ][ 0 ],
+        freqAllocate[ i ][ 1 ] ) ) ),
       lastExpand: 0,
       lastAmountCollected: 0
-    } ) );
+    } );
+
+    sim.addObject( rebelGroup );
 
     sim.scheduleEvent( new Demand( {
       occTime: 1,
@@ -307,7 +315,8 @@ sim.scenario.setupInitialState = function () {
   /* Create Enterprises */
   for ( ; i < ( sim.v.nmrOfRebelGroups + sim.v.nmrOfEnterprises ); i += 1 ) {
     objId = i + 1;
-    sim.addObject( new Enterprise( {
+
+    enterprise = new Enterprise( {
       id: objId,
       name: "enterprise" + objId,
       wealth: 0,
@@ -319,7 +328,9 @@ sim.scenario.setupInitialState = function () {
       fleeThreshold: rand.uniformInt( fleeThreshold[ 0 ], fleeThreshold[ 1 ] ),
       nmrOfExtortions: 0,
       nmrOfLootings: 0
-    } ) );
+    } );
+
+    sim.addObject( enterprise );
 
     sim.scheduleEvent( new Income( {
       occTime: 1,
