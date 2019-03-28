@@ -41,7 +41,7 @@ sim.model.activityTypes = [];
 /* Global Variables */
 sim.model.v.nmrOfEnterprises = {
   range: "NonNegativeInteger",
-  initialValue: 3000,
+  initialValue: 1000,
   label: "Number Enterprises",
   hint: "The number of Enterprises"
 };
@@ -224,6 +224,13 @@ sim.experiment.parameterDefs = [
       "[0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05]"
     ]
   } )
+  // new oes.ExperimentParamDef( {
+  //   name: "extortionRates",
+  //   values: [
+  //     "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]",
+  //     "[0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05]"
+  //   ]
+  // } )
 ];
 sim.experiment.replications = 10;
 sim.experiment.seeds = [ 126, 8758, 635, 2653, 198, 681, 8734, 6523, 2643, 27 ];
