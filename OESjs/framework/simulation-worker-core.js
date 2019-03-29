@@ -5103,12 +5103,14 @@ sim.runExperiment = function () {
         }
       }
       oes.stat.computeOnlyAtEndStatistics();
-      // initialize scenario statistics
-      Object.keys( sim.model.statistics).forEach( function (varName) {
-        if (sim.model.statistics[varName].label) {  // output statistics
-          exp.scenarios[i].stat[varName] = 0;
-        }
-      });
+      if ( k === 0 ) {
+        // initialize scenario statistics
+        Object.keys( sim.model.statistics ).forEach( function ( varName ) {
+          if ( sim.model.statistics[ varName ].label ) {  // output statistics
+            exp.scenarios[ i ].stat[ varName ] = 0;
+          }
+        });
+      }
       // aggregate scenario run statistics from sim.stat to sim.experiment.scenarios[i].stat
       Object.keys( sim.model.statistics).forEach( function (varName) {
         if (sim.model.statistics[varName].label) {  // output statistics

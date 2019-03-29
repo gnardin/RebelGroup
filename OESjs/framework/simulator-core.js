@@ -8283,7 +8283,7 @@ oes.ui.setupExportStatisticsDefUI = function (parentEl) {
               } );
           }
         } );
-      }
+      },
       // "export": function () {
       //   if ( !sim.storeMan ) {
       //     oes.setupStorageManagement( sim.model.name );
@@ -8413,10 +8413,10 @@ oes.ui.setupExportStatisticsDefUI = function (parentEl) {
       //           }
 
       //           // Export data
-      //           generateTextFile( sim.export.defFilename, defText );
-      //           generateTextFile( sim.export.sumFilename, sumText );
+      //           writeFile( sim.export.defFilename, defText );
+      //           writeFile( sim.export.sumFilename, sumText );
       //           if ( sim.export.timeSeries ) {
-      //             generateTextFile( sim.export.tsFilename, tsText );
+      //             writeFile( sim.export.tsFilename, tsText );
       //           }
       //         } ).catch( function ( err ) {
       //           console.log( err.name + ": " + err.message );
@@ -8426,7 +8426,6 @@ oes.ui.setupExportStatisticsDefUI = function (parentEl) {
       // }
     }
   });
-  //sim.ui["export"].userActions["export"].label = "Export";
   // render view and store its data binding
   sim.ui["export"].dataBinding = sim.ui["export"].render( mainContentEl);
 };
