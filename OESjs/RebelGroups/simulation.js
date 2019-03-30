@@ -13,7 +13,7 @@
  ******************************************************************************/
 sim.scenario.simulationEndTime = 365;
 sim.scenario.idCounter = 1; // optional
-// sim.scenario.randomSeed = 198; // optional
+sim.scenario.randomSeed = 3078; // optional
 /*******************************************************************************
  * Simulation Config
  ******************************************************************************/
@@ -120,7 +120,8 @@ sim.model.v.freqDemand = {
 };
 sim.model.v.freqExpand = {
   range: "string",
-  initialValue: "[[5,2],[5,2],[5,2],[5,2],[5,2],[5,2],[5,2],[5,2],[5,2]]",
+  initialValue:
+    "[[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2]]",
   label: "RGs Expansion Frequency",
   hint: "The frequency each Rebel Group try to expand their domain (Normal)"
 };
@@ -133,7 +134,7 @@ sim.model.v.freqAllocate = {
 };
 sim.model.v.fightExpansion = {
   range: "NonNegativeInteger",
-  initialValue: 1,
+  initialValue: 50,
   label: "Fight Expansion",
   hint: "The number of enterprises conquered due to win a fight"
 };
@@ -224,13 +225,6 @@ sim.experiment.parameterDefs = [
       "[0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05]"
     ]
   } )
-  // new oes.ExperimentParamDef( {
-  //   name: "extortionRates",
-  //   values: [
-  //     "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]",
-  //     "[0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05]"
-  //   ]
-  // } )
 ];
 sim.experiment.replications = 10;
 sim.experiment.seeds = [ 126, 8758, 635, 2653, 198, 681, 8734, 6523, 2643, 27 ];
@@ -445,33 +439,11 @@ sim.scenario.setupInitialState = function () {
       initialValue: 0,
       showTimeSeries: true,
       computeOnlyAtEnd: false
-    },
-    "aliveRGs": {
-      range: "NonNegativeInteger",
-      label: "Alive Rebel Groups",
-      initialValue: 0,
-      showTimeSeries: false,
-      computeOnlyAtEnd: true,
-      expression: function () {
-        var aliveRGs = "";
-        var rebelGroups = cLASS[ "RebelGroup" ].instances;
-
-        Object.keys( rebelGroups ).forEach( function ( id ) {
-          if ( rebelGroups[ id ].nmrOfRebels > 0 ) {
-            if ( aliveRGs.length > 0 ) {
-              aliveRGs += "0" + id;
-            } else {
-              aliveRGs += id;
-            }
-          }
-        } );
-        return parseInt( aliveRGs );
-      }
     }
   };
 
+  // Rebel Group's Size
   Object.keys( rebelGroupsObj ).forEach( function ( id ) {
-    // Rebel Group's Size
     sim.model.statistics[ "nmrOfRebels" + id ] = {
       objectType: "RebelGroup",
       objectIdRef: id,
@@ -482,7 +454,7 @@ sim.scenario.setupInitialState = function () {
     };
   } );
 
-  // Number of Extorted Enterprise
+  // Rebel Group's Number of Extorted Enterprise
   Object.keys( rebelGroupsObj ).forEach( function ( id ) {
     sim.model.statistics[ "nmrOfExtorted" + id ] = {
       range: "NonNegativeInteger",
@@ -493,6 +465,25 @@ sim.scenario.setupInitialState = function () {
       expression: function () {
         var rebelGroupObj = cLASS[ "RebelGroup" ].instances[ id ];
         return rebelGroupObj.extortedEnterprises.length;
+      }
+    };
+  } );
+
+  // Rebel Group's Alive
+  Object.keys( rebelGroupsObj ).forEach( function ( id ) {
+    sim.model.statistics[ "alive" + id ] = {
+      range: "NonNegativeInteger",
+      label: "Alive Rebel Group " + id,
+      initialValue: 0,
+      showTimeSeries: false,
+      computeOnlyAtEnd: true,
+      expression: function () {
+        var rebelGroupObj = cLASS[ "RebelGroup" ].instances[ id ];
+        if ( rebelGroupObj.nmrOfRebels > 0 ) {
+          return 1; // Alive
+        } else {
+          return 0; // Dead
+        }
       }
     };
   } );

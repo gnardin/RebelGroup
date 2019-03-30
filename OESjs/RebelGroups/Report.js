@@ -32,7 +32,7 @@ var Report = new cLASS( {
       strengthRatio =
         sim.model.f.relativeStrength( this.rebelGroup, this.extorter );
 
-      fightProb = sim.model.f.sigmoid( 1, 1, 10,
+      fightProb = sim.model.f.sigmoid( 1, 1, 1,
         sim.model.f.normalizeValue( strengthRatio ), nmrOfReports );
 
       // Decide to Fight

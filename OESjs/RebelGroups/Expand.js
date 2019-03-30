@@ -76,7 +76,7 @@ var Expand = new cLASS( {
               this.rebelGroup ) );
 
           /* Fight Probability */
-          fightProb = sim.model.f.sigmoid( 1, 1, 1, 1.5, strengthRatio );
+          fightProb = sim.model.f.sigmoid( 1, 1, 1, 1, strengthRatio );
         }
 
         if ( rand.uniform() < fightProb ) {
