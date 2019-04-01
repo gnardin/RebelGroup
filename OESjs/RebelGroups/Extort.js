@@ -58,3 +58,4 @@ var Extort = new cLASS( {
     }
   }
 } );
+Extort.priority = 3;

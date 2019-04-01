@@ -218,3 +218,4 @@ var Fight = new cLASS( {
     }
   }
 } );
+Fight.priority = 2;

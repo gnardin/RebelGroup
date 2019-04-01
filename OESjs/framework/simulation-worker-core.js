@@ -5083,7 +5083,7 @@ sim.runExperiment = function () {
     valueCombination = cp[i];  // a JS array
     // initialize the scenario record
     exp.scenarios[i] = {stat:{}};
-    exp.scenarios[i].parameterValues = valueCombination;
+    exp.scenarios[ i ].parameterValues = valueCombination;
     // create experiment parameter slots for assigning corresponding model variables
     for (j = 0; j < N; j++) {
       expParamSlots[exp.parameterDefs[j].name] = valueCombination[j];
@@ -5197,6 +5197,7 @@ sim.runExperimentScenarioStep = function () {
   // extract and process next events
   if (sim.time === nextEvtTime) {
     nextEvents = sim.FEL.removeNextEvents();
+    if (nextEvents.length > 1) nextEvents.sort( oes.Event.rank);  // priority order
     for (i=0; i < nextEvents.length; i++) {
       e = nextEvents[i];
       eventTypeName = e.constructor.Name;

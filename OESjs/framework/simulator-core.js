@@ -8079,7 +8079,7 @@ oes.ui.setupExportStatisticsDefUI = function (parentEl) {
               function ( records ) {
                 var param, output, expScenRun;
                 var defHeader, defText, defLine;  // Definitions
-                var statVarName, i, j, r, v;
+                var statVarName, i, j;
 
                 defText = "";
 
@@ -8094,11 +8094,15 @@ oes.ui.setupExportStatisticsDefUI = function (parentEl) {
                   if ( typeof defHeader === "undefined" ) {
                     defHeader = [];
                     if ( sim.export.header ) {
-                      for ( j = 0; j < sim.experiment.parameterDefs.length; j += 1 ) {
-                        defHeader.push( sim.experiment.parameterDefs[ j ].name );
+                      for ( j = 0; j < sim.experiment.parameterDefs.length;
+                        j += 1 ) {
+                        defHeader.push(
+                          sim.experiment.parameterDefs[ j ].name );
                       }
-                      defText = [ "id", "experimentRun", "experimentScenarioNo" ].concat(
-                        defHeader ).join( sim.export.sep ) + "\n";
+                      defText = [ "id",
+                        "experimentRun",
+                        "experimentScenarioNo" ].concat( defHeader ).join(
+                          sim.export.sep ) + "\n";
                     }
                   }
                   // Definition Line
@@ -8132,7 +8136,7 @@ oes.ui.setupExportStatisticsDefUI = function (parentEl) {
                 var param, output, expScenRun;
                 var defHeader, defText, defLine;  // Definitions
                 var sumHeader, sumText, sumLine;  // Summary
-                var statVarName, i, j, r, v;
+                var statVarName, i, j;
 
                 sumText = "";
                 defText = "";
@@ -8149,11 +8153,15 @@ oes.ui.setupExportStatisticsDefUI = function (parentEl) {
                   if ( typeof defHeader === "undefined" ) {
                     defHeader = [];
                     if ( sim.export.header ) {
-                      for ( j = 0; j < sim.experiment.parameterDefs.length; j += 1 ) {
-                        defHeader.push( sim.experiment.parameterDefs[ j ].name );
+                      for ( j = 0; j < sim.experiment.parameterDefs.length;
+                        j += 1 ) {
+                        defHeader.push(
+                          sim.experiment.parameterDefs[ j ].name );
                       }
-                      defText = [ "id", "experimentRun", "experimentScenarioNo" ].concat(
-                        defHeader ).join( sim.export.sep ) + "\n";
+                      defText = [ "id",
+                        "experimentRun",
+                        "experimentScenarioNo" ].concat( defHeader ).join(
+                          sim.export.sep ) + "\n";
                     }
                   }
                   // Definition Line
@@ -8205,7 +8213,7 @@ oes.ui.setupExportStatisticsDefUI = function (parentEl) {
               function ( records ) {
                 var param, output, expScenRun;
                 var tsHeader, tsText, tsLine, tsVarName, ts; // Time Series
-                var statVarName, i, j, r, v;
+                var statVarName, i, j, r, t, v;
 
                 tsText = "";
 
@@ -8240,18 +8248,18 @@ oes.ui.setupExportStatisticsDefUI = function (parentEl) {
 
                       ts = [];
                       if ( typeof sim.model.timeIncrement !== "undefined" ) {
-                        for ( let v = 0; v < tsHeader.length; v += 1 ) {
+                        for ( v = 0; v < tsHeader.length; v += 1 ) {
                           if ( output.timeSeries[ tsHeader[ v ] ] ) {
                             ts[ v ] = output.timeSeries[ tsHeader[ v ] ];
                           }
                         }
 
-                        for ( let r = 0, t = 0; r < ts[ 0 ].length; r += 1,
-                          t += sim.model.timeIncrement ) {
+                        for ( r = 0, t = 0; r < ts[ 0 ].length;
+                          r += 1, t += sim.model.timeIncrement ) {
                           tsLine = [];
                           tsLine.push( expScenRun[ "id" ] );
                           tsLine.push( t );
-                          for ( let v = 0; v < tsHeader.length; v += 1 ) {
+                          for ( v = 0; v < tsHeader.length; v += 1 ) {
                             tsLine.push( ts[ v ][ r ] );
                           }
 
@@ -8283,147 +8291,7 @@ oes.ui.setupExportStatisticsDefUI = function (parentEl) {
               } );
           }
         } );
-      },
-      // "export": function () {
-      //   if ( !sim.storeMan ) {
-      //     oes.setupStorageManagement( sim.model.name );
-      //   }
-
-      //   sim.storeMan.retrieveAll( oes.ExperimentRun ).then( function ( runs ) {
-      //     if ( runs.length > 0 ) {
-      //       sim.storeMan.retrieveAll( oes.ExperimentScenarioRun ).then(
-      //         function ( records ) {
-      //           var param, output, expScenRun;
-      //           var defHeader, defText, defLine;  // Definitions
-      //           var sumHeader, sumText, sumLine;  // Summary
-      //           var tsHeader, tsText, tsLine, tsVarName, ts; // Time Series
-      //           var statVarName, i, j, r, v;
-
-      //           defText = "";
-      //           sumText = "";
-      //           tsText = "";
-
-      //           // Create output records
-      //           for ( i = 0; i < records.length; i += 1 ) {
-      //             defLine = [];
-      //             sumLine = [];
-      //             expScenRun = new oes.ExperimentScenarioRun( records[ i ] );
-      //             param = expScenRun.parameterValueCombination;
-      //             output = expScenRun.outputStatistics;
-
-      //             // Definition Header
-      //             if ( typeof defHeader === "undefined" ) {
-      //               defHeader = [];
-      //               if ( sim.export.header ) {
-      //                 for ( j = 0; j < sim.experiment.parameterDefs.length; j += 1 ) {
-      //                   defHeader.push( sim.experiment.parameterDefs[ j ].name );
-      //                 }
-      //                 defText = [ "id", "experimentRun", "experimentScenarioNo" ].concat(
-      //                   defHeader ).join( sim.export.sep ) + "\n";
-      //               }
-      //             }
-      //             // Definition Line
-      //             defLine.push( expScenRun[ "id" ] );
-      //             defLine.push( expScenRun[ "experimentRun" ] );
-      //             defLine.push( expScenRun[ "experimentScenarioNo" ] );
-      //             param.forEach( function ( prop ) {
-      //               defLine.push( prop );
-      //             } );
-
-      //             // Summary Header
-      //             if ( typeof sumHeader === "undefined" ) {
-      //               sumHeader = [];
-      //               for ( statVarName of Object.keys( output ) ) {
-      //                 if ( typeof output[ statVarName ] !== "object" ) {
-      //                   sumHeader.push( statVarName );
-      //                 }
-      //               }
-      //               if ( sim.export.header ) {
-      //                 sumText = [ "id" ].concat( sumHeader )
-      //                   .join( sim.export.sep ) + "\n";
-      //               }
-      //             }
-      //             // Summary Line
-      //             sumLine.push( expScenRun[ "id" ] );
-      //             sumHeader.forEach( function ( prop ) {
-      //               sumLine.push( output[ prop ] );
-      //             } );
-
-      //             // Time Series
-      //             if ( sim.export.timeSeries ) {
-      //               // Time Series Header
-      //               if ( typeof tsHeader === "undefined" ) {
-      //                 tsHeader = [];
-      //                 for ( tsVarName of Object.keys( output.timeSeries ) ) {
-      //                   tsHeader.push( tsVarName );
-      //                 }
-      //                 if ( sim.export.header ) {
-      //                   if ( typeof sim.model.timeIncrement !== "undefined" ) {
-      //                     tsText = [ "id", "time" ].concat( tsHeader )
-      //                       .join( sim.export.sep ) + "\n";
-      //                   } else {
-      //                     tsText = [ "id", "time", "variable", "value" ]
-      //                       .join( sim.export.sep ) +
-      //                       "\n";
-      //                   }
-      //                 }
-      //               }
-
-      //               // Time Series Line
-      //               if ( tsHeader.length > 0 ) {
-
-      //                 ts = [];
-      //                 if ( typeof sim.model.timeIncrement !== "undefined" ) {
-      //                   for ( let v = 0; v < tsHeader.length; v += 1 ) {
-      //                     if ( output.timeSeries[ tsHeader[ v ] ] ) {
-      //                       ts[ v ] = output.timeSeries[ tsHeader[ v ] ];
-      //                     }
-      //                   }
-
-      //                   for ( let r = 0, t = 0; r < ts[ 0 ].length; r += 1,
-      //                     t += sim.model.timeIncrement ) {
-      //                     tsLine = [];
-      //                     tsLine.push( expScenRun[ "id" ] );
-      //                     tsLine.push( t );
-      //                     for ( let v = 0; v < tsHeader.length; v += 1 ) {
-      //                       tsLine.push( ts[ v ][ r ] );
-      //                     }
-
-      //                     tsText += tsLine.join( sim.export.sep ) + "\n";
-      //                   }
-      //                 } else {
-      //                   for ( v = 0; v < tsHeader.length; v += 1 ) {
-      //                     ts = output.timeSeries[ tsHeader[ v ] ];
-
-      //                     for ( r = 0; r < ts[ 0 ].length; r += 1 ) {
-      //                       tsLine = [];
-      //                       tsLine.push( expScenRun[ "id" ] );
-      //                       tsLine.push( ts[ 0 ][ r ] );
-      //                       tsLine.push( tsHeader[ v ] );
-      //                       tsLine.push( ts[ 1 ][ r ] );
-      //                       tsText += tsLine.join( sim.export.sep ) + "\n";
-      //                     }
-      //                   }
-      //                 }
-      //               }
-      //             }
-
-      //             defText += defLine.join( sim.export.sep ) + "\n";
-      //             sumText += sumLine.join( sim.export.sep ) + "\n";
-      //           }
-
-      //           // Export data
-      //           writeFile( sim.export.defFilename, defText );
-      //           writeFile( sim.export.sumFilename, sumText );
-      //           if ( sim.export.timeSeries ) {
-      //             writeFile( sim.export.tsFilename, tsText );
-      //           }
-      //         } ).catch( function ( err ) {
-      //           console.log( err.name + ": " + err.message );
-      //         } );
-      //     }
-      //   } );
-      // }
+      }
     }
   });
   // render view and store its data binding

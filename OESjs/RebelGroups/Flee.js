@@ -39,3 +39,4 @@ var Flee = new cLASS( {
     }
   }
 } );
+Flee.priority = 3;

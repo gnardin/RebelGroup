@@ -67,6 +67,5 @@ var RebelGroup = new cLASS( {
       label: "Amount Collected Last Period"
     }
   },
-  methods: {
-  }
+  methods: {}
 } );

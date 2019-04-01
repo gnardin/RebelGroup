@@ -111,6 +111,7 @@ var Expand = new cLASS( {
     }
   }
 } );
+Expand.priority = 1;
 Expand.recurrence = function ( e ) {
   return e.rebelGroup.freqExpand;
 };

@@ -18,22 +18,19 @@ var Loot = new cLASS( {
   methods: {
     "onEvent": function () {
       var followupEvents = [];
-      var amount = this.enterprise.wealth;
 
-      var fleeProb = this.enterprise.fleeProb;
+      // Update Rebel Group's wealth
+      this.rebelGroup.wealth += this.enterprise.wealth;
+      this.rebelGroup.lastAmountCollected += this.enterprise.wealth;
 
-      // Update Rebel Group
-      this.rebelGroup.wealth += amount;
-      this.rebelGroup.lastAmountCollected += amount;
-
-      // Update Enterprise
+      // Update Enterprise's wealth
       this.enterprise.wealth = 0;
       this.enterprise.accIncome = 0;
       this.enterprise.nmrOfLootings += 1;
 
       if ( this.enterprise.rebelGroup !== null ) {
         if ( ( this.enterprise.rebelGroup.id === this.rebelGroup.id ) ) {
-          if ( ( rand.uniform() < fleeProb ) ||
+          if ( ( rand.uniform() < this.enterprise.fleeProb ) ||
             ( this.enterprise.nmrOfLootings >=
               this.enterprise.fleeThreshold ) ) {
             followupEvents.push( new Flee( {
@@ -43,7 +40,7 @@ var Loot = new cLASS( {
           }
         } else {
           // Flee or Report if looted by a different Rebel Group
-          if ( rand.uniform() < fleeProb ) {
+          if ( rand.uniform() < this.enterprise.fleeProb ) {
             followupEvents.push( new Flee( {
               occTime: this.occTime + 1,
               enterprise: this.enterprise
@@ -65,3 +62,4 @@ var Loot = new cLASS( {
     }
   }
 } );
+Loot.priority = 3;

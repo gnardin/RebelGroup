@@ -48,6 +48,7 @@ var Demand = new cLASS( {
     }
   }
 } );
+Demand.priority = 0;
 Demand.recurrence = function ( e ) {
   return e.rebelGroup.freqDemand;
 };
