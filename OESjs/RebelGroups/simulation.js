@@ -41,7 +41,7 @@ sim.model.activityTypes = [];
 /* Global Variables */
 sim.model.v.nmrOfEnterprises = {
   range: "NonNegativeInteger",
-  initialValue: 1000,
+  initialValue: 3000,
   label: "Number Enterprises",
   hint: "The number of Enterprises"
 };

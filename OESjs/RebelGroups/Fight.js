@@ -61,8 +61,9 @@ var Fight = new cLASS( {
         allied = false;
         for ( i = 0; ( i < rebelGroupsKeys.length ) & !allied; i += 1 ) {
           rebelGroup = rebelGroups[ rebelGroupsKeys[ i ] ];
-          if ( ( opponentAlliance.nmrOfRebels + rebelGroup.nmrOfRebels ) >
-            this.attacker.nmrOfRebels ) {
+          if ( ( !attackerAlliance.members.includes( rebelGroup.id ) ) &&
+            ( ( opponentAlliance.nmrOfRebels + rebelGroup.nmrOfRebels ) >
+              this.attacker.nmrOfRebels ) ) {
             opponentAlliance.members.push( rebelGroup.id );
             opponentAlliance.nmrOfExtorted +=
               rebelGroup.extortedEnterprises.length;
