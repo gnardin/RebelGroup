@@ -153,8 +153,8 @@ sim.model.v.fightModel = {
  * Enable the trace log of specific Rebel Groups listed in the array
  */
 sim.model.v.traceObjId = {
-  range: "NonNegativeInteger",
-  initialValue: [ 8 ],
+  range: "Object",
+  initialValue: [ 8 ]
 };
 /* Global Functions */
 /**
