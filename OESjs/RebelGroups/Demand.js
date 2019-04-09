@@ -18,10 +18,13 @@ var Demand = new cLASS( {
     "onEvent": function () {
       var followupEvents = [];
       var strengthRatio;
+      var nmrOfExtort = 0;
+      var nmrOfLoot = 0;
 
       if ( this.rebelGroup.nmrOfRebels > 0 ) {
         strengthRatio =
           sim.model.f.globalRelativeStrength( this.rebelGroup );
+
         this.rebelGroup.extortedEnterprises.forEach( ( enterprise ) => {
           /**
            * Decision to extort or loot
@@ -35,15 +38,28 @@ var Demand = new cLASS( {
               rebelGroup: this.rebelGroup,
               enterprise: enterprise
             } ) );
+            nmrOfExtort += 1;
           } else {
             followupEvents.push( new Loot( {
               occTime: this.occTime + 1,
               rebelGroup: this.rebelGroup,
               enterprise: enterprise
             } ) );
+            nmrOfLoot += 1;
           }
         } );
+
+        // Debug
+        sim.model.f.logObj( this.rebelGroup.id,
+          "\nTimestep " + this.occTime +
+          "\nAction: Demand" +
+          "\nNumber of Enterprises = " +
+          this.rebelGroup.extortedEnterprises.length +
+          "\nGlobal Strength Ratio = " + strengthRatio +
+          "\nNumber of Extortions " + nmrOfExtort +
+          "\nNumber of Loots " + nmrOfLoot );
       }
+
       return followupEvents;
     }
   }

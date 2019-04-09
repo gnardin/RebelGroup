@@ -22,6 +22,14 @@ var AllocateWealth = new cLASS( {
         sim.model.f.globalRelativeStrength( this.rebelGroup );
       var totalSalary = this.rebelGroup.nmrOfRebels * this.rebelGroup.rebelCost;
 
+      sim.model.f.logObj( this.rebelGroup.id,
+        "\nTimestep " + this.occTime +
+        "\nAction: AllocateWealth" +
+        "\nWealth = " + this.rebelGroup.wealth +
+        "\nTotal Salary = " + totalSalary +
+        "\nAmount Collected = " +
+        this.rebelGroup.lastAmountCollected );
+
       if ( this.rebelGroup.wealth > totalSalary ) {
         this.rebelGroup.wealth -= totalSalary;
       } else {
@@ -49,6 +57,11 @@ var AllocateWealth = new cLASS( {
         expel = Math.min( this.rebelGroup.nmrOfRebels,
           Math.max( expel, deltaRebels ) );
       }
+
+      sim.model.f.logObj( this.rebelGroup.id,
+        "Nmr Rebels = " + this.rebelGroup.nmrOfRebels +
+        "\nNmr Recruits = " + recruit +
+        "\nNmr Expels = " + expel );
 
       this.rebelGroup.nmrOfRebels = Math.max( 0,
         this.rebelGroup.nmrOfRebels + recruit - expel );

@@ -13,7 +13,7 @@
  ******************************************************************************/
 sim.scenario.simulationEndTime = 365;
 sim.scenario.idCounter = 1; // optional
-// sim.scenario.randomSeed = 5372; // optional
+// sim.scenario.randomSeed = 1234; // optional
 /*******************************************************************************
  * Simulation Config
  ******************************************************************************/
@@ -138,6 +138,24 @@ sim.model.v.fightExpansion = {
   label: "Fight Expansion",
   hint: "The number of enterprises conquered due to win a fight"
 };
+/**
+ * Define the algorithm that distribute the loses among Rebel Groups in a loser
+ * alliance
+ *
+ * 1: Proportion based on number of Enterprises
+ * 2: Proportion based on strength
+ */
+sim.model.v.fightModel = {
+  range: "NonNegativeInteger",
+  initialValue: 2
+};
+/**
+ * Enable the trace log of specific Rebel Groups listed in the array
+ */
+sim.model.v.traceObjId = {
+  range: "NonNegativeInteger",
+  initialValue: [ 8 ],
+};
 /* Global Functions */
 /**
  * Calculates the global relative strength of a Rebel Group. The Rebel Group's
@@ -201,6 +219,31 @@ sim.model.f.normalizeValue = function ( value ) {
 sim.model.f.sigmoid = function ( a, b, c, d, e ) {
   return a / ( b + ( c * Math.pow( Math.E, ( -1 * d * e ) ) ) );
 };
+/**
+ * Create a log trace for specific objects whose Ids are specified at
+ * sim.model.v.traceObjIds
+ *
+ * @param obj Object
+ * @param text Text to print on the console
+ */
+sim.model.f.logObj = function ( objIds, text ) {
+  var log = false;
+
+  if ( Array.isArray( objIds ) ) {
+    objIds.forEach( ( objId ) => {
+      if ( sim.v.traceObjId.includes( objId ) ) {
+        log = true;
+      }
+    } );
+  } else if ( Number.isInteger( objIds ) &&
+    ( sim.v.traceObjId.includes( objIds ) ) ) {
+    log = true;
+  }
+
+  if ( log ) {
+    console.log( text );
+  }
+};
 /*******************************************************************************
  * Define Experiments
  ******************************************************************************/
@@ -208,10 +251,18 @@ sim.experiment.id = 1;
 sim.experiment.experimentNo = 1;
 sim.experiment.title = "Basic";
 sim.experiment.parameterDefs = [
-  new oes.ExperimentParamDef( {
-    name: "nmrOfEnterprises",
-    values: [ 1000, 3000 ]
-  } ),
+  // new oes.ExperimentParamDef( {
+  //   name: "nmrOfRebels",
+  //   values: [
+  //     "[500,500,500]",
+  //     "[1000,500,500]",
+  //     "[1000,500,250]",
+  //   ]
+  // } )
+  // new oes.ExperimentParamDef( {
+  //   name: "nmrOfEnterprises",
+  //   values: [ 1000, 3000 ]
+  // } ),
   new oes.ExperimentParamDef( {
     name: "extortionRates",
     values: [
@@ -226,9 +277,13 @@ sim.experiment.parameterDefs = [
     ]
   } )
 ];
-sim.experiment.replications = 10;
-sim.experiment.seeds = [ 126, 8758, 635, 2653, 198, 681, 8734, 6523,
-  2643, 27 ];
+// sim.experiment.replications = 10;
+// sim.experiment.seeds = [ 126, 8758, 635, 2653, 198, 681, 8734, 6523,
+//   2643, 27 ];
+sim.experiment.replications = 30;
+sim.experiment.seeds = [ 3078, 2577, 5523, 564, 4684, 4836, 8120, 3701, 5462,
+  1702, 6244, 8812, 2801, 3980, 7615, 6681, 2043, 3570, 3589, 6890, 5348,
+  7094, 5372, 7473, 4191, 1710, 7683, 8796, 5476, 2770 ];
 sim.experiment.storeEachExperimentScenarioRun = true;
 /*******************************************************************************
  * Define Initial State
@@ -243,8 +298,9 @@ sim.scenario.initialState.events = [];
 sim.scenario.setupInitialState = function () {
   var rebelGroupsObj, rebelGroupsKeys, rebelGroup;
   var enterprisesObj, enterprise;
-  var nmrEnts, totalEnts, totalProp;
   var objId, i;
+  var nmrEnts = {};
+  var totalProp = 0;
 
   // Enterprises input parameters
   var income = JSON.parse( sim.v.income );
@@ -341,22 +397,21 @@ sim.scenario.setupInitialState = function () {
   }
 
   /* Adjust the proportion of Enterprises */
-  nmrEnts = {};
-  totalEnts = 0;
-  totalProp = propOfEnterprises.reduce( ( a, b ) => a + b, 0 );
-  for ( i = 0; i < sim.v.nmrOfRebelGroups; i += 1 ) {
-    objId = i + 1;
+  totalProp = propOfEnterprises.reduce( ( total, value ) => total + value, 0 );
 
-    nmrEnts[ objId ] = Math.min( sim.v.nmrOfEnterprises - totalEnts,
-      Math.ceil( ( propOfEnterprises[ i ] / totalProp ) *
-        sim.v.nmrOfEnterprises ) );
-
-    totalEnts += nmrEnts[ objId ];
-  }
-
-  /* Randomly associate Enterprises with Rebel Groups */
   rebelGroupsObj = cLASS[ "RebelGroup" ].instances;
   rebelGroupsKeys = Object.keys( rebelGroupsObj );
+
+  rebelGroupsKeys.reduce( ( total, rebelGroupId, index ) => {
+    nmrEnts[ rebelGroupId ] = Math.min( sim.v.nmrOfEnterprises -
+      total, Math.ceil( ( propOfEnterprises[ index ] / totalProp ) *
+        sim.v.nmrOfEnterprises ) );
+
+    total += nmrEnts[ rebelGroupId ];
+    return total;
+  }, 0 );
+
+  /* Randomly associate Enterprises with Rebel Groups */
   enterprisesObj = cLASS[ "Enterprise" ].instances;
   Object.keys( enterprisesObj ).forEach( function ( id ) {
     enterprise = enterprisesObj[ id ];

@@ -29,6 +29,12 @@ var Expand = new cLASS( {
       var enterprisesObj = cLASS[ "Enterprise" ].instances;
       var enterprisesKey = Object.keys( enterprisesObj );
 
+      // Debug
+      sim.model.f.logObj( this.rebelGroup.id,
+        "\nTimestep " + this.occTime +
+        "\nAction: Expand" +
+        "\nNumber Extorted = " + this.rebelGroup.extortedEnterprises.length );
+
       /* Expand Probability */
       globalStrengthRatio =
         sim.model.f.globalRelativeStrength( this.rebelGroup );
