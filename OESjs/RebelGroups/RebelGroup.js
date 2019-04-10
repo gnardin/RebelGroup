@@ -54,10 +54,6 @@ var RebelGroup = new cLASS( {
       range: "NonNegativeInteger",
       label: "Frequency to Expand"
     },
-    "freqAllocate": {
-      range: "NonNegativeInteger",
-      label: "Frequency to Allocate Resource"
-    },
     "lastExpand": {
       range: "NonNegativeInteger",
       label: "Time Last Expansion"

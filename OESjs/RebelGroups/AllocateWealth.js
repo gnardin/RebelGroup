@@ -83,13 +83,3 @@ var AllocateWealth = new cLASS( {
     }
   }
 } );
-AllocateWealth.recurrence = function ( e ) {
-  return e.rebelGroup.freqAllocate;
-};
-AllocateWealth.createNextEvent = function ( e ) {
-  var nextTime = e.occTime + AllocateWealth.recurrence( e );
-  return new AllocateWealth( {
-    occTime: nextTime,
-    rebelGroup: e.rebelGroup
-  } );
-};

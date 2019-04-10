@@ -49,6 +49,11 @@ var Demand = new cLASS( {
           }
         } );
 
+        followupEvents.push( new AllocateWealth( {
+          occTime: this.occTime + 2,
+          rebelGroup: this.rebelGroup,
+        } ) );
+
         // Debug
         sim.model.f.logObj( this.rebelGroup.id,
           "\nTimestep " + this.occTime +

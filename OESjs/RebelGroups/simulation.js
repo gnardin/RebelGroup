@@ -125,13 +125,6 @@ sim.model.v.freqExpand = {
   label: "RGs Expansion Frequency",
   hint: "The frequency each Rebel Group try to expand their domain (Normal)"
 };
-sim.model.v.freqAllocate = {
-  range: "string",
-  initialValue:
-    "[[30,0],[30,0],[30,0],[30,0],[30,0],[30,0],[30,0],[30,0],[30,0]]",
-  label: "RGs Allocate Frequency",
-  hint: "The frequency each Rebel Group reallocate their wealth (Normal)"
-};
 sim.model.v.fightExpansion = {
   range: "NonNegativeInteger",
   initialValue: 50,
@@ -140,7 +133,7 @@ sim.model.v.fightExpansion = {
 };
 sim.model.v.traceObjId = {
   range: "Object",
-  initialValue: [ ]
+  initialValue: []
 };
 /* Global Functions */
 /**
@@ -299,8 +292,6 @@ sim.scenario.setupInitialState = function () {
     JSON.parse( sim.v.freqDemand ).slice( 0, sim.v.nmrOfRebelGroups );
   var freqExpand =
     JSON.parse( sim.v.freqExpand ).slice( 0, sim.v.nmrOfRebelGroups );
-  var freqAllocate =
-    JSON.parse( sim.v.freqAllocate ).slice( 0, sim.v.nmrOfRebelGroups );
 
   /* Create Rebel Groups */
   for ( i = 0; i < sim.v.nmrOfRebelGroups; i += 1 ) {
@@ -322,8 +313,6 @@ sim.scenario.setupInitialState = function () {
         freqDemand[ i ][ 1 ] ) ) ),
       freqExpand: Math.abs( Math.round( rand.normal( freqExpand[ i ][ 0 ],
         freqExpand[ i ][ 1 ] ) ) ),
-      freqAllocate: Math.abs( Math.round( rand.normal( freqAllocate[ i ][ 0 ],
-        freqAllocate[ i ][ 1 ] ) ) ),
       lastExpand: 0,
       lastAmountCollected: 0
     } );
@@ -336,11 +325,6 @@ sim.scenario.setupInitialState = function () {
     } ) );
     sim.scheduleEvent( new Expand( {
       occTime: 1,
-      rebelGroup: objId
-    } ) );
-    sim.scheduleEvent( new AllocateWealth( {
-      occTime: Math.round( rand.normal( freqAllocate[ i ][ 0 ],
-        freqAllocate[ i ][ 1 ] ) ),
       rebelGroup: objId
     } ) );
   }
