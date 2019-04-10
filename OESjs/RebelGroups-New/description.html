@@ -1,0 +1,179 @@
+<!-- ===========================================================================
+* Rebel Groups Protection Racket simulation model
+*
+* @copyright Copyright 2018-2019 Brandenburg University of Technology, Germany
+* @license The MIT License (MIT)
+* @author Frances Duffy
+* @author Kamil Klosek
+* @author Luis Gustavo Nardin
+* @author Gerd Wagner
+=========================================================================== -->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+  <head>
+    <meta charset="utf-8" />
+    <title>Rebel Groups Protection Racket</title>
+    <meta name="viewport" content="width=device-width, initial-scale = 1.0" />
+    <link rel="stylesheet" href="../framework/description.css" />
+    <script src="metadata.js"></script>
+    <script src="../framework/description.js"></script>
+  </head>
+
+  <body onload="oes.ui.setupDescription()">
+    <div id="frontMatter">
+      <h1>Rebel Groups Protection Racket</h1>
+      <p>
+        <strong>Classification tags</strong>: Rebel Group, Civil War,
+        Discrete-Event Simulation
+      </p>
+      <!-- <figure class="right">
+        <img src="media/img/theme-image.png" alt="" width="295" height="246" />
+      </figure> -->
+      <section id="shortDescription">
+      </section>
+    </div>
+
+    <section class="mbd collapsed">
+      <h1>
+        <span>►</span>Conceptual Model <sup class="expl-req">?</sup>
+      </h1>
+      <div id="expl-CM" class="expl"></div>
+
+      <section>
+        <h1>
+          Conceptual Information Model <sup class="expl-req">?</sup>
+        </h1>
+        <div id="expl-CIM" class="expl"></div>
+
+        <p>The potentially relevant object types are:</p>
+        <ol>
+          <li>enterprises</li>
+          <li>rebel groups</li>
+          <li>clans</li>
+          <li>households</li>
+        </ol>
+
+        <p></p>
+      </section>
+
+      <section>
+        <h1>
+          Conceptual Process Model <sup class="expl-req">?</sup>
+        </h1>
+        <div id="expl-CPM" class="expl"></div>
+
+        <table>
+          <caption>Event rules</caption>
+          <thead>
+            <tr>
+              <td>Events</td>
+              <td>Participating objects</td>
+              <td>Caused state changes and follow-up events</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Extortion</td>
+              <td>Rebel group and assigned enterprises</td>
+              <td>Each period the rebel group extracts a fraction of wealth from its assigned enterprises. The exact fraction can be adjusted before the simulation is started.
+			  Looting is an alternative action and differs to extortion by depleting the wealth of an enterprise completely to 0.</td>
+            </tr>
+            <tr>
+              <td>Looting</td>
+              <td>Rebel group and assigned enterprises</td>
+              <td>Looting translates into the complete wealth depletion of the enterprise. The enterprise is left with 0 wealth and the fleeing action is triggered.
+			  The probability for looting is higher for the weaker party. This shall simulate the pressure the weaker rebel group experiences to collect wealth at a
+			  faster pace to grow in size in comparison to the stronger competitor(s).</td>
+            </tr>
+            <tr>
+              <td>Allocating Resources</td>
+              <td>Rebel group</td>
+              <td>Each period, the rebel group pays part of its wealth to maintain the costs for each single rebel. The costs are predetermined and can be altered.
+			  If the costs exceed the accumulated wealth, then the rebel group expels a fraction of rebels to match its income level. If the rebel group extorts income
+			  in excess of its current rebel size, then it grows according to its global strength. Weaker parties grow faster than stronger rebel groups but can never
+			  exceed an absolute growth above 0.5x of its current size in one period. Once a rebel group achieves hegemony (a group size relation defined as 4:1), then the rebel
+			  group does not grow anymore and saves its wealth for future allocation.</td>
+            </tr>
+			<tr>
+              <td>Fleeing</td>
+              <td>Enterprise</td>
+              <td>An enterprise which is looted in a period has an assigned probability to flee and leave the game. Once the enterprise decides to flee, the rebel group
+			  cannot extract or loot the enterprise anymore.</td>
+            </tr>
+			<tr>
+              <td>Expansion</td>
+              <td>Rebel group and enterprises</td>
+              <td>At the beginning of the simulation each enterprise is assigned to one of the existing rebel groups. This shall also mimic the territory of the rebel group.
+			  Each rebel group has a predetermined expansion value which is translated into a probability to attempt an expansion. An expansion means that the rebel groups forces
+			  a reassignment of a group of enterprises. Depending on the global strength of the rebel groups, this action can trigger reporting and fighting. If the expansion is
+			  successful, then the group of enterprises at disposition is reassigned to the victorious rebel group.</td>
+            </tr>
+			<tr>
+              <td>Reporting</td>
+              <td>Rebel group and assigned enterprises</td>
+              <td>In the case of an expansion attempt, the disputed enterprises can decide to report to their assigned rebel group. This action increases the probability of fighting.</td>
+            </tr>
+			<tr>
+              <td>Fighting</td>
+              <td>Rebel groups</td>
+              <td>In the case of an expansion (and associated reporting), there is a probability that the rebel groups engage in fighting with each other. Once triggered, the rebel
+			  groups lose a fraction of their size. The decrease is based on the relative strength of the rebel group. The stronger rebel group inflicts higher losses on the
+			  weaker rebel group than vice versa. The exact amount is based on a probabilistic function.</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </section>
+    </section>
+
+    <section class="mbd collapsed">
+      <h1>
+        <span>►</span>Simulation Design Model <sup class="expl-req">?</sup>
+      </h1>
+      <div id="expl-DM" class="expl"></div>
+
+      <section>
+        <h1>
+          Information Design Model <sup class="expl-req">?</sup>
+        </h1>
+        <div id="expl-IDM" class="expl"></div>
+
+         <p>The model abstracts away from clans and households. It includes the following object types:</p>
+        <ol>
+          <li>Enterprise with properties ...</li>
+          <li>RebelGroup with properties ...</li>
+        </ol>
+
+        <figure>
+          <img src="media/img/IDM.png" width="1000" />
+          <figcaption>An information design model describing object types and event types.</figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h1>Process Design Model <sup class="expl-req">?</sup></h1>
+        <div id="expl-PDM" class="expl"></div>
+
+        <table>
+          <caption>Event Rule Design</caption>
+          <thead>
+            <tr>
+              <td>ON (event type)</td>
+              <td>DO (event routine)</td>
+
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Demand</td>
+              <td><pre><code>SET rg TO rebelGroup<br>IF (rg.nmrOfRebels > 0)<br>THEN<br>  strengthRatio = globalStrengthRatio(rg)<br>  FOR EACH e IN Enterprises<br>  DO<br>    IF (rand.uniform() &#60; (1 - strengthRatio))<br>    THEN<br>      Loot(e)<br>    ELSE<br>      Extort(e)<br>    ENDIF<br>  DONE<br>ENDIF</code></pre>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </section>
+  </body>
+
+</html>
