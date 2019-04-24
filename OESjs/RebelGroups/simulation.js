@@ -71,57 +71,57 @@ sim.model.v.fleeThreshold = {
 };
 sim.model.v.nmrOfRebelGroups = {
   range: "NonNegativeInteger",
-  initialValue: 9,
+  initialValue: 3,
   label: "Number Rebel Groups",
   hint: "The number of Rebel Groups"
 };
 sim.model.v.nmrOfRebels = {
   range: "string",
-  initialValue: "[500,500,500,500,500,500,500,500,500]",
+  initialValue: "[300,300,300]",
   label: "RG Rebel Members",
   hint: "The number of rebel members per Rebel Group"
 };
 sim.model.v.propOfEnterprises = {
   range: "string",
-  initialValue: "[0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11,0.11]",
+  initialValue: "[0.34,0.33,0.33]",
   label: "RG Prop Enterprises",
   hint: "The proportion of Enterprises per Rebel Group"
 };
 sim.model.v.extortionRates = {
   range: "string",
-  initialValue: "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]",
+  initialValue: "[0.1,0.1,0.1]",
   label: "RG Extortion Rate",
   hint: "The extortion rate per Rebel Group"
 };
 sim.model.v.rebelCosts = {
   range: "string",
-  initialValue: "[291,291,291,291,291,291,291,291,291]",
+  initialValue: "[291,291,291]",
   label: "RG Rebel Cost",
   hint: "The monthly cost per rebel per Rebel Group"
 };
 sim.model.v.recruitThreshold = {
   range: "string",
-  initialValue: "[0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8]",
+  initialValue: "[0.8,0.8,0.8]",
   label: "RG Recruit Threshold",
   hint: "The threshold to stop recruiting per Rebel Group"
 };
 sim.model.v.recruitRate = {
   range: "string",
-  initialValue: "[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]",
+  initialValue: "[0.5,0.5,0.5]",
   label: "RG Recruit Rate",
   hint: "The rate of rebels recruited per recruitment per Rebel Group"
 };
 sim.model.v.freqDemand = {
   range: "string",
   initialValue:
-    "[[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2]]",
+    "[[30,2],[30,2],[30,2]]",
   label: "RG Demand Frequency",
   hint: "The frequency each Rebel Group demand extortion money (Normal)"
 };
 sim.model.v.freqExpand = {
   range: "string",
   initialValue:
-    "[[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2],[30,2]]",
+    "[[30,2],[30,2],[30,2]]",
   label: "RGs Expansion Frequency",
   hint: "The frequency each Rebel Group try to expand their domain (Normal)"
 };
@@ -231,27 +231,24 @@ sim.experiment.experimentNo = 1;
 sim.experiment.title = "Basic";
 sim.experiment.parameterDefs = [
   new oes.ExperimentParamDef( {
-    name: "nmrOfEnterprises",
-    values: [ 1000, 3000 ]
+    name: "nmrOfRebels",
+    values: [
+      "[300,300,300]",
+      "[300,150,150]",
+      "[300,150,75]"
+    ]
   } ),
   new oes.ExperimentParamDef( {
-    name: "extortionRates",
+    name: "propOfEnterprises",
     values: [
-      "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]",
-      "[0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05]",
-      "[0.1,0.1,0.1,0.1,0.1,0.1,0.05,0.05,0.05]",
-      "[0.1,0.1,0.1,0.1,0.1,0.05,0.05,0.05,0.05]",
-      "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.05,0.05]",
-      "[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.05]",
-      "[0.1,0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05]",
-      "[0.1,0.1,0.1,0.05,0.05,0.05,0.05,0.05,0.05]"
+      "[0.34,0.33,0.33]",
+      "[0.5,0.25,0.25]",
+      "[0.6,0.3,0.1]"
     ]
   } )
 ];
-sim.experiment.replications = 30;
-sim.experiment.seeds = [ 3078, 2577, 5523, 564, 4684, 4836, 8120, 3701, 5462,
-  1702, 6244, 8812, 2801, 3980, 7615, 6681, 2043, 3570, 3589, 6890, 5348,
-  7094, 5372, 7473, 4191, 1710, 7683, 8796, 5476, 2770 ];
+sim.experiment.replications = 100;
+sim.experiment.seeds = [ 3078, 2577, 5523, 564, 4684, 4836, 8120, 3701, 5462, 1702, 6244, 8812, 2801, 3980, 7615, 6681, 2043, 3570, 3589, 6890, 5348, 7094, 5372, 7473, 4191, 1710, 7683, 8796, 5476, 2770, 5427, 601, 5550, 4275, 5514, 3762, 1341, 9545, 8908, 8602, 6035, 672, 9671, 9532, 5511, 6110, 1310, 4025, 9342, 9309, 5948, 5433, 4197, 6753, 1553, 8068, 849, 3120, 6931, 4209, 1045, 178, 2068, 8163, 6135, 166, 3044, 2564, 7831, 5680, 8588, 3074, 2557, 9196, 7403, 9179, 9029, 1278, 957, 6944, 4213, 8826, 47, 6997, 9111, 7252, 6552, 4483, 5634, 7193, 9581, 8704, 1598, 6418, 1650, 77, 9490, 7078, 4215, 2377 ];
 sim.experiment.storeEachExperimentScenarioRun = true;
 /*******************************************************************************
  * Define Initial State

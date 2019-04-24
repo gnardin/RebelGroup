@@ -1,9 +1,5 @@
 # Rebel Groups Protection Racket
 
-## TODO
-
-* Calibrate and validate the model with empirical event data.
-
 ## Improvements
 
 * Make RebelGroups' _freqDemand_, _freqExpand_, and _freqAllocate_ random per rescheduling instead of defined randomly on the initial setup.
