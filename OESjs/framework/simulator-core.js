@@ -6728,7 +6728,7 @@ sim.runExperiment = function () {
     // initialize scenario statistics
     Object.keys( sim.model.statistics).forEach( function (varName) {
       if (sim.model.statistics[varName].label) {  // output statistics
-        exp.scenarios[i].stat[varName] = 0;
+        exp.scenarios[i].stat[varName] = [];
       }
     });
     // create experiment parameter slots for assigning corresponding model variables
@@ -6753,7 +6753,7 @@ sim.runExperiment = function () {
       // aggregate scenario run statistics from sim.stat to sim.experiment.scenarios[i].stat
       Object.keys( sim.model.statistics).forEach( function (varName) {
         if (sim.model.statistics[varName].label) {  // output statistics
-          exp.scenarios[i].stat[varName] += sim.stat[varName];
+          exp.scenarios[i].stat[varName].push( sim.stat[varName]);
         }
       });
       if (sim.experiment.storeEachExperimentScenarioRun) {
@@ -6774,7 +6774,14 @@ sim.runExperiment = function () {
     // compute average values
     Object.keys( sim.model.statistics).forEach( function (varName) {
       if (sim.model.statistics[varName].label) {  // output statistics
-        exp.scenarios[i].stat[varName] /= exp.replications;
+        avg = exp.scenarios[i].stat[varName].reduce( (t, v) => t + v ) /
+          exp.replications;
+        sd = 0;
+        exp.scenarios[i].stat[varName].forEach( v => {
+          sd += Math.pow( v - avg, 2);
+        });
+        sd = Math.sqrt( sd / exp.scenarios[i].stat[varName].length );
+        exp.scenarios[i].stat[varName] = avg.toFixed(2) + " ± " + sd.toFixed(2);
       }
     });
     // send scenario statistics to main thread

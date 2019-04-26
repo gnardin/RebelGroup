@@ -21,7 +21,7 @@ oes.ui.explanation = {};
  * Simulation Model
  ******************************************************************************/
 sim.model.name = "RebelGroups-1";
-sim.model.title = "Rebel Groups Protection Racket";
+sim.model.title = "Rebel Group Protection Rackets";
 sim.model.systemNarrative =
   "<p>How do rebel groups control territory and engage with the local economy during civil war? Charles Tilly's seminal War and State Making as Organized Crime (1985) posits that the process of waging war and providing governance resembles that of a protection racket, in which aspiring governing groups will extort local populations in order to gain power, and civilians or businesses will pay in order to ensure their own protection. As civil war research increasingly probes the mechanisms that fuel local disputes and the origination of violence, we develop an agent-based simulation model to explore the economic relationship of rebel groups with local populations, using extortion racket interactions to explain the dynamics of rebel fighting, their impact on the economy, and the importance of their economic base of support. This analysis provides insights for understanding the causes and byproducts of rebel competition in present-day conflicts, such as the cases of South Sudan, Afghanistan, and Somalia. </p>";
 sim.model.shortDescription =
@@ -31,4 +31,4 @@ sim.model.license = "CC BY-NC";
 sim.model.creator =
   "Frances Duffy, Kamil Klosek, Luis Gustavo Nardin, Gerd Wagner";
 sim.model.created = "2018-07-26";
-sim.model.modified = "2019-04-24";
+sim.model.modified = "2019-04-26";
