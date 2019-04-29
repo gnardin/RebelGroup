@@ -2133,15 +2133,16 @@ sTORAGEmANAGER.adapters["LocalStorage"] = {
   //------------------------------------------------
   add: function (dbName, mc, records) {  // does not access localStorage
   //------------------------------------------------
+    var recordsCopy = JSON.parse(JSON.stringify(records));
     return new Promise( function (resolve) {
       var newObj=null;
-      if (!Array.isArray( records)) {  // single record insertion
-        records = [records];
+      if (!Array.isArray( recordsCopy)) {  // single record insertion
+        recordsCopy = [recordsCopy];
       }
-      records.forEach( function (rec) {
+      recordsCopy.forEach( function (rec) {
         newObj = new mc( rec);
         mc.instances[newObj.id] = newObj;
-      })
+      });
       resolve( newObj);
     });
   },
@@ -2303,20 +2304,21 @@ sTORAGEmANAGER.adapters["IndexedDB"] = {
           if (!upgradeDb.objectStoreNames.contains( tableName)) {
             upgradeDb.createObjectStore( tableName, {keyPath: keyPath});
           }
-        })
+        });
       }).then( resolve);
     });
   },
   //------------------------------------------------
   add: function (dbName, mc, records) {
   //------------------------------------------------
+    var recordsCopy = JSON.parse(JSON.stringify(records));
     return new Promise( function (resolve) {
       var tableName = mc.tableName || util.class2TableName( mc.Name);
       idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
         var tx = idbCx.transaction( tableName, "readwrite");
         var os = tx.objectStore( tableName);
         // Promise.all takes a list of promises and resolves if all of them do
-        return Promise.all( records.map( function (rec) {return os.add( rec);}))
+        return Promise.all( recordsCopy.map( function (rec) {return os.add( rec);}))
             .then( function () {return tx.complete;});
       }).then( resolve)
       .catch( function (err) {console.log( err.name +": "+ err.message);});
@@ -5124,7 +5126,7 @@ sim.runExperiment = function () {
           experimentRun: expRunId,
           experimentScenarioNo: i,
           parameterValueCombination: exp.scenarios[i].parameterValues,
-          outputStatistics: Object.assign({}, sim.stat)
+          outputStatistics: Object.assign( {}, sim.stat)
         });
       }
       // update the progress bar
