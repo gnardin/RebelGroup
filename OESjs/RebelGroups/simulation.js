@@ -18,6 +18,7 @@ sim.scenario.idCounter = 1; // optional
  * Simulation Config
  ******************************************************************************/
 // sim.config.stepDuration = 0; // optional
+// sim.config.runInMainThread = true; // optional
 // sim.config.createLog = false; // optional
 // sim.config.userInteractive = false; // optional
 // sim.config.visualize = true; // optional

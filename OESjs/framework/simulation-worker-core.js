@@ -3786,15 +3786,15 @@ oes.verifySimulation = function () {
  * @method
  * @author Gerd Wagner
  */
-oes.setupStorageManagement = function (dbName) {
-  var storageAdapter = {dbName: dbName};
-  if (!('indexedDB' in self)) {
-    console.log("This browser doesn't support IndexedDB. Falling back to LocalStorage.");
+oes.setupStorageManagement = function ( dbName ) {
+  var storageAdapter = { dbName: dbName };
+  if ( !( 'indexedDB' in self ) ) {
+    console.log( "This browser doesn't support IndexedDB. Falling back to LocalStorage." );
     storageAdapter.name = "LocalStorage";
   } else {
     storageAdapter.name = "IndexedDB";
   }
-  sim.storeMan = new sTORAGEmANAGER( storageAdapter);
+  sim.storeMan = new sTORAGEmANAGER( storageAdapter );
   //sim.storeMan.createEmptyDb().then( oes.setupFrontEndSimEnv);
   // last step in setupFrontEndSimEnv, then wait for user actions
   sim.storeMan.createEmptyDb([oes.ExperimentRun, oes.ExperimentScenarioRun]).then( function () {
@@ -5044,7 +5044,7 @@ sim.runScenarioStep = function (followupEvents) {
 /*******************************************************
  Run an Experiment (in a JS worker)
  ********************************************************/
-sim.runExperiment = function () {
+sim.runExperiment = async function () {
   var exp = sim.experiment, cp=[], valueSets=[], i=0, j=0, k=0, M=0,
       N = exp.parameterDefs.length, increm=0, x=0, expPar={},
       expRunId = (new Date()).getTime(),
@@ -5053,7 +5053,7 @@ sim.runExperiment = function () {
       nextProgressIncrementStep=0;  // thresholds for updating the progress bar
   var avg, sd;
   try {
-    sim.storeMan.add( oes.ExperimentRun, {
+    await sim.storeMan.add( oes.ExperimentRun, {
       id: expRunId,
       experimentDef: exp.id,
       dateTime: (new Date()).toISOString(),
@@ -5121,7 +5121,7 @@ sim.runExperiment = function () {
         }
       });
       if (sim.experiment.storeEachExperimentScenarioRun) {
-        sim.storeMan.add( oes.ExperimentScenarioRun, {
+        await sim.storeMan.add( oes.ExperimentScenarioRun, {
           id: expRunId + i * exp.replications + k,
           experimentRun: expRunId,
           experimentScenarioNo: i,
@@ -5157,7 +5157,7 @@ sim.runExperiment = function () {
     if (!sim.experiment.storeEachExperimentScenarioRun) {
       // store the average statistics aggregated over all exp. scenario runs
       try {
-        sim.storeMan.add( oes.ExperimentScenarioRun, {
+        await sim.storeMan.add( oes.ExperimentScenarioRun, {
           experimentRun: expRunId,
           experimentScenarioNo: i,
           parameterValueCombination: exp.scenarios[i].parameterValues,

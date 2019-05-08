@@ -3592,11 +3592,12 @@ sTORAGEmANAGER.adapters["IndexedDB"] = {
   //------------------------------------------------
     return new Promise( function (resolve) {
       idb.open( dbName, 1, function (upgradeDb) {
-        modelClasses.forEach( function ( mc ) {
-          var tableName = mc.tableName || util.class2TableName( mc.Name ),
+        modelClasses.forEach( function (mc) {
+          var tableName = mc.tableName || util.class2TableName( mc.Name),
             keyPath = mc.primaryKey || "id";
-          if ( !upgradeDb.objectStoreNames.contains( tableName ) ) {
-            upgradeDb.createObjectStore( tableName, { keyPath: keyPath } );
+          if (!upgradeDb.objectStoreNames.contains( tableName)) {
+            console.log( "Create DB" );
+            upgradeDb.createObjectStore( tableName, { keyPath: keyPath });
           }
         } );
       }).then( resolve);
@@ -5136,12 +5137,12 @@ sim.experiment = {
 sim.export = {
   objectName: "export",
   properties: {
-    "header": { range: "Boolean", optional: false, label: "Fields Header", hint: "Export field headers" },
-    "sep": { range: "String", optional: true, label: "Field Field Separator", hint: "Export field separator" },
-    "timeSeries": { range: "Boolean", optional: true, label: "Export Time Series" },
-    "defFilename": { range: "String", optional: true, label: "Experiment Definition", hint: "Export definition of the experiments" },
-    "sumFilename": { range: "String", optional: true, label: "Summary Statistics", hint: "Export summary statistics of the experiments" },
-    "tsFilename": { range: "String", optional: true, label: "Time Series Data", hint: "Export time series of the experiments" },
+    "header": {range: "Boolean", optional: false, label: "Fields Header", hint: "Export field headers"},
+    "sep": {range: "String", optional: true, label: "Field Field Separator", hint: "Export field separator"},
+    "timeSeries": {range: "Boolean", optional: true, label: "Export Time Series"},
+    "defFilename": {range: "String", optional: true, label: "Experiment Definition", hint: "Export definition of the experiments"},
+    "sumFilename": {range: "String", optional: true, label: "Summary Statistics", hint: "Export summary statistics of the experiments"},
+    "tsFilename": {range: "String", optional: true, label: "Time Series Data", hint: "Export time series of the experiments"},
   }
 };
 
@@ -6685,7 +6686,7 @@ sim.runScenarioStep = function (followupEvents) {
 /*******************************************************
  Run an Experiment (in a JS worker)
  ********************************************************/
-sim.runExperiment = function () {
+sim.runExperiment = async function () {
   var exp = sim.experiment, cp=[], valueSets=[], i=0, j=0, k=0, M=0,
       N = exp.parameterDefs.length, increm=0, x=0, expPar={},
       expRunId = (new Date()).getTime(),
@@ -6693,7 +6694,7 @@ sim.runExperiment = function () {
       tenthRunLength=0,  // a tenth of the total run time
       nextProgressIncrementStep=0;  // thresholds for updating the progress bar
   try {
-    sim.storeMan.add( oes.ExperimentRun, {
+    await sim.storeMan.add( oes.ExperimentRun, {
       id: expRunId,
       experimentDef: exp.id,
       dateTime: (new Date()).toISOString(),
@@ -6759,7 +6760,7 @@ sim.runExperiment = function () {
         }
       });
       if (sim.experiment.storeEachExperimentScenarioRun) {
-        sim.storeMan.add( oes.ExperimentScenarioRun, {
+        await sim.storeMan.add( oes.ExperimentScenarioRun, {
           id: expRunId + i * exp.replications + k,
           experimentRun: expRunId,
           experimentScenarioNo: i,
@@ -6795,7 +6796,7 @@ sim.runExperiment = function () {
     if (!sim.experiment.storeEachExperimentScenarioRun) {
       // store the average statistics aggregated over all exp. scenario runs
       try {
-        sim.storeMan.add( oes.ExperimentScenarioRun, {
+        await sim.storeMan.add( oes.ExperimentScenarioRun, {
           experimentRun: expRunId,
           experimentScenarioNo: i,
           parameterValueCombination: exp.scenarios[i].parameterValues,
@@ -7387,7 +7388,7 @@ oes.ui.setupUI = function () {
             statFormEl.style.display = "none";
             oes.stat.prepareTimeSeriesCompression( statGraphWidth);
           }
-          if (window.Worker && !sim.config.visualize) {
+          if (!sim.config.runInMainThread && window.Worker && !sim.config.visualize) {
             // start the scenario simulation worker
             worker = new Worker("simulation-worker.js");
             msg = {runExperiment: false, endTime: sim.scenario.simulationEndTime,
@@ -8047,7 +8048,6 @@ oes.ui.setupExperimentsUI = function (parentEl) {
     uiPanelEl.style.display = "none";
   }
 };
-
 /*******************************************************
  TODO: UI for Export Statistics
  *******************************************************
