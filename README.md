@@ -28,7 +28,8 @@ The description of the content of each directory under `<rebelDir>` is provided 
 
 | **Directory**       | **Description**                         |
 |---------------------|-----------------------------------------|
-| _data_              | Compressed data generated based on the experimental settings reported on the article Duffy, F. S., Klosek, K. C., Nardin, L. G., &amp; Wagner, G. (under review). Rebel group protection rackets: Simulating the effects of economic support on civil war violence. _Computational Conflict Research_. Computational Social Sciences Book Series. Cham: Springer.|
+| _data_              | Raw data generated based on the experimental settings reported on the article Duffy, F. S., Klosek, K. C., Nardin, L. G., &amp; Wagner, G. (under review). Rebel group protection rackets: Simulating the effects of economic support on civil war violence. _Computational Conflict Research_. Computational Social Sciences Book Series. Cham: Springer.|
+| _output_             | Summary of the data in the `data` directory |
 | _script_            | Scripts used to generate the statistics of the files in the _data_ directory.
 | _OESjs/framework_   | OESjs simulator framework source-code   |
 | _OESjs/RebelGroups_ | RebelGroups simulation mode source-code |
