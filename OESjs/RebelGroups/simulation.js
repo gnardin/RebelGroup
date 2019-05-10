@@ -114,15 +114,13 @@ sim.model.v.recruitRate = {
 };
 sim.model.v.freqDemand = {
   range: "string",
-  initialValue:
-    "[[30,2],[30,2],[30,2]]",
+  initialValue: "[[30,2],[30,2],[30,2]]",
   label: "RG Demand Frequency",
   hint: "The frequency each Rebel Group demand extortion money (Normal)"
 };
 sim.model.v.freqExpand = {
   range: "string",
-  initialValue:
-    "[[30,2],[30,2],[30,2]]",
+  initialValue: "[[30,2],[30,2],[30,2]]",
   label: "RGs Expansion Frequency",
   hint: "The frequency each Rebel Group try to expand their domain (Normal)"
 };
