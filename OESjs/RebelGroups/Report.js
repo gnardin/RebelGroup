@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Report event class
  *
- * @copyright Copyright 2018 Brandenburg University of Technology, Germany
+ * @copyright Copyright 2018-2019 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
  * @author Frances Duffy
  * @author Kamil Klosek
@@ -12,28 +12,29 @@ var Report = new cLASS( {
   Name: "Report",
   supertypeName: "eVENT",
   properties: {
-    "rebelGroup": { range: "RebelGroup", label: "Rebel group" },
+    "rebelGroup": { range: "RebelGroup", label: "RebelGroup" },
     "enterprise": { range: "Enterprise", label: "Enterprise" },
     "extorter": { range: "RebelGroup", label: "Extorter" }
   },
   methods: {
     "onEvent": function () {
       var followupEvents = [];
-      var strengthRatio, nmrOfReports, fightProb;
+      var strengthRatio, reports, fightProb;
+
       var extorterId = this.extorter.id;
 
       if ( !( extorterId in this.rebelGroup.reports ) ) {
-        nmrOfReports = 1;
+        reports = 1;
       } else {
-        nmrOfReports = this.rebelGroup.reports[ extorterId ] + 1;
+        reports = this.rebelGroup.reports[ extorterId ] + 1;
       }
 
       /* Fight Probability */
       strengthRatio =
         sim.model.f.relativeStrength( this.rebelGroup, this.extorter );
 
-      fightProb = sim.model.f.sigmoid( 1, 1, 10,
-        sim.model.f.normalizeValue( strengthRatio ), nmrOfReports );
+      fightProb = sim.model.f.sigmoid( 1, 1, 1,
+        sim.model.f.normalizeValue( strengthRatio ), reports );
 
       // Decide to Fight
       if ( ( rand.uniform < fightProb ) &&
@@ -44,7 +45,7 @@ var Report = new cLASS( {
         } ) );
         this.rebelGroup.reports[ extorterId ] = 0;
       } else {
-        this.rebelGroup.reports[ extorterId ] = nmrOfReports;
+        this.rebelGroup.reports[ extorterId ] = reports;
       }
 
       sim.stat.nmrOfReports += 1;

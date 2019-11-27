@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Demand event class
  *
- * @copyright Copyright 2018 Brandenburg University of Technology, Germany
+ * @copyright Copyright 2018-2019 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
  * @author Frances Duffy
  * @author Kamil Klosek
@@ -18,40 +18,58 @@ var Demand = new cLASS( {
     "onEvent": function () {
       var followupEvents = [];
       var strengthRatio;
+      var nmrOfExtort = 0;
+      var nmrOfLoot = 0;
 
       if ( this.rebelGroup.nmrOfRebels > 0 ) {
         strengthRatio =
           sim.model.f.globalRelativeStrength( this.rebelGroup );
+
         this.rebelGroup.extortedEnterprises.forEach( ( enterprise ) => {
           /**
            * Decision to extort or loot
            *
-           * Rebel Groups loot based on their strength with respect to the other
-           * Rebel Groups, otherwise they extort
-           *
-           * TODO
-           * Rebel Groups also loot if they receive external support that does
-           * not require them to create a deeper connection with the community
+           * Rebel Groups extort based on their strength with respect to
+           * all other Rebel Groups, otherwise they loot
            */
-          if ( rand.uniform() < ( 1 - strengthRatio ) ) {
-            followupEvents.push( new Loot( {
-              occTime: this.occTime + 1,
-              rebelGroup: this.rebelGroup,
-              enterprise: enterprise
-            } ) );
-          } else {
+          if ( rand.uniform() < strengthRatio ) {
             followupEvents.push( new Extort( {
               occTime: this.occTime + 1,
               rebelGroup: this.rebelGroup,
               enterprise: enterprise
             } ) );
+            nmrOfExtort += 1;
+          } else {
+            followupEvents.push( new Loot( {
+              occTime: this.occTime + 1,
+              rebelGroup: this.rebelGroup,
+              enterprise: enterprise
+            } ) );
+            nmrOfLoot += 1;
           }
         } );
+
+        followupEvents.push( new AllocateWealth( {
+          occTime: this.occTime + 2,
+          rebelGroup: this.rebelGroup,
+        } ) );
+
+        // Debug
+        sim.model.f.logObj( this.rebelGroup.id,
+          "\nTimestep " + this.occTime +
+          "\nAction: Demand" +
+          "\nNumber of Enterprises = " +
+          this.rebelGroup.extortedEnterprises.length +
+          "\nGlobal Strength Ratio = " + strengthRatio +
+          "\nNumber of Extortions " + nmrOfExtort +
+          "\nNumber of Loots " + nmrOfLoot );
       }
+
       return followupEvents;
     }
   }
 } );
+Demand.priority = 0;
 Demand.recurrence = function ( e ) {
   return e.rebelGroup.freqDemand;
 };

@@ -1,7 +1,7 @@
 <!-- ===========================================================================
-* Rebel Groups Protection Racket simulation model
+* Rebel Group Protection Rackets simulation model
 *
-* @copyright Copyright 2018 Brandenburg University of Technology, Germany
+* @copyright Copyright 2018-2019 Brandenburg University of Technology, Germany
 * @license The MIT License (MIT)
 * @author Frances Duffy
 * @author Kamil Klosek
@@ -13,7 +13,7 @@
 
   <head>
     <meta charset="utf-8" />
-    <title>Rebel Groups Protection Racket</title>
+    <title>Rebel Group Protection Rackets</title>
     <meta name="viewport" content="width=device-width, initial-scale = 1.0" />
     <link rel="stylesheet" href="../framework/description.css" />
     <script src="metadata.js"></script>
@@ -27,9 +27,9 @@
         <strong>Classification tags</strong>: Rebel Group, Civil War,
         Discrete-Event Simulation
       </p>
-      <figure class="right">
+      <!-- <figure class="right">
         <img src="media/img/theme-image.png" alt="" width="295" height="246" />
-      </figure>
+      </figure> -->
       <section id="shortDescription">
       </section>
     </div>
@@ -121,7 +121,7 @@
               <td>Extortion</td>
               <td>Rebel group and assigned enterprises</td>
               <td>Each period the rebel group extracts a fraction of wealth from its assigned enterprises. The exact fraction can be adjusted before the simulation is started. 
-			  Looting is an alternative action and differs to extortition by depleting the wealth of an enterprise completely to 0.</td>
+			  Looting is an alternative action and differs to extortion by depleting the wealth of an enterprise completely to 0.</td>
             </tr>
             <tr>
               <td>Looting</td>
@@ -131,7 +131,7 @@
 			  faster pace to grow in size in comparison to the stronger competitor(s).</td>
             </tr>
             <tr>
-              <td>AllocateResouces</td>
+              <td>Allocating Resources</td>
               <td>Rebel group</td>
               <td>Each period, the rebel group pays part of its wealth to maintain the costs for each single rebel. The costs are predetermined and can be altered.
 			  If the costs exceed the accumulated wealth, then the rebel group expels a fraction of rebels to match its income level. If the rebel group extorts income
@@ -142,7 +142,7 @@
 			<tr>
               <td>Fleeing</td>
               <td>Enterprise</td>
-              <td>An enterprise which is looted in a period has an assinged probability to flee and leave the game. Once the enterprise decides to flee, the rebel group
+              <td>An enterprise which is looted in a period has an assigned probability to flee and leave the game. Once the enterprise decides to flee, the rebel group
 			  cannot extract or loot the enterprise anymore.</td>
             </tr>
 			<tr>
@@ -167,6 +167,37 @@
             </tr>
           </tbody>
         </table>
+
+      </section>
+    </section>
+
+    <section class="mbd collapsed">
+      <h1>
+        <span>►</span>Simulation Design Model <sup class="expl-req">?</sup>
+      </h1>
+      <div id="expl-DM" class="expl"></div>
+
+      <section>
+        <h1>
+          Information Design Model <sup class="expl-req">?</sup>
+        </h1>
+        <div id="expl-IDM" class="expl"></div>
+
+         <p>The model abstracts away from clans and households. It includes the following object types:</p>
+        <ol>
+          <li>Enterprise with properties ...</li>
+          <li>RebelGroup with properties ...</li>
+        </ol>
+
+        <figure>
+          <img src="media/img/idm.svg" width="1000" />
+          <figcaption>An information design model describing object types and event types.</figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h1>Process Design Model <sup class="expl-req">?</sup></h1>
+        <div id="expl-PDM" class="expl"></div>
 
         <table>
           <caption>Event Rule Design</caption>

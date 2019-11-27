@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Expand event class
  *
- * @copyright Copyright 2018 Brandenburg University of Technology, Germany
+ * @copyright Copyright 2018-2019 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
  * @author Frances Duffy
  * @author Kamil Klosek
@@ -29,12 +29,17 @@ var Expand = new cLASS( {
       var enterprisesObj = cLASS[ "Enterprise" ].instances;
       var enterprisesKey = Object.keys( enterprisesObj );
 
+      // Debug
+      sim.model.f.logObj( this.rebelGroup.id,
+        "\nTimestep " + this.occTime +
+        "\nAction: Expand" +
+        "\nNumber Extorted = " + this.rebelGroup.extortedEnterprises.length );
+
       /* Expand Probability */
       globalStrengthRatio =
         sim.model.f.globalRelativeStrength( this.rebelGroup );
 
-      expandProb = sim.model.f.sigmoid( 1, 1, 10,
-        sim.model.f.normalizeValue( globalStrengthRatio ),
+      expandProb = sim.model.f.sigmoid( 1, 1, 1, globalStrengthRatio,
         ( this.occTime - this.rebelGroup.lastExpand ) );
 
       // Expand if there are available Enterprises and rebels
@@ -43,7 +48,7 @@ var Expand = new cLASS( {
         ( enterprisesKey.length >
           this.rebelGroup.extortedEnterprises.length ) ) {
 
-        // Select the poorest Enterprise with greater probability
+        // Select poorer Enterprise with greater probability
         wEnterprises = [];
         wEnterprises[ 0 ] = 1 / enterprisesObj[ enterprisesKey[ 0 ] ].wealth;
         for ( i = 1; i < enterprisesKey.length; i += 1 ) {
@@ -77,7 +82,7 @@ var Expand = new cLASS( {
               this.rebelGroup ) );
 
           /* Fight Probability */
-          fightProb = sim.model.f.sigmoid( 1, 1, 1, 1.5, strengthRatio );
+          fightProb = sim.model.f.sigmoid( 1, 1, 1, 1, strengthRatio );
         }
 
         if ( rand.uniform() < fightProb ) {
@@ -112,6 +117,7 @@ var Expand = new cLASS( {
     }
   }
 } );
+Expand.priority = 1;
 Expand.recurrence = function ( e ) {
   return e.rebelGroup.freqExpand;
 };

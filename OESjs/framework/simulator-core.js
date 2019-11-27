@@ -3264,7 +3264,7 @@ sTORAGEmANAGER.prototype.retrieveAll = function (mc) {
         }
       }
       resolve( records);
-    })
+    });
   });
 };
 /**
@@ -3427,12 +3427,13 @@ sTORAGEmANAGER.adapters["LocalStorage"] = {
   //------------------------------------------------
   add: function (dbName, mc, records) {  // does not access localStorage
   //------------------------------------------------
+    var recordsCopy = JSON.parse(JSON.stringify(records));
     return new Promise( function (resolve) {
       var newObj=null;
-      if (!Array.isArray( records)) {  // single record insertion
-        records = [records];
+      if (!Array.isArray( recordsCopy)) {  // single record insertion
+        recordsCopy = [recordsCopy];
       }
-      records.forEach( function (rec) {
+      recordsCopy.forEach( function (rec) {
         newObj = new mc( rec);
         mc.instances[newObj.id] = newObj;
       })
@@ -3593,24 +3594,26 @@ sTORAGEmANAGER.adapters["IndexedDB"] = {
       idb.open( dbName, 1, function (upgradeDb) {
         modelClasses.forEach( function (mc) {
           var tableName = mc.tableName || util.class2TableName( mc.Name),
-              keyPath = mc.primaryKey || "id";
+            keyPath = mc.primaryKey || "id";
           if (!upgradeDb.objectStoreNames.contains( tableName)) {
-            upgradeDb.createObjectStore( tableName, {keyPath: keyPath});
+            console.log( "Create DB" );
+            upgradeDb.createObjectStore( tableName, { keyPath: keyPath });
           }
-        })
+        } );
       }).then( resolve);
     });
   },
   //------------------------------------------------
   add: function (dbName, mc, records) {
   //------------------------------------------------
+    var recordsCopy = JSON.parse(JSON.stringify(records));
     return new Promise( function (resolve) {
       var tableName = mc.tableName || util.class2TableName( mc.Name);
       idb.open( dbName).then( function (idbCx) {  // idbCx is a DB connection
         var tx = idbCx.transaction( tableName, "readwrite");
         var os = tx.objectStore( tableName);
         // Promise.all takes a list of promises and resolves if all of them do
-        return Promise.all( records.map( function (rec) {return os.add( rec);}))
+        return Promise.all( recordsCopy.map( function (rec) {return os.add( rec);}))
             .then( function () {return tx.complete;});
       }).then( resolve)
       .catch( function (err) {console.log( err.name +": "+ err.message);});
@@ -5128,6 +5131,18 @@ sim.experiment = {
       }
     }
     return errMsgs;
+  }
+};
+
+sim.export = {
+  objectName: "export",
+  properties: {
+    "header": {range: "Boolean", optional: false, label: "Fields Header", hint: "Export field headers"},
+    "sep": {range: "String", optional: true, label: "Field Field Separator", hint: "Export field separator"},
+    "timeSeries": {range: "Boolean", optional: true, label: "Export Time Series"},
+    "defFilename": {range: "String", optional: true, label: "Experiment Definition", hint: "Export definition of the experiments"},
+    "sumFilename": {range: "String", optional: true, label: "Summary Statistics", hint: "Export summary statistics of the experiments"},
+    "tsFilename": {range: "String", optional: true, label: "Time Series Data", hint: "Export time series of the experiments"},
   }
 };
 
@@ -6671,7 +6686,7 @@ sim.runScenarioStep = function (followupEvents) {
 /*******************************************************
  Run an Experiment (in a JS worker)
  ********************************************************/
-sim.runExperiment = function () {
+sim.runExperiment = async function () {
   var exp = sim.experiment, cp=[], valueSets=[], i=0, j=0, k=0, M=0,
       N = exp.parameterDefs.length, increm=0, x=0, expPar={},
       expRunId = (new Date()).getTime(),
@@ -6679,7 +6694,7 @@ sim.runExperiment = function () {
       tenthRunLength=0,  // a tenth of the total run time
       nextProgressIncrementStep=0;  // thresholds for updating the progress bar
   try {
-    sim.storeMan.add( oes.ExperimentRun, {
+    await sim.storeMan.add( oes.ExperimentRun, {
       id: expRunId,
       experimentDef: exp.id,
       dateTime: (new Date()).toISOString(),
@@ -6716,7 +6731,7 @@ sim.runExperiment = function () {
     // initialize scenario statistics
     Object.keys( sim.model.statistics).forEach( function (varName) {
       if (sim.model.statistics[varName].label) {  // output statistics
-        exp.scenarios[i].stat[varName] = 0;
+        exp.scenarios[i].stat[varName] = [];
       }
     });
     // create experiment parameter slots for assigning corresponding model variables
@@ -6741,16 +6756,16 @@ sim.runExperiment = function () {
       // aggregate scenario run statistics from sim.stat to sim.experiment.scenarios[i].stat
       Object.keys( sim.model.statistics).forEach( function (varName) {
         if (sim.model.statistics[varName].label) {  // output statistics
-          exp.scenarios[i].stat[varName] += sim.stat[varName];
+          exp.scenarios[i].stat[varName].push( sim.stat[varName]);
         }
       });
       if (sim.experiment.storeEachExperimentScenarioRun) {
-        sim.storeMan.add( oes.ExperimentScenarioRun, {
+        await sim.storeMan.add( oes.ExperimentScenarioRun, {
           id: expRunId + i * exp.replications + k,
           experimentRun: expRunId,
           experimentScenarioNo: i,
           parameterValueCombination: exp.scenarios[i].parameterValues,
-          outputStatistics: JSON.parse( JSON.stringify( sim.stat ) )
+          outputStatistics: Object.assign({}, sim.stat)
         });
       }
       // update the progress bar
@@ -6762,7 +6777,14 @@ sim.runExperiment = function () {
     // compute average values
     Object.keys( sim.model.statistics).forEach( function (varName) {
       if (sim.model.statistics[varName].label) {  // output statistics
-        exp.scenarios[i].stat[varName] /= exp.replications;
+        avg = exp.scenarios[i].stat[varName].reduce( (t, v) => t + v ) /
+          exp.replications;
+        sd = 0;
+        exp.scenarios[i].stat[varName].forEach( v => {
+          sd += Math.pow( v - avg, 2);
+        });
+        sd = Math.sqrt( sd / exp.scenarios[i].stat[varName].length );
+        exp.scenarios[i].stat[varName] = avg.toFixed(2) + " ± " + sd.toFixed(2);
       }
     });
     // send scenario statistics to main thread
@@ -6774,7 +6796,7 @@ sim.runExperiment = function () {
     if (!sim.experiment.storeEachExperimentScenarioRun) {
       // store the average statistics aggregated over all exp. scenario runs
       try {
-        sim.storeMan.add( oes.ExperimentScenarioRun, {
+        await sim.storeMan.add( oes.ExperimentScenarioRun, {
           experimentRun: expRunId,
           experimentScenarioNo: i,
           parameterValueCombination: exp.scenarios[i].parameterValues,
@@ -7366,7 +7388,7 @@ oes.ui.setupUI = function () {
             statFormEl.style.display = "none";
             oes.stat.prepareTimeSeriesCompression( statGraphWidth);
           }
-          if (window.Worker && !sim.config.visualize) {
+          if (!sim.config.runInMainThread && window.Worker && !sim.config.visualize) {
             // start the scenario simulation worker
             worker = new Worker("simulation-worker.js");
             msg = {runExperiment: false, endTime: sim.scenario.simulationEndTime,
@@ -7486,7 +7508,8 @@ oes.ui.setupUI = function () {
    Set up UI for defining/modifying experiments within scenario UI
   **********************************************************************/
   if (Object.keys( sim.model.v).length > 0 && !sim.config.suppressExperimentsUI) {
-    oes.ui.setupExperimentsUI( document.forms["scenario"]);
+    oes.ui.setupExperimentsUI( document.forms[ "scenario" ] );
+    oes.ui.setupExportStatisticsDefUI( document.forms[ "scenario" ] );
   }
 
   /*********************************************************************
@@ -8025,35 +8048,285 @@ oes.ui.setupExperimentsUI = function (parentEl) {
     uiPanelEl.style.display = "none";
   }
 };
-
 /*******************************************************
- TODO: UI for Expost Statistics
+ TODO: UI for Export Statistics
  *******************************************************
  *
  * @method
- * @author Gerd Wagner
+ * @author Luis Gustavo Nardin
  */
-oes.ui.setupExpostStatisticsDefUI = function (parentEl) {
-  var uiPanelEl = dom.createExpandablePanel({id:"spaceUI", heading:"Space"});
+sim.export.header = true;
+sim.export.sep = ";";
+sim.export.timeSeries = true;
+sim.export.defFilename = "definitions.csv";
+sim.export.sumFilename = "summary.csv";
+sim.export.tsFilename = "timeseries.csv";
+
+oes.ui.setupExportStatisticsDefUI = function (parentEl) {
+  var uiPanelEl = dom.createExpandablePanel( {
+    id: "exportStatisticsUI",
+    heading: "Export", borderColor: "chartreuse",
+    hint: "Export simulation statistics stored in the IndexedDB."
+  } );
   var mainContentEl = uiPanelEl.lastElementChild;
   parentEl.appendChild( uiPanelEl);
-  sim.ui["space"] = new oBJECTvIEW({
-    modelObject: sim.model.space,
-    fields: [["xMax", "yMax", "zMax"].slice(0,
-        oes.space.dimensions[sim.model.space.type])],
+  sim.ui["export"] = new oBJECTvIEW({
+    modelObject: sim.export,
+    heading: "Export Statistics",
+    fields: [[ "header", "sep", "timeSeries" ],
+             [ "defFilename", "sumFilename", "tsFilename" ]],
     suppressNoValueFields: false,
     userActions: {
-      "applyChanges": function () {
-        sim.updateInitialStateObjects();
-        oes.ui.resetCanvas();
-        // visualize initial state (at start of step 0)
-        if (sim.config.visualize) oes.ui.visualizeStep();
+      "defintion": function () {
+        if ( !sim.storeMan ) {
+          oes.setupStorageManagement( sim.model.name );
+        }
+
+        sim.storeMan.retrieveAll( oes.ExperimentRun ).then( function ( runs ) {
+          if ( runs.length > 0 ) {
+            sim.storeMan.retrieveAll( oes.ExperimentScenarioRun ).then(
+              function ( records ) {
+                var param, output, expScenRun;
+                var defHeader, defText, defLine;  // Definitions
+                var statVarName, i, j;
+
+                defText = "";
+
+                // Create output records
+                for ( i = 0; i < records.length; i += 1 ) {
+                  defLine = [];
+                  expScenRun = new oes.ExperimentScenarioRun( records[ i ] );
+                  param = expScenRun.parameterValueCombination;
+                  output = expScenRun.outputStatistics;
+
+                  // Definition Header
+                  if ( typeof defHeader === "undefined" ) {
+                    defHeader = [];
+                    if ( sim.export.header ) {
+                      for ( j = 0; j < sim.experiment.parameterDefs.length;
+                        j += 1 ) {
+                        defHeader.push(
+                          sim.experiment.parameterDefs[ j ].name );
+                      }
+                      defText = [ "id",
+                        "experimentRun",
+                        "experimentScenarioNo" ].concat( defHeader ).join(
+                          sim.export.sep ) + "\n";
+                    }
+                  }
+                  // Definition Line
+                  defLine.push( expScenRun[ "id" ] );
+                  defLine.push( expScenRun[ "experimentRun" ] );
+                  defLine.push( expScenRun[ "experimentScenarioNo" ] );
+                  param.forEach( function ( prop ) {
+                    defLine.push( prop );
+                  } );
+
+                  defText += defLine.join( sim.export.sep ) + "\n";
+                }
+
+                // Export data
+                generateTextFile( sim.export.defFilename, defText );
+              } ).catch( function ( err ) {
+                console.log( err.name + ": " + err.message );
+              } );
+          }
+        } );
+      },
+      "summary": function () {
+        if ( !sim.storeMan ) {
+          oes.setupStorageManagement( sim.model.name );
+        }
+
+        sim.storeMan.retrieveAll( oes.ExperimentRun ).then( function ( runs ) {
+          if ( runs.length > 0 ) {
+            sim.storeMan.retrieveAll( oes.ExperimentScenarioRun ).then(
+              function ( records ) {
+                var param, output, expScenRun;
+                var defHeader, defText, defLine;  // Definitions
+                var sumHeader, sumText, sumLine;  // Summary
+                var statVarName, i, j;
+
+                sumText = "";
+                defText = "";
+
+                // Create output records
+                for ( i = 0; i < records.length; i += 1 ) {
+                  defLine = [];
+                  sumLine = [];
+                  expScenRun = new oes.ExperimentScenarioRun( records[ i ] );
+                  param = expScenRun.parameterValueCombination;
+                  output = expScenRun.outputStatistics;
+
+                  //  Definition Header
+                  if ( typeof defHeader === "undefined" ) {
+                    defHeader = [];
+                    if ( sim.export.header ) {
+                      for ( j = 0; j < sim.experiment.parameterDefs.length;
+                        j += 1 ) {
+                        defHeader.push(
+                          sim.experiment.parameterDefs[ j ].name );
+                      }
+                      defText = [ "id",
+                        "experimentRun",
+                        "experimentScenarioNo" ].concat( defHeader ).join(
+                          sim.export.sep ) + "\n";
+                    }
+                  }
+                  // Definition Line
+                  defLine.push( expScenRun[ "id" ] );
+                  defLine.push( expScenRun[ "experimentRun" ] );
+                  defLine.push( expScenRun[ "experimentScenarioNo" ] );
+                  param.forEach( function ( prop ) {
+                    defLine.push( prop );
+                  } );
+
+                  // Summary Header
+                  if ( typeof sumHeader === "undefined" ) {
+                    sumHeader = [];
+                    for ( statVarName of Object.keys( output ) ) {
+                      if ( typeof output[ statVarName ] !== "object" ) {
+                        sumHeader.push( statVarName );
+                      }
+                    }
+                    if ( sim.export.header ) {
+                      sumText = [ "id" ].concat( sumHeader )
+                        .join( sim.export.sep ) + "\n";
+                    }
+                  }
+                  // Summary Line
+                  sumLine.push( expScenRun[ "id" ] );
+                  sumHeader.forEach( function ( prop ) {
+                    sumLine.push( output[ prop ] );
+                  } );
+
+                  sumText += sumLine.join( sim.export.sep ) + "\n";
+                }
+
+                // Export data
+                generateTextFile( sim.export.sumFilename, sumText );
+              } ).catch( function ( err ) {
+                console.log( err.name + ": " + err.message );
+              } );
+          }
+        } );
+      },
+      "timeseries": function () {
+        if ( !sim.storeMan ) {
+          oes.setupStorageManagement( sim.model.name );
+        }
+
+        sim.storeMan.retrieveAll( oes.ExperimentRun ).then( function ( runs ) {
+          if ( runs.length > 0 ) {
+            sim.storeMan.retrieveAll( oes.ExperimentScenarioRun ).then(
+              function ( records ) {
+                var param, output, expScenRun;
+                var tsHeader, tsText, tsLine, tsVarName, ts; // Time Series
+                var statVarName, i, j, r, t, v;
+
+                tsText = "";
+
+                // Create output records
+                for ( i = 0; i < records.length; i += 1 ) {
+                  expScenRun = new oes.ExperimentScenarioRun( records[ i ] );
+                  param = expScenRun.parameterValueCombination;
+                  output = expScenRun.outputStatistics;
+
+                  // Time Series
+                  if ( sim.export.timeSeries ) {
+                    // Time Series Header
+                    if ( typeof tsHeader === "undefined" ) {
+                      tsHeader = [];
+                      for ( tsVarName of Object.keys( output.timeSeries ) ) {
+                        tsHeader.push( tsVarName );
+                      }
+                      if ( sim.export.header ) {
+                        if ( typeof sim.model.timeIncrement !== "undefined" ) {
+                          tsText = [ "id", "time" ].concat( tsHeader )
+                            .join( sim.export.sep ) + "\n";
+                        } else {
+                          tsText = [ "id", "time", "variable", "value" ]
+                            .join( sim.export.sep ) +
+                            "\n";
+                        }
+                      }
+                    }
+
+                    // Time Series Line
+                    if ( tsHeader.length > 0 ) {
+
+                      ts = [];
+                      if ( typeof sim.model.timeIncrement !== "undefined" ) {
+                        for ( v = 0; v < tsHeader.length; v += 1 ) {
+                          if ( output.timeSeries[ tsHeader[ v ] ] ) {
+                            ts[ v ] = output.timeSeries[ tsHeader[ v ] ];
+                          }
+                        }
+
+                        for ( r = 0, t = 0; r < ts[ 0 ].length;
+                          r += 1, t += sim.model.timeIncrement ) {
+                          tsLine = [];
+                          tsLine.push( expScenRun[ "id" ] );
+                          tsLine.push( t );
+                          for ( v = 0; v < tsHeader.length; v += 1 ) {
+                            tsLine.push( ts[ v ][ r ] );
+                          }
+
+                          tsText += tsLine.join( sim.export.sep ) + "\n";
+                        }
+                      } else {
+                        for ( v = 0; v < tsHeader.length; v += 1 ) {
+                          ts = output.timeSeries[ tsHeader[ v ] ];
+
+                          for ( r = 0; r < ts[ 0 ].length; r += 1 ) {
+                            tsLine = [];
+                            tsLine.push( expScenRun[ "id" ] );
+                            tsLine.push( ts[ 0 ][ r ] );
+                            tsLine.push( tsHeader[ v ] );
+                            tsLine.push( ts[ 1 ][ r ] );
+                            tsText += tsLine.join( sim.export.sep ) + "\n";
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+
+                if ( sim.export.timeSeries ) {
+                  generateTextFile( sim.export.tsFilename, tsText );
+                }
+              } ).catch( function ( err ) {
+                console.log( err.name + ": " + err.message );
+              } );
+          }
+        } );
       }
     }
   });
-  sim.ui["space"].userActions["applyChanges"].label = "Apply changes";
   // render view and store its data binding
-  sim.ui["space"].dataBinding = sim.ui["space"].render( mainContentEl);
+  sim.ui["export"].dataBinding = sim.ui["export"].render( mainContentEl);
+};
+/*******************************************************************************
+ * Generate the file from text
+ *
+ * @param {string} filename - Name of the file
+ * @param {string} text - Content of the file
+ ******************************************************************************/
+var generateTextFile = function ( filename, text ) {
+  var data, file, url;
+
+  data = new Blob( [ text ], { type: "text/plain" } );
+
+  url = window.URL.createObjectURL( data );
+
+  file = document.createElement( "a" );
+  file.setAttribute( "style", "display: none" );
+  file.setAttribute( "href", url );
+  file.setAttribute( "download", filename );
+  document.body.appendChild( file );
+  file.click();
+  window.URL.revokeObjectURL( url );
+  file.remove();
 };
 /*******************************************************
  Set up the Visualization

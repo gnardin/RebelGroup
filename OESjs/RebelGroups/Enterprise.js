@@ -1,7 +1,7 @@
 /*******************************************************************************
  * Enterprise object class
  *
- * @copyright Copyright 2018 Brandenburg University of Technology, Germany
+ * @copyright Copyright 2018-2019 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
  * @author Frances Duffy
  * @author Kamil Klosek
@@ -12,21 +12,21 @@ var Enterprise = new cLASS( {
   Name: "Enterprise",
   supertypeName: "oBJECT",
   properties: {
-    "income": {
-      range: "Object",
-      label: "Income"
-    },
-    "freqIncome": {
-      range: "Object",
-      label: "Frequency of Income"
+    "wealth": {
+      range: "Decimal",
+      label: "Liquidity"
     },
     "rebelGroup": {
       range: "RebelGroup",
       label: "Main Rebel Group"
     },
-    "wealth": {
+    "income": {
       range: "Decimal",
-      label: "Liquidity"
+      label: "Income"
+    },
+    "freqIncome": {
+      range: "NonNegativeInteger",
+      label: "Frequency of Income"
     },
     "accIncome": {
       range: "Decimal",

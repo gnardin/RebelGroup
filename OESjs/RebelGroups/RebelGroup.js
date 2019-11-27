@@ -1,7 +1,7 @@
 /*******************************************************************************
  * The Rebel Group object class
  *
- * @copyright Copyright 2018 Brandenburg University of Technology, Germany
+ * @copyright Copyright 2018-2019 Brandenburg University of Technology, Germany
  * @license The MIT License (MIT)
  * @author Frances Duffy
  * @author Kamil Klosek
@@ -47,26 +47,21 @@ var RebelGroup = new cLASS( {
       label: "Number of Reports other Rebel Groups"
     },
     "freqDemand": {
-      range: "Object",
+      range: "NonNegativeInteger",
       label: "Frequency to Demand"
     },
     "freqExpand": {
-      range: "Object",
+      range: "NonNegativeInteger",
       label: "Frequency to Expand"
-    },
-    "freqAllocate": {
-      range: "Object",
-      label: "Frequency to Allocate Resource"
     },
     "lastExpand": {
       range: "NonNegativeInteger",
       label: "Time Last Expansion"
     },
-    "lastAmountExtorted": {
+    "lastAmountCollected": {
       range: "Decimal",
-      label: "Amount Extorted Last Period"
+      label: "Amount Collected Last Period"
     }
   },
-  methods: {
-  }
+  methods: {}
 } );
