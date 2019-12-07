@@ -54,7 +54,7 @@ The `statistics` script generates files with the mean and standard deviation of 
 
 The analysis is split into three scripts that return the results of the hypothesis testing between the multiple output metrics for the experiments reported on the article
 
-`Duffy, F. S., Klosek, K. C., Nardin, L. G., & Wagner, G. (In Press). Rebel group protection rackets: Simulating the effects of economic support on civil war violence. In E. Deutschmann, J. Lorenz, L.G. Nardin, D. Natalini, & A.F.X. Wilhelm (Eds.), Computational Conflict Research. Computational Social Sciences Book Series. Cham: Springer.`
+<blockquote>Duffy, F. S., Klosek, K. C., Nardin, L. G., & Wagner, G. (2020). Rebel group protection rackets: Simulating the effects of economic support on civil war violence. In E. Deutschmann, J. Lorenz, L.G. Nardin, D. Natalini, & A.F.X. Wilhelm (Eds.), <i>Computational Conflict Research</i>, Computational Social Sciences Book Series (pp. 225–251). Cham: Springer. DOI: <a href="https://doi.org/10.1007/978-3-030-29333-8_11">10.1007/978-3-030-29333-8_11</a></blockquote>
 
 * Open a terminal
 * Navigate to the `<rebelDir>/data` folder
